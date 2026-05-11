@@ -822,8 +822,8 @@ releaseCommand = "uv run manage.py migrate --noinput"
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run ruff check .` and `uv run mypy .` exit 0 on final codebase
-- [ ] `uv run pytest` passes all tests (0 failures, 0 errors)
+- [x] `uv run ruff check .` and `uv run mypy .` exit 0 on final codebase
+- [x] `uv run pytest` passes all tests (0 failures, 0 errors)
 
 #### Automated QA:
 - [ ] `curl https://<railway-domain>/health/` returns `{"status": "ok"}` with HTTP 200
