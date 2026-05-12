@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Predicciones — {{ pool.name }}{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-800">{{ pool.name }}</h1>
+    <p class="text-sm text-gray-500">Fase de grupos — {{ pool.tournament.name }}</p>
+  </div>
+  <div class="text-right">
+    <p class="text-2xl font-bold {% if total_predicted == total_matches %}text-green-600{% else %}text-gray-700{% endif %}">
+      {{ total_predicted }} <span class="text-base font-normal text-gray-400">/ {{ total_matches }}</span>
+    </p>
+    <p class="text-xs text-gray-400">partidos predichos</p>
+  </div>
+</div>
+
+{% if predictions_submitted %}
+<div class="bg-green-100 text-green-800 rounded-lg p-4 mb-6 text-sm font-medium">
+  ✅ Tus predicciones ya fueron enviadas. Solo podés ver los resultados.
+</div>
+{% endif %}
+
+<div class="space-y-4">
+{% for group in group_data %}
+<details class="bg-white rounded-xl shadow overflow-hidden" {% if forloop.first %}open{% endif %}>
+  <summary class="flex items-center justify-between px-5 py-4 cursor-pointer select-none hover:bg-gray-50">
+    <span class="font-bold text-gray-800 text-lg">Grupo {{ group.letter }}</span>
+    <span class="text-sm text-gray-400">
+      {{ group.matches|length }} partidos
+    </span>
+  </summary>
+
+  <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Match inputs -->
+    <div class="space-y-3">
+      {% for item in group.matches %}
+      {% with match=item.match pred=item.prediction %}
+      <form
+        hx-post="{% url 'save_match_prediction' pool.pk match.pk %}"
+        hx-target="#standings-{{ group.letter }}"
+        hx-swap="outerHTML"
+        hx-trigger="change delay:400ms"
+        hx-indicator="#spinner-{{ match.pk }}"
+        class="flex items-center gap-2"
+      >
+        {% csrf_token %}
+        <span class="text-xs text-gray-600 flex-1 text-right truncate" title="{{ match.home_team.name }}">{{ match.home_team.name }}</span>
+        <input
+          type="number" name="predicted_home_score" min="0" max="20"
+          value="{{ pred.predicted_home_score|default:'' }}"
+          {% if predictions_submitted %}readonly{% endif %}
+          class="w-12 text-center border border-gray-300 rounded-lg py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none {% if predictions_submitted %}bg-gray-100 text-gray-500{% endif %}"
+        >
+        <span class="text-gray-400 font-bold">–</span>
+        <input
+          type="number" name="predicted_away_score" min="0" max="20"
+          value="{{ pred.predicted_away_score|default:'' }}"
+          {% if predictions_submitted %}readonly{% endif %}
+          class="w-12 text-center border border-gray-300 rounded-lg py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none {% if predictions_submitted %}bg-gray-100 text-gray-500{% endif %}"
+        >
+        <span class="text-xs text-gray-600 flex-1 truncate" title="{{ match.away_team.name }}">{{ match.away_team.name }}</span>
+        <span id="spinner-{{ match.pk }}" class="htmx-indicator text-green-500 text-xs">⏳</span>
+      </form>
+      {% endwith %}
+      {% endfor %}
+    </div>
+
+    <!-- Live standings -->
+    <div>
+      {% include "predictions/partials/group_standings.html" with standings=group.standings group_letter=group.letter %}
+    </div>
+
+  </div>
+</details>
+{% endfor %}
+</div>
+{% endblock %}
