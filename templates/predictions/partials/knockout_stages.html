@@ -1,0 +1,75 @@
+{% for stage in stages %}
+<details class="bg-white rounded-xl shadow overflow-hidden" {% if forloop.first %}open{% endif %}>
+  <summary class="flex items-center justify-between px-5 py-4 cursor-pointer select-none hover:bg-gray-50">
+    <span class="font-bold text-gray-800 text-lg">{{ stage.label }}</span>
+    <span class="text-sm text-gray-400">{{ stage.slots|length }} partidos</span>
+  </summary>
+
+  <div class="px-5 pb-5 space-y-3">
+    {% for slot in stage.slots %}
+    <div class="flex items-center gap-3 py-2 border-b last:border-0">
+      <span class="text-xs text-gray-400 w-20 shrink-0">{{ slot.slot_key }}</span>
+
+      <span class="text-sm text-gray-700 w-28 text-right truncate" title="{{ slot.home_team.name|default:'TBD' }}">
+        {{ slot.home_team.name|default:"TBD" }}
+      </span>
+
+      {% if slot.match and not predictions_submitted %}
+      <form
+        class="ko-form flex items-center gap-1"
+        hx-post="{% url 'save_knockout_prediction' pool.pk slot.match.pk %}"
+        hx-target="#ko-bracket"
+        hx-swap="innerHTML"
+        hx-trigger="change delay:400ms"
+        hx-indicator="#ko-sp-{{ slot.match.pk }}"
+      >
+        {% csrf_token %}
+        <input type="number" name="predicted_home_score" min="0" max="20"
+          value="{{ slot.prediction.predicted_home_score|default:'' }}"
+          class="w-12 text-center border border-gray-300 rounded py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none">
+        <span class="text-gray-400 font-bold">–</span>
+        <input type="number" name="predicted_away_score" min="0" max="20"
+          value="{{ slot.prediction.predicted_away_score|default:'' }}"
+          class="w-12 text-center border border-gray-300 rounded py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none">
+
+        {% if slot.home_team and slot.away_team %}
+        <span class="winner-wrap hidden items-center gap-1 ml-1">
+          <span class="text-xs text-gray-500">Gan.:</span>
+          <select name="predicted_winner"
+            class="text-xs border border-gray-300 rounded py-1 px-1 focus:ring-2 focus:ring-green-400 focus:outline-none">
+            <option value="">--</option>
+            <option value="{{ slot.home_team.pk }}"
+              {% if slot.prediction.predicted_winner_id == slot.home_team.pk %}selected{% endif %}>
+              {{ slot.home_team.fifa_code }}
+            </option>
+            <option value="{{ slot.away_team.pk }}"
+              {% if slot.prediction.predicted_winner_id == slot.away_team.pk %}selected{% endif %}>
+              {{ slot.away_team.fifa_code }}
+            </option>
+          </select>
+        </span>
+        {% endif %}
+
+        <span id="ko-sp-{{ slot.match.pk }}" class="htmx-indicator text-green-500 text-xs">⏳</span>
+      </form>
+      {% elif slot.match and predictions_submitted %}
+      <div class="flex items-center gap-1 text-sm text-gray-500">
+        <span>{{ slot.prediction.predicted_home_score|default:"–" }}</span>
+        <span class="font-bold">–</span>
+        <span>{{ slot.prediction.predicted_away_score|default:"–" }}</span>
+        {% if slot.prediction.predicted_winner %}
+        <span class="text-xs text-green-600 ml-1">({{ slot.prediction.predicted_winner.fifa_code }})</span>
+        {% endif %}
+      </div>
+      {% else %}
+      <span class="text-xs text-gray-400 italic">Sin partido</span>
+      {% endif %}
+
+      <span class="text-sm text-gray-700 w-28 truncate" title="{{ slot.away_team.name|default:'TBD' }}">
+        {{ slot.away_team.name|default:"TBD" }}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+</details>
+{% endfor %}

@@ -189,7 +189,18 @@ class SaveKnockoutPredictionView(LoginRequiredMixin, View):
                 "predicted_winner": winner,
             },
         )
-        return HttpResponse(status=200)
+
+        bracket = build_predicted_knockout_bracket(user, pool)
+        stages = [
+            {"key": k, "label": STAGE_LABELS[k], "slots": bracket.get(k, [])}
+            for k in ("r32", "r16", "qf", "sf", "final")
+            if k in bracket
+        ]
+        return render(request, "predictions/partials/knockout_stages.html", {
+            "pool": pool,
+            "stages": stages,
+            "predictions_submitted": membership.predictions_submitted,
+        })
 
 
 # ─── Champion & Top Scorer Picks ──────────────────────────────────────────────
