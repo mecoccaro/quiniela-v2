@@ -35,6 +35,9 @@
 
 <script>
 (function () {
+  var savedScrollY = 0;
+  var openStageIndices = new Set();
+
   function syncWinner(form) {
     var home = form.querySelector('[name=predicted_home_score]');
     var away = form.querySelector('[name=predicted_away_score]');
@@ -59,12 +62,33 @@
     }
   });
 
-  // Re-run on load and after every HTMX settle (bracket refresh)
-  function initAll() {
+  // Before each bracket save: snapshot scroll + open stages
+  document.addEventListener('htmx:beforeRequest', function (e) {
+    if (e.target.closest && e.target.closest('.ko-form')) {
+      savedScrollY = window.scrollY;
+      openStageIndices.clear();
+      document.querySelectorAll('#ko-bracket details').forEach(function (el, idx) {
+        if (el.hasAttribute('open')) openStageIndices.add(idx);
+      });
+    }
+  });
+
+  // After swap: restore open stages, scroll position, winner dropdowns
+  document.addEventListener('htmx:afterSettle', function () {
+    document.querySelectorAll('#ko-bracket details').forEach(function (el, idx) {
+      if (openStageIndices.has(idx)) {
+        el.setAttribute('open', '');
+      } else {
+        el.removeAttribute('open');
+      }
+    });
+    window.scrollTo(0, savedScrollY);
     document.querySelectorAll('.ko-form').forEach(syncWinner);
-  }
-  document.addEventListener('DOMContentLoaded', initAll);
-  document.addEventListener('htmx:afterSettle', initAll);
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.ko-form').forEach(syncWinner);
+  });
 })();
 </script>
 {% endblock %}

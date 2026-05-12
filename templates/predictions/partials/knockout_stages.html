@@ -25,11 +25,11 @@
       >
         {% csrf_token %}
         <input type="number" name="predicted_home_score" min="0" max="20"
-          value="{{ slot.prediction.predicted_home_score|default:'' }}"
+          value="{{ slot.prediction.predicted_home_score|default_if_none:'' }}"
           class="w-12 text-center border border-gray-300 rounded py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none">
         <span class="text-gray-400 font-bold">–</span>
         <input type="number" name="predicted_away_score" min="0" max="20"
-          value="{{ slot.prediction.predicted_away_score|default:'' }}"
+          value="{{ slot.prediction.predicted_away_score|default_if_none:'' }}"
           class="w-12 text-center border border-gray-300 rounded py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none">
 
         {% if slot.home_team and slot.away_team %}
