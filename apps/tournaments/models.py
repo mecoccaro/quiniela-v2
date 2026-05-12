@@ -60,8 +60,9 @@ class Match(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, related_name="matches")
     stage = models.CharField(max_length=20, choices=Stage)
     group_letter = models.CharField(max_length=1, blank=True)
-    home_team = models.ForeignKey(Team, on_delete=models.PROTECT, related_name="home_matches")
-    away_team = models.ForeignKey(Team, on_delete=models.PROTECT, related_name="away_matches")
+    home_team = models.ForeignKey(Team, on_delete=models.PROTECT, null=True, blank=True, related_name="home_matches")
+    away_team = models.ForeignKey(Team, on_delete=models.PROTECT, null=True, blank=True, related_name="away_matches")
+    bracket_slot = models.CharField(max_length=20, blank=True)
     scheduled_at = models.DateTimeField(null=True, blank=True)
     home_score = models.PositiveIntegerField(null=True, blank=True)
     away_score = models.PositiveIntegerField(null=True, blank=True)
@@ -80,4 +81,6 @@ class Match(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.home_team} vs {self.away_team} ({self.stage})"
+        home = str(self.home_team) if self.home_team_id else (self.bracket_slot or "TBD")
+        away = str(self.away_team) if self.away_team_id else "TBD"
+        return f"{home} vs {away} ({self.stage})"

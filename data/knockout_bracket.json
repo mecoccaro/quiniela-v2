@@ -1,0 +1,44 @@
+{
+  "_note": "WC2026 knockout bracket structure. Group positions: X1=winner, X2=runner-up, X3=third. 3RD_N=Nth-ranked third-place team (1=best). win:SLOT=predicted winner of that slot.",
+  "r32": [
+    {"slot": "R32_1",  "home": "A1",    "away": "B2"},
+    {"slot": "R32_2",  "home": "C1",    "away": "D2"},
+    {"slot": "R32_3",  "home": "E1",    "away": "F2"},
+    {"slot": "R32_4",  "home": "G1",    "away": "H2"},
+    {"slot": "R32_5",  "home": "I1",    "away": "J2"},
+    {"slot": "R32_6",  "home": "K1",    "away": "L2"},
+    {"slot": "R32_7",  "home": "B1",    "away": "A2"},
+    {"slot": "R32_8",  "home": "D1",    "away": "C2"},
+    {"slot": "R32_9",  "home": "F1",    "away": "E2"},
+    {"slot": "R32_10", "home": "H1",    "away": "G2"},
+    {"slot": "R32_11", "home": "J1",    "away": "I2"},
+    {"slot": "R32_12", "home": "L1",    "away": "K2"},
+    {"slot": "R32_13", "home": "3RD_1", "away": "3RD_2"},
+    {"slot": "R32_14", "home": "3RD_3", "away": "3RD_4"},
+    {"slot": "R32_15", "home": "3RD_5", "away": "3RD_6"},
+    {"slot": "R32_16", "home": "3RD_7", "away": "3RD_8"}
+  ],
+  "r16": [
+    {"slot": "R16_1", "home": "win:R32_1",  "away": "win:R32_2"},
+    {"slot": "R16_2", "home": "win:R32_3",  "away": "win:R32_4"},
+    {"slot": "R16_3", "home": "win:R32_5",  "away": "win:R32_6"},
+    {"slot": "R16_4", "home": "win:R32_7",  "away": "win:R32_8"},
+    {"slot": "R16_5", "home": "win:R32_9",  "away": "win:R32_10"},
+    {"slot": "R16_6", "home": "win:R32_11", "away": "win:R32_12"},
+    {"slot": "R16_7", "home": "win:R32_13", "away": "win:R32_14"},
+    {"slot": "R16_8", "home": "win:R32_15", "away": "win:R32_16"}
+  ],
+  "qf": [
+    {"slot": "QF_1", "home": "win:R16_1", "away": "win:R16_2"},
+    {"slot": "QF_2", "home": "win:R16_3", "away": "win:R16_4"},
+    {"slot": "QF_3", "home": "win:R16_5", "away": "win:R16_6"},
+    {"slot": "QF_4", "home": "win:R16_7", "away": "win:R16_8"}
+  ],
+  "sf": [
+    {"slot": "SF_1", "home": "win:QF_1", "away": "win:QF_2"},
+    {"slot": "SF_2", "home": "win:QF_3", "away": "win:QF_4"}
+  ],
+  "final": [
+    {"slot": "FINAL_1", "home": "win:SF_1", "away": "win:SF_2"}
+  ]
+}

@@ -1,16 +1,37 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import TemplateView
 
-from apps.pools.models import Pool, PoolMembership, Prediction
+from apps.pools.models import (
+    LeaderboardEntry,
+    Pool,
+    PoolChampionPick,
+    PoolMembership,
+    PoolTopScorerPick,
+    Prediction,
+)
 from apps.tournaments.models import Match, Team
-from apps.tournaments.services import get_predicted_group_standings
+from apps.tournaments.services import (
+    build_predicted_knockout_bracket,
+    get_predicted_group_standings,
+)
 from apps.users.models import User
 
-from .forms import MatchPredictionForm
+from .forms import ChampionPickForm, KnockoutPredictionForm, MatchPredictionForm, TopScorerPickForm
 
+STAGE_LABELS = {
+    "r32": "Ronda de 32",
+    "r16": "Octavos de final",
+    "qf": "Cuartos de final",
+    "sf": "Semifinales",
+    "final": "Final",
+}
+
+
+# ─── Group Stage ──────────────────────────────────────────────────────────────
 
 class GroupPredictionsView(LoginRequiredMixin, TemplateView):
     template_name = "predictions/group_stage.html"
@@ -100,3 +121,173 @@ class SaveMatchPredictionView(LoginRequiredMixin, View):
             "predictions/partials/group_standings.html",
             {"standings": enriched, "group_letter": match.group_letter},
         )
+
+
+# ─── Knockout Stage ───────────────────────────────────────────────────────────
+
+class KnockoutPredictionsView(LoginRequiredMixin, View):
+
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        pool = get_object_or_404(Pool, pk=kwargs["pool_id"])
+        self.membership = get_object_or_404(PoolMembership, pool=pool, user=request.user)
+
+        total_group = Match.objects.filter(
+            tournament=pool.tournament, stage=Match.Stage.GROUP
+        ).count()
+        user_group = Prediction.objects.filter(
+            user=request.user, pool=pool, match__stage=Match.Stage.GROUP
+        ).count()
+        if user_group < total_group:
+            messages.warning(request, "Completá todas las predicciones de fase de grupos primero.")
+            return redirect("group_predictions", pool_id=pool.pk)
+
+        self.pool = pool
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        user: User = request.user  # type: ignore[assignment]
+        bracket = build_predicted_knockout_bracket(user, self.pool)
+        stages = [
+            {"key": k, "label": STAGE_LABELS[k], "slots": bracket.get(k, [])}
+            for k in ("r32", "r16", "qf", "sf", "final")
+            if k in bracket
+        ]
+        return render(request, "predictions/knockout.html", {
+            "pool": self.pool,
+            "stages": stages,
+            "predictions_submitted": self.membership.predictions_submitted,
+        })
+
+
+class SaveKnockoutPredictionView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pool_id: int, match_id: int) -> HttpResponse:
+        user: User = request.user  # type: ignore[assignment]
+        pool = get_object_or_404(Pool, pk=pool_id)
+        membership = get_object_or_404(PoolMembership, pool=pool, user=user)
+
+        if membership.predictions_submitted:
+            return HttpResponse("Predicciones ya enviadas.", status=403)
+
+        match = get_object_or_404(Match, pk=match_id, tournament=pool.tournament)
+
+        form = KnockoutPredictionForm(request.POST)
+        if not form.is_valid():
+            return HttpResponse(str(form.errors), status=400)
+
+        winner_id = form.cleaned_data.get("predicted_winner")
+        winner = get_object_or_404(Team, pk=winner_id) if winner_id else None
+
+        Prediction.objects.update_or_create(
+            user=user,
+            pool=pool,
+            match=match,
+            defaults={
+                "predicted_home_score": form.cleaned_data["predicted_home_score"],
+                "predicted_away_score": form.cleaned_data["predicted_away_score"],
+                "predicted_winner": winner,
+            },
+        )
+        return HttpResponse(status=200)
+
+
+# ─── Champion & Top Scorer Picks ──────────────────────────────────────────────
+
+class PicksView(LoginRequiredMixin, View):
+
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        pool = get_object_or_404(Pool, pk=kwargs["pool_id"])
+        self.membership = get_object_or_404(PoolMembership, pool=pool, user=request.user)
+        self.pool = pool
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        user: User = request.user  # type: ignore[assignment]
+        teams = Team.objects.filter(
+            tournament_teams__tournament=self.pool.tournament
+        ).order_by("name")
+        champion_pick = PoolChampionPick.objects.filter(user=user, pool=self.pool).first()
+        top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=self.pool).first()
+        return render(request, "predictions/picks.html", {
+            "pool": self.pool,
+            "teams": teams,
+            "champion_pick": champion_pick,
+            "top_scorer_pick": top_scorer_pick,
+            "predictions_submitted": self.membership.predictions_submitted,
+        })
+
+
+class SaveChampionPickView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        user: User = request.user  # type: ignore[assignment]
+        pool = get_object_or_404(Pool, pk=pool_id)
+        membership = get_object_or_404(PoolMembership, pool=pool, user=user)
+
+        if membership.predictions_submitted:
+            return HttpResponse("Predicciones ya enviadas.", status=403)
+
+        form = ChampionPickForm(request.POST)
+        if not form.is_valid():
+            return HttpResponse("Datos inválidos.", status=400)
+
+        team = get_object_or_404(Team, pk=form.cleaned_data["team_id"])
+        PoolChampionPick.objects.update_or_create(
+            user=user, pool=pool, defaults={"team": team}
+        )
+        return HttpResponse(status=200)
+
+
+class SaveTopScorerPickView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        user: User = request.user  # type: ignore[assignment]
+        pool = get_object_or_404(Pool, pk=pool_id)
+        membership = get_object_or_404(PoolMembership, pool=pool, user=user)
+
+        if membership.predictions_submitted:
+            return HttpResponse("Predicciones ya enviadas.", status=403)
+
+        form = TopScorerPickForm(request.POST)
+        if not form.is_valid():
+            return HttpResponse("Datos inválidos.", status=400)
+
+        PoolTopScorerPick.objects.update_or_create(
+            user=user, pool=pool, defaults={"player_name": form.cleaned_data["player_name"]}
+        )
+        return HttpResponse(status=200)
+
+
+# ─── Submission ───────────────────────────────────────────────────────────────
+
+class SubmitPredictionsView(LoginRequiredMixin, View):
+
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        pool = get_object_or_404(Pool, pk=kwargs["pool_id"])
+        self.membership = get_object_or_404(PoolMembership, pool=pool, user=request.user)
+        self.pool = pool
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        user: User = request.user  # type: ignore[assignment]
+        champion_pick = PoolChampionPick.objects.filter(user=user, pool=self.pool).first()
+        top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=self.pool).first()
+        return render(request, "predictions/submission_confirm.html", {
+            "pool": self.pool,
+            "champion_pick": champion_pick,
+            "top_scorer_pick": top_scorer_pick,
+            "predictions_submitted": self.membership.predictions_submitted,
+        })
+
+    def post(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        user: User = request.user  # type: ignore[assignment]
+        if not self.membership.predictions_submitted:
+            self.membership.predictions_submitted = True
+            self.membership.save()
+            LeaderboardEntry.objects.get_or_create(
+                pool=self.pool, user=user, defaults={"total_points": 0}
+            )
+        return redirect("group_predictions", pool_id=self.pool.pk)
