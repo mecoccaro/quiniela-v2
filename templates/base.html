@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Quiniela 2026{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  {% include "partials/nav.html" %}
+
+  {% if messages %}
+    <div class="max-w-4xl mx-auto mt-4 px-4">
+      {% for message in messages %}
+        <div class="p-3 rounded mb-2 {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <main class="max-w-4xl mx-auto py-8 px-4">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

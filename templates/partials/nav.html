@@ -1,0 +1,17 @@
+<nav class="bg-green-700 text-white shadow">
+  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="{% url 'dashboard' %}" class="font-bold text-lg tracking-wide">⚽ Quiniela 2026</a>
+    <div class="flex items-center gap-4 text-sm">
+      {% if user.is_authenticated %}
+        <span class="text-green-200">{{ user.nickname }}</span>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded">Salir</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}" class="hover:text-green-200">Ingresar</a>
+        <a href="{% url 'register' %}" class="bg-white text-green-700 hover:bg-green-100 px-3 py-1 rounded font-medium">Registrarse</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>

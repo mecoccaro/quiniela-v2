@@ -337,11 +337,11 @@ Populate from official WC2026 draw results and published schedule. FIFA rankings
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run manage.py load_wc2026` exits 0
-- [ ] Re-running `uv run manage.py load_wc2026` exits 0 (idempotency)
-- [ ] `uv run pytest tests/test_seeding.py` passes: asserts 48 teams, 12 TournamentTeams per group letter, 72 matches, all with stage=`group`
-- [ ] `uv run pytest tests/test_auth.py` passes: registration creates user, login returns 200, logout clears session
-- [ ] `uv run ruff check .` and `uv run mypy .` exit 0
+- [x] `uv run manage.py load_wc2026` exits 0
+- [x] Re-running `uv run manage.py load_wc2026` exits 0 (idempotency)
+- [x] `uv run pytest tests/test_seeding.py` passes: asserts 48 teams, 12 TournamentTeams per group letter, 72 matches, all with stage=`group`
+- [x] `uv run pytest tests/test_auth.py` passes: registration creates user, login returns 200, logout clears session
+- [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
 - [ ] Register a test user via the form at `/users/register/` and verify redirect to dashboard
