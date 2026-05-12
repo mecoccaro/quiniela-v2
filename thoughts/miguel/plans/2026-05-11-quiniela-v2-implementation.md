@@ -439,10 +439,10 @@ def rank_third_place_teams(
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest tests/test_standings.py -v` passes all test cases (target: ≥ 20 test cases)
-- [ ] `uv run pytest tests/test_standings.py --tb=short` exits 0 with 0 failures
-- [ ] `uv run mypy apps/tournaments/standings.py` exits 0 (fully typed)
-- [ ] `uv run ruff check .` exits 0
+- [x] `uv run pytest tests/test_standings.py -v` passes all test cases (target: ≥ 20 test cases)
+- [x] `uv run pytest tests/test_standings.py --tb=short` exits 0 with 0 failures
+- [x] `uv run mypy apps/tournaments/standings.py` exits 0 (fully typed)
+- [x] `uv run ruff check .` exits 0
 
 #### Automated QA:
 - [ ] Run `uv run pytest tests/test_standings.py -v` and verify edge cases are explicitly named in output (e.g., `test_three_way_tie_resolved_by_h2h_gd`)
