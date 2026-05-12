@@ -153,11 +153,10 @@ def build_predicted_knockout_bracket(
         for p in Prediction.objects.filter(user=user, pool=pool, match_id__in=ko_match_ids)
     }
 
-    # Build winner map {slot_key: team_id} from predicted_winner on each prediction
-    winner_map: dict[str, int | None] = {
-        slot: (ko_predictions[m.pk].predicted_winner_id if ko_predictions.get(m.pk) else None)
-        for slot, m in knockout_matches.items()
-    }
+    # winner_map built stage-by-stage: after resolving home/away for each slot,
+    # derive winner from predicted_winner_id (penalty pick) or from score comparison.
+    # This lets R16 use R32 winners, QF use R16 winners, etc.
+    winner_map: dict[str, int | None] = {}
 
     result: dict[str, list[BracketSlot]] = {}
     for stage_key in ("r32", "r16", "qf", "sf", "final"):
@@ -169,13 +168,24 @@ def build_predicted_knockout_bracket(
             home_id = _resolve_team(slot_def["home"], position_map, third_ids, winner_map)
             away_id = _resolve_team(slot_def["away"], position_map, third_ids, winner_map)
             match = knockout_matches.get(slot_key)
-            prediction = ko_predictions.get(match.pk) if match else None
+            pred = ko_predictions.get(match.pk) if match else None
+
+            # Derive winner for this slot so subsequent stages can resolve their teams
+            if pred:
+                if pred.predicted_winner_id:
+                    winner_map[slot_key] = pred.predicted_winner_id
+                elif pred.predicted_home_score > pred.predicted_away_score:
+                    winner_map[slot_key] = home_id
+                elif pred.predicted_away_score > pred.predicted_home_score:
+                    winner_map[slot_key] = away_id
+                # else: tied without penalty pick → winner stays unknown
+
             slots.append(BracketSlot(
                 slot_key=slot_key,
                 home_team=all_teams.get(home_id) if home_id else None,
                 away_team=all_teams.get(away_id) if away_id else None,
                 match=match,
-                prediction=prediction,
+                prediction=pred,
             ))
         result[stage_key] = slots
 

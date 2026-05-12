@@ -166,7 +166,7 @@ def test_picks_page_returns_200(client_logged_in, pool, membership):
 
 
 @pytest.mark.django_db
-def test_save_champion_pick(client_logged_in, pool, membership, teams):
+def test_save_champion_pick_endpoint_still_works(client_logged_in, pool, membership, teams):
     response = client_logged_in.post(
         f"/predictions/pool/{pool.pk}/picks/champion/",
         {"team_id": teams[0].pk},
@@ -189,7 +189,19 @@ def test_save_top_scorer_pick(client_logged_in, pool, membership):
 # ─── Submission ───────────────────────────────────────────────────────────────
 
 @pytest.mark.django_db
-def test_submit_locks_predictions(client_logged_in, pool, membership):
+def test_submit_blocked_when_predictions_incomplete(client_logged_in, pool, membership):
+    """Submit redirects back when not all matches are predicted."""
+    PoolTopScorerPick.objects.create(user=membership.user, pool=pool, player_name="Messi")
+    response = client_logged_in.post(f"/predictions/pool/{pool.pk}/submit/")
+    assert response.status_code == 302
+    assert "submit" in response["Location"]
+    membership.refresh_from_db()
+    assert membership.predictions_submitted is False
+
+
+@pytest.mark.django_db
+def test_submit_locks_predictions(client_logged_in, pool, membership, user, all_group_predictions):
+    PoolTopScorerPick.objects.create(user=user, pool=pool, player_name="Messi")
     response = client_logged_in.post(f"/predictions/pool/{pool.pk}/submit/")
     assert response.status_code == 302
     membership.refresh_from_db()
@@ -197,13 +209,15 @@ def test_submit_locks_predictions(client_logged_in, pool, membership):
 
 
 @pytest.mark.django_db
-def test_submit_creates_leaderboard_entry(client_logged_in, pool, membership, user):
+def test_submit_creates_leaderboard_entry(client_logged_in, pool, membership, user, all_group_predictions):
+    PoolTopScorerPick.objects.create(user=user, pool=pool, player_name="Messi")
     client_logged_in.post(f"/predictions/pool/{pool.pk}/submit/")
     assert LeaderboardEntry.objects.filter(pool=pool, user=user).count() == 1
 
 
 @pytest.mark.django_db
-def test_submit_idempotent(client_logged_in, pool, membership, user):
+def test_submit_idempotent(client_logged_in, pool, membership, user, all_group_predictions):
+    PoolTopScorerPick.objects.create(user=user, pool=pool, player_name="Messi")
     client_logged_in.post(f"/predictions/pool/{pool.pk}/submit/")
     client_logged_in.post(f"/predictions/pool/{pool.pk}/submit/")
     assert LeaderboardEntry.objects.filter(pool=pool, user=user).count() == 1

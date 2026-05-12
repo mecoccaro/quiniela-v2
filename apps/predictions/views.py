@@ -206,15 +206,25 @@ class PicksView(LoginRequiredMixin, View):
 
     def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
         user: User = request.user  # type: ignore[assignment]
-        teams = Team.objects.filter(
-            tournament_teams__tournament=self.pool.tournament
-        ).order_by("name")
-        champion_pick = PoolChampionPick.objects.filter(user=user, pool=self.pool).first()
+        bracket = build_predicted_knockout_bracket(user, self.pool)
+        # Champion is derived from the Final prediction winner — not a free pick
+        final_slots = bracket.get("final", [])
+        predicted_champion: Team | None = None
+        if final_slots and final_slots[0].prediction:
+            pred = final_slots[0].prediction
+            if pred.predicted_winner_id:
+                predicted_champion = final_slots[0].home_team if pred.predicted_winner_id == (
+                    final_slots[0].home_team.pk if final_slots[0].home_team else None
+                ) else final_slots[0].away_team
+            elif pred.predicted_home_score is not None and pred.predicted_away_score is not None:
+                if pred.predicted_home_score > pred.predicted_away_score:
+                    predicted_champion = final_slots[0].home_team
+                elif pred.predicted_away_score > pred.predicted_home_score:
+                    predicted_champion = final_slots[0].away_team
         top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=self.pool).first()
         return render(request, "predictions/picks.html", {
             "pool": self.pool,
-            "teams": teams,
-            "champion_pick": champion_pick,
+            "predicted_champion": predicted_champion,
             "top_scorer_pick": top_scorer_pick,
             "predictions_submitted": self.membership.predictions_submitted,
         })
@@ -273,21 +283,81 @@ class SubmitPredictionsView(LoginRequiredMixin, View):
 
     def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
         user: User = request.user  # type: ignore[assignment]
-        champion_pick = PoolChampionPick.objects.filter(user=user, pool=self.pool).first()
+        bracket = build_predicted_knockout_bracket(user, self.pool)
+        final_slots = bracket.get("final", [])
+        predicted_champion: Team | None = None
+        if final_slots and final_slots[0].prediction:
+            pred = final_slots[0].prediction
+            if pred.predicted_winner_id:
+                predicted_champion = final_slots[0].home_team if pred.predicted_winner_id == (
+                    final_slots[0].home_team.pk if final_slots[0].home_team else None
+                ) else final_slots[0].away_team
+            elif pred.predicted_home_score is not None and pred.predicted_away_score is not None:
+                if pred.predicted_home_score > pred.predicted_away_score:
+                    predicted_champion = final_slots[0].home_team
+                elif pred.predicted_away_score > pred.predicted_home_score:
+                    predicted_champion = final_slots[0].away_team
+        # If already submitted, fall back to stored champion pick
+        if self.membership.predictions_submitted:
+            stored = PoolChampionPick.objects.filter(user=user, pool=self.pool).first()
+            if stored:
+                predicted_champion = stored.team
         top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=self.pool).first()
+        total_matches = Match.objects.filter(tournament=self.pool.tournament).count()
+        user_predictions = Prediction.objects.filter(user=user, pool=self.pool).count()
         return render(request, "predictions/submission_confirm.html", {
             "pool": self.pool,
-            "champion_pick": champion_pick,
+            "predicted_champion": predicted_champion,
             "top_scorer_pick": top_scorer_pick,
             "predictions_submitted": self.membership.predictions_submitted,
+            "total_matches": total_matches,
+            "user_predictions": user_predictions,
         })
 
     def post(self, request: HttpRequest, pool_id: int) -> HttpResponse:
         user: User = request.user  # type: ignore[assignment]
-        if not self.membership.predictions_submitted:
-            self.membership.predictions_submitted = True
-            self.membership.save()
-            LeaderboardEntry.objects.get_or_create(
-                pool=self.pool, user=user, defaults={"total_points": 0}
+        if self.membership.predictions_submitted:
+            return redirect("group_predictions", pool_id=self.pool.pk)
+
+        # Require all matches to be predicted
+        total_matches = Match.objects.filter(tournament=self.pool.tournament).count()
+        user_predictions = Prediction.objects.filter(user=user, pool=self.pool).count()
+        if user_predictions < total_matches:
+            messages.error(
+                request,
+                f"Faltan predicciones: tenés {user_predictions} de {total_matches} partidos completados.",
             )
+            return redirect("submit_predictions", pool_id=self.pool.pk)
+
+        # Require top scorer pick
+        if not PoolTopScorerPick.objects.filter(user=user, pool=self.pool).exists():
+            messages.error(request, "Tenés que elegir un goleador antes de confirmar.")
+            return redirect("picks", pool_id=self.pool.pk)
+
+        # Auto-derive champion from Final prediction
+        bracket = build_predicted_knockout_bracket(user, self.pool)
+        final_slots = bracket.get("final", [])
+        champion_team: Team | None = None
+        if final_slots and final_slots[0].prediction:
+            pred = final_slots[0].prediction
+            if pred.predicted_winner_id:
+                champion_team = final_slots[0].home_team if pred.predicted_winner_id == (
+                    final_slots[0].home_team.pk if final_slots[0].home_team else None
+                ) else final_slots[0].away_team
+            elif pred.predicted_home_score is not None and pred.predicted_away_score is not None:
+                if pred.predicted_home_score > pred.predicted_away_score:
+                    champion_team = final_slots[0].home_team
+                elif pred.predicted_away_score > pred.predicted_home_score:
+                    champion_team = final_slots[0].away_team
+
+        if champion_team:
+            PoolChampionPick.objects.update_or_create(
+                user=user, pool=self.pool, defaults={"team": champion_team}
+            )
+
+        self.membership.predictions_submitted = True
+        self.membership.save()
+        LeaderboardEntry.objects.get_or_create(
+            pool=self.pool, user=user, defaults={"total_points": 0}
+        )
         return redirect("group_predictions", pool_id=self.pool.pk)

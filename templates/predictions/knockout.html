@@ -9,8 +9,8 @@
     <p class="text-sm text-gray-500">Eliminatorias — {{ pool.tournament.name }}</p>
   </div>
   {% if not predictions_submitted %}
-  <a href="{% url 'picks' pool.pk %}" class="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-    Elegir campeón →
+  <a href="{% url 'picks' pool.pk %}" class="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-semibold">
+    Goleador y confirmar →
   </a>
   {% endif %}
 </div>
@@ -32,19 +32,19 @@
   <div class="px-5 pb-5 space-y-3">
     {% for slot in stage.slots %}
     <div class="flex items-center gap-3 py-2 border-b last:border-0">
-      <span class="text-xs text-gray-500 w-16 shrink-0">{{ slot.slot_key }}</span>
+      <span class="text-xs text-gray-400 w-20 shrink-0">{{ slot.slot_key }}</span>
 
-      <span class="text-sm text-gray-700 flex-1 text-right truncate">
+      <span class="text-sm text-gray-700 w-28 text-right truncate" title="{{ slot.home_team.name|default:'TBD' }}">
         {{ slot.home_team.name|default:"TBD" }}
       </span>
 
       {% if slot.match and not predictions_submitted %}
       <form
+        class="ko-form flex items-center gap-1"
         hx-post="{% url 'save_knockout_prediction' pool.pk slot.match.pk %}"
         hx-swap="none"
         hx-trigger="change delay:400ms"
-        hx-indicator="#ko-spinner-{{ slot.match.pk }}"
-        class="flex items-center gap-1"
+        hx-indicator="#ko-sp-{{ slot.match.pk }}"
       >
         {% csrf_token %}
         <input type="number" name="predicted_home_score" min="0" max="20"
@@ -56,32 +56,39 @@
           class="w-12 text-center border border-gray-300 rounded py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none">
 
         {% if slot.home_team and slot.away_team %}
-        <select name="predicted_winner"
-          class="text-xs border border-gray-300 rounded py-1 px-1 focus:ring-2 focus:ring-green-400 focus:outline-none ml-1">
-          <option value="">Ganador</option>
-          <option value="{{ slot.home_team.pk }}"
-            {% if slot.prediction.predicted_winner_id == slot.home_team.pk %}selected{% endif %}>
-            {{ slot.home_team.fifa_code }}
-          </option>
-          <option value="{{ slot.away_team.pk }}"
-            {% if slot.prediction.predicted_winner_id == slot.away_team.pk %}selected{% endif %}>
-            {{ slot.away_team.fifa_code }}
-          </option>
-        </select>
+        <span class="winner-wrap hidden items-center gap-1 ml-1">
+          <span class="text-xs text-gray-500">Gan.:</span>
+          <select name="predicted_winner"
+            class="text-xs border border-gray-300 rounded py-1 px-1 focus:ring-2 focus:ring-green-400 focus:outline-none">
+            <option value="">--</option>
+            <option value="{{ slot.home_team.pk }}"
+              {% if slot.prediction.predicted_winner_id == slot.home_team.pk %}selected{% endif %}>
+              {{ slot.home_team.fifa_code }}
+            </option>
+            <option value="{{ slot.away_team.pk }}"
+              {% if slot.prediction.predicted_winner_id == slot.away_team.pk %}selected{% endif %}>
+              {{ slot.away_team.fifa_code }}
+            </option>
+          </select>
+        </span>
         {% endif %}
-        <span id="ko-spinner-{{ slot.match.pk }}" class="htmx-indicator text-green-500 text-xs ml-1">⏳</span>
+
+        <span id="ko-sp-{{ slot.match.pk }}" class="htmx-indicator text-green-500 text-xs">⏳</span>
       </form>
       {% elif slot.match and predictions_submitted %}
-      <span class="text-sm text-gray-500">
-        {{ slot.prediction.predicted_home_score|default:"–" }}
-        –
-        {{ slot.prediction.predicted_away_score|default:"–" }}
-      </span>
+      <div class="flex items-center gap-1 text-sm text-gray-500">
+        <span>{{ slot.prediction.predicted_home_score|default:"–" }}</span>
+        <span class="font-bold">–</span>
+        <span>{{ slot.prediction.predicted_away_score|default:"–" }}</span>
+        {% if slot.prediction.predicted_winner %}
+        <span class="text-xs text-green-600 ml-1">({{ slot.prediction.predicted_winner.fifa_code }})</span>
+        {% endif %}
+      </div>
       {% else %}
-      <span class="text-xs text-gray-400 italic">Sin partido asignado</span>
+      <span class="text-xs text-gray-400 italic">Sin partido</span>
       {% endif %}
 
-      <span class="text-sm text-gray-700 flex-1 truncate">
+      <span class="text-sm text-gray-700 w-28 truncate" title="{{ slot.away_team.name|default:'TBD' }}">
         {{ slot.away_team.name|default:"TBD" }}
       </span>
     </div>
@@ -94,8 +101,36 @@
 {% if not predictions_submitted %}
 <div class="mt-6 flex justify-end">
   <a href="{% url 'picks' pool.pk %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">
-    Siguiente: Elegir campeón y goleador →
+    Siguiente: goleador y confirmar →
   </a>
 </div>
 {% endif %}
+
+<script>
+(function () {
+  function syncWinner(form) {
+    var home = form.querySelector('[name=predicted_home_score]');
+    var away = form.querySelector('[name=predicted_away_score]');
+    var wrap = form.querySelector('.winner-wrap');
+    if (!home || !away || !wrap) return;
+    var equal = home.value !== '' && away.value !== '' &&
+                parseInt(home.value, 10) === parseInt(away.value, 10);
+    if (equal) {
+      wrap.classList.remove('hidden');
+      wrap.classList.add('flex');
+    } else {
+      wrap.classList.add('hidden');
+      wrap.classList.remove('flex');
+      var sel = wrap.querySelector('select');
+      if (sel) sel.value = '';
+    }
+  }
+
+  document.querySelectorAll('.ko-form').forEach(function (form) {
+    form.querySelector('[name=predicted_home_score]').addEventListener('input', function () { syncWinner(form); });
+    form.querySelector('[name=predicted_away_score]').addEventListener('input', function () { syncWinner(form); });
+    syncWinner(form); // set initial state on page load
+  });
+})();
+</script>
 {% endblock %}

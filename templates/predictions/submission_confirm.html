@@ -13,25 +13,44 @@
   </div>
   {% else %}
 
+  {% if messages %}
+  {% for message in messages %}
+  <div class="bg-red-100 text-red-800 rounded-lg p-3 mb-4 text-sm">{{ message }}</div>
+  {% endfor %}
+  {% endif %}
+
   <div class="bg-white rounded-xl shadow p-5 mb-6 space-y-4">
     <div>
-      <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Campeón</p>
+      <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Partidos predichos</p>
+      <p class="font-semibold {% if user_predictions == total_matches %}text-green-700{% else %}text-red-600{% endif %}">
+        {{ user_predictions }} / {{ total_matches }}
+        {% if user_predictions < total_matches %}
+        — <a href="{% url 'group_predictions' pool.pk %}" class="underline text-sm">completar grupos</a>
+           /
+           <a href="{% url 'knockout_predictions' pool.pk %}" class="underline text-sm">completar eliminatorias</a>
+        {% endif %}
+      </p>
+    </div>
+    <div>
+      <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Campeón predicho</p>
       <p class="font-semibold text-gray-800">
-        {{ champion_pick.team.name|default:"⚠️ Sin elegir" }}
+        {% if predicted_champion %}🏆 {{ predicted_champion.name }}
+        {% else %}<span class="text-red-600">Sin campeón — completá tu Final</span>{% endif %}
       </p>
     </div>
     <div>
       <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Goleador</p>
       <p class="font-semibold text-gray-800">
-        {{ top_scorer_pick.player_name|default:"⚠️ Sin elegir" }}
+        {% if top_scorer_pick %}{{ top_scorer_pick.player_name }}
+        {% else %}<span class="text-red-600">Sin goleador — <a href="{% url 'picks' pool.pk %}" class="underline">elegir</a></span>{% endif %}
       </p>
     </div>
   </div>
 
+  {% if user_predictions == total_matches and predicted_champion and top_scorer_pick %}
   <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6 text-sm text-yellow-800">
     Una vez confirmadas, <strong>no podrás modificar</strong> tus predicciones.
   </div>
-
   <form method="post">
     {% csrf_token %}
     <button type="submit"
@@ -39,6 +58,10 @@
       Confirmar y enviar predicciones
     </button>
   </form>
+  {% else %}
+  <p class="text-sm text-gray-500 text-center">Completá todos los campos antes de poder enviar.</p>
+  {% endif %}
+
   {% endif %}
 </div>
 {% endblock %}
