@@ -16,8 +16,9 @@ CSRF_TRUSTED_ORIGINS = [
 
 DATABASES = {"default": dj_database_url.config(conn_max_age=600)}
 
-CELERY_BROKER_URL = os.environ["REDIS_URL"]
-CELERY_RESULT_BACKEND = os.environ["REDIS_URL"]
+_redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+CELERY_BROKER_URL = _redis_url
+CELERY_RESULT_BACKEND = _redis_url
 
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
