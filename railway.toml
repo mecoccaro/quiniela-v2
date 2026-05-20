@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+buildCommand = "uv sync && uv run manage.py collectstatic --noinput"
+
+[deploy]
+startCommand = "gunicorn quiniela.wsgi:application --workers 2 --bind 0.0.0.0:$PORT"
+releaseCommand = "uv run manage.py migrate --noinput"
