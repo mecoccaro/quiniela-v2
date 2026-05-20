@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Picks — {{ pool.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">{{ pool.name }}</h1>
+  <p class="text-sm text-gray-500">Goleador — {{ pool.tournament.name }}</p>
+</div>
+
+{% if predictions_submitted %}
+<div class="bg-green-100 text-green-800 rounded-lg p-4 mb-6 text-sm font-medium">
+  ✅ Tus predicciones ya fueron enviadas.
+</div>
+{% endif %}
+
+<div class="space-y-6">
+
+  <!-- Champion (derived from bracket) -->
+  <div class="bg-white rounded-xl shadow p-5">
+    <h2 class="font-bold text-gray-800 text-lg mb-1">Campeón predicho</h2>
+    <p class="text-xs text-gray-400 mb-4">Se toma automáticamente del ganador de tu Final.</p>
+    {% if predicted_champion %}
+    <p class="text-xl font-bold text-green-700">🏆 {{ predicted_champion.name }}</p>
+    {% else %}
+    <p class="text-sm text-gray-400 italic">
+      Completá las eliminatorias hasta la Final para ver tu campeón predicho.
+      <a href="{% url 'knockout_predictions' pool.pk %}" class="text-green-600 hover:underline">Ir a eliminatorias</a>
+    </p>
+    {% endif %}
+  </div>
+
+  <!-- Top scorer pick -->
+  <div class="bg-white rounded-xl shadow p-5">
+    <h2 class="font-bold text-gray-800 text-lg mb-4">Goleador del torneo</h2>
+    {% if predictions_submitted %}
+      <p class="text-gray-700">
+        Tu pick: <strong>{{ top_scorer_pick.player_name|default:"Sin pick" }}</strong>
+      </p>
+    {% else %}
+    <form
+      hx-post="{% url 'save_top_scorer_pick' pool.pk %}"
+      hx-swap="none"
+      hx-trigger="change delay:400ms"
+      hx-indicator="#scorer-spinner"
+    >
+      {% csrf_token %}
+      <input type="text" name="player_name" maxlength="100"
+        value="{{ top_scorer_pick.player_name|default:'' }}"
+        placeholder="Nombre del jugador"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none">
+      <span id="scorer-spinner" class="htmx-indicator text-green-500 text-xs mt-1 block">⏳ Guardando...</span>
+    </form>
+    {% endif %}
+  </div>
+
+</div>
+
+{% if not predictions_submitted %}
+<div class="mt-6 flex justify-end">
+  <a href="{% url 'submit_predictions' pool.pk %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">
+    Siguiente: Confirmar y enviar →
+  </a>
+</div>
+{% endif %}
+{% endblock %}

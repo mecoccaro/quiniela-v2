@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminatorias — {{ pool.name }}{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-800">{{ pool.name }}</h1>
+    <p class="text-sm text-gray-500">Eliminatorias — {{ pool.tournament.name }}</p>
+  </div>
+  {% if not predictions_submitted %}
+  <a href="{% url 'picks' pool.pk %}" class="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-semibold">
+    Goleador y confirmar →
+  </a>
+  {% endif %}
+</div>
+
+{% if predictions_submitted %}
+<div class="bg-green-100 text-green-800 rounded-lg p-4 mb-6 text-sm font-medium">
+  ✅ Tus predicciones ya fueron enviadas. Solo podés ver los resultados.
+</div>
+{% endif %}
+
+<div id="ko-bracket" class="space-y-4">
+  {% include "predictions/partials/knockout_stages.html" %}
+</div>
+
+{% if not predictions_submitted %}
+<div class="mt-6 flex justify-end">
+  <a href="{% url 'picks' pool.pk %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">
+    Siguiente: goleador y confirmar →
+  </a>
+</div>
+{% endif %}
+
+<script>
+(function () {
+  var savedScrollY = 0;
+  var openStageIndices = new Set();
+
+  function syncWinner(form) {
+    var home = form.querySelector('[name=predicted_home_score]');
+    var away = form.querySelector('[name=predicted_away_score]');
+    var wrap = form.querySelector('.winner-wrap');
+    if (!home || !away || !wrap) return;
+    var equal = home.value !== '' && away.value !== '' &&
+                parseInt(home.value, 10) === parseInt(away.value, 10);
+    wrap.classList.toggle('hidden', !equal);
+    wrap.classList.toggle('flex', equal);
+    if (!equal) {
+      var sel = wrap.querySelector('select');
+      if (sel) sel.value = '';
+    }
+  }
+
+  // Event delegation — survives HTMX innerHTML swaps
+  document.addEventListener('input', function (e) {
+    var name = e.target.name;
+    if (name === 'predicted_home_score' || name === 'predicted_away_score') {
+      var form = e.target.closest('.ko-form');
+      if (form) syncWinner(form);
+    }
+  });
+
+  // Before each bracket save: snapshot scroll + open stages
+  document.addEventListener('htmx:beforeRequest', function (e) {
+    if (e.target.closest && e.target.closest('.ko-form')) {
+      savedScrollY = window.scrollY;
+      openStageIndices.clear();
+      document.querySelectorAll('#ko-bracket details').forEach(function (el, idx) {
+        if (el.hasAttribute('open')) openStageIndices.add(idx);
+      });
+    }
+  });
+
+  // After swap: restore open stages, scroll position, winner dropdowns
+  document.addEventListener('htmx:afterSettle', function () {
+    document.querySelectorAll('#ko-bracket details').forEach(function (el, idx) {
+      if (openStageIndices.has(idx)) {
+        el.setAttribute('open', '');
+      } else {
+        el.removeAttribute('open');
+      }
+    });
+    window.scrollTo(0, savedScrollY);
+    document.querySelectorAll('.ko-form').forEach(syncWinner);
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.ko-form').forEach(syncWinner);
+  });
+})();
+</script>
+{% endblock %}

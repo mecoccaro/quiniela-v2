@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Participantes — {{ pool.name }}{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Participantes</h1>
+  <span class="text-sm text-gray-500">{{ pool.name }}</span>
+</div>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+      <tr>
+        <th class="px-4 py-3 text-left">Jugador</th>
+        <th class="px-4 py-3 text-left hidden sm:table-cell">Campeón</th>
+        <th class="px-4 py-3 text-left hidden sm:table-cell">Goleador</th>
+        <th class="px-4 py-3 text-right">Pts</th>
+        <th class="px-4 py-3 text-center">Estado</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for p in participants %}
+      <tr class="{% if p.user == request.user %}bg-green-50{% endif %} hover:bg-gray-50">
+        <td class="px-4 py-3 font-medium text-gray-800">
+          {{ p.user.nickname }}
+          {% if p.user == request.user %}<span class="text-xs text-green-600 ml-1">(vos)</span>{% endif %}
+        </td>
+        <td class="px-4 py-3 text-gray-600 hidden sm:table-cell">
+          {% if p.champion_pick %}{{ p.champion_pick.team }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+        </td>
+        <td class="px-4 py-3 text-gray-600 hidden sm:table-cell">
+          {% if p.top_scorer_pick %}{{ p.top_scorer_pick.player_name }}{% else %}<span class="text-gray-400">—</span>{% endif %}
+        </td>
+        <td class="px-4 py-3 text-right font-bold text-gray-900">
+          {% if p.entry %}{{ p.entry.total_points }}{% else %}—{% endif %}
+        </td>
+        <td class="px-4 py-3 text-center">
+          {% if p.predictions_submitted %}
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Enviado</span>
+          {% else %}
+            <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">Pendiente</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-4 flex gap-2 text-sm">
+  <a href="{% url 'leaderboard' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Tabla de posiciones</a>
+  <a href="{% url 'my_predictions' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Mis predicciones</a>
+</div>
+{% endblock %}

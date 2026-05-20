@@ -1,0 +1,24 @@
+{
+  "_note": "R32 bracket lookup table — maps group outcomes to R32 slots. Third-place assignments follow FIFA's pre-defined table. Needs completion with full 495-combination table before Phase 6 implementation.",
+  "slots": {
+    "R32_1":  {"home": "A1", "away": "B2"},
+    "R32_2":  {"home": "C1", "away": "D2"},
+    "R32_3":  {"home": "E1", "away": "F2"},
+    "R32_4":  {"home": "G1", "away": "H2"},
+    "R32_5":  {"home": "I1", "away": "J2"},
+    "R32_6":  {"home": "K1", "away": "L2"},
+    "R32_7":  {"home": "B1", "away": "A2"},
+    "R32_8":  {"home": "D1", "away": "C2"},
+    "R32_9":  {"home": "F1", "away": "E2"},
+    "R32_10": {"home": "H1", "away": "G2"},
+    "R32_11": {"home": "J1", "away": "I2"},
+    "R32_12": {"home": "L1", "away": "K2"},
+    "R32_13": {"home": "3rd_TBD_1", "away": "3rd_TBD_2"},
+    "R32_14": {"home": "3rd_TBD_3", "away": "3rd_TBD_4"},
+    "R32_15": {"home": "3rd_TBD_5", "away": "3rd_TBD_6"},
+    "R32_16": {"home": "3rd_TBD_7", "away": "3rd_TBD_8"}
+  },
+  "third_place_assignments": {
+    "_note": "Full 495-combination table (C(12,8)) required. To be implemented in Phase 6 research."
+  }
+}
