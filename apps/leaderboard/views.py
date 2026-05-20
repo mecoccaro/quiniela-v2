@@ -34,9 +34,14 @@ class LeaderboardView(LoginRequiredMixin, View):
             .select_related("user")
             .order_by("rank", "user__nickname")
         )
+        submitted_ids = set(
+            PoolMembership.objects.filter(pool=pool, predictions_submitted=True)
+            .values_list("user_id", flat=True)
+        )
         return render(request, "leaderboard/leaderboard.html", {
             "pool": pool,
             "entries": entries,
+            "submitted_ids": submitted_ids,
         })
 
 

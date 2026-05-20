@@ -6,7 +6,7 @@ branch: master
 repository: quiniela-v2
 topic: "quiniela-v2 — full implementation plan for football prediction pool portal"
 tags: [plan, django, quiniela, world-cup-2026, prediction-pool]
-status: in-progress
+status: completed
 autonomy: critical
 commit_per_phase: true
 last_updated: 2026-05-11
@@ -487,10 +487,10 @@ Logged-in users assigned to a pool can access a prediction form for all 72 group
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest tests/test_prediction_views.py` passes: authenticated user can GET the group stage page (200), POST a prediction for a match (201/200), re-POST updates existing prediction (200)
-- [ ] Test: unauthenticated user redirected to login (302)
-- [ ] Test: user with `predictions_submitted=True` gets 403 on POST
-- [ ] `uv run ruff check .` and `uv run mypy .` exit 0
+- [x] `uv run pytest tests/test_prediction_views.py` passes: authenticated user can GET the group stage page (200), POST a prediction for a match (201/200), re-POST updates existing prediction (200)
+- [x] Test: unauthenticated user redirected to login (302)
+- [x] Test: user with `predictions_submitted=True` gets 403 on POST
+- [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
 - [ ] Start dev server, load WC2026 data, create user + pool membership, open `/predictions/pool/1/group-stage/` — verify all 12 groups render with 6 matches each
@@ -543,10 +543,10 @@ This is an **upfront bracket-prediction system**: users predict all 103 matches 
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest tests/test_knockout_predictions.py` passes: gating blocks access when group stage incomplete, knockout prediction saves correctly, predicted_winner validation enforced
-- [ ] Test: `SubmitPredictionsView` POST sets `predictions_submitted=True` and creates `LeaderboardEntry`
-- [ ] Test: any prediction POST after `predictions_submitted=True` returns 403
-- [ ] `uv run ruff check .` and `uv run mypy .` exit 0
+- [x] `uv run pytest tests/test_knockout_predictions.py` passes: gating blocks access when group stage incomplete, knockout prediction saves correctly, predicted_winner validation enforced
+- [x] Test: `SubmitPredictionsView` POST sets `predictions_submitted=True` and creates `LeaderboardEntry`
+- [x] Test: any prediction POST after `predictions_submitted=True` returns 403
+- [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
 - [ ] With all 72 group predictions entered, navigate to knockout predictions page — verify R32 matchups render using predicted group winners/runners-up

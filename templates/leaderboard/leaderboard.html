@@ -33,7 +33,7 @@
         </td>
         <td class="px-4 py-3 text-right font-bold text-gray-900">{{ entry.total_points }}</td>
         <td class="px-4 py-3 text-center hidden sm:table-cell">
-          {% if entry.user.memberships.get.predictions_submitted %}
+          {% if entry.user.pk in submitted_ids %}
             <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Enviado</span>
           {% endif %}
         </td>
