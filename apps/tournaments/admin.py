@@ -1,12 +1,71 @@
-from django.contrib import admin
+from django import forms
+from django.contrib import admin, messages
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import path, reverse
 
 from .models import Match, Team, Tournament, TournamentTeam
+
+
+class ScoreFinalPicksForm(forms.Form):
+    official_champion = forms.ModelChoiceField(queryset=Team.objects.all(), label="Official Champion")
+    official_top_scorer_name = forms.CharField(max_length=100, label="Official Top Scorer Name")
 
 
 @admin.register(Tournament)
 class TournamentAdmin(admin.ModelAdmin):
     list_display = ["name", "slug", "status", "num_groups"]
     prepopulated_fields = {"slug": ("name",)}
+    actions = ["score_final_picks_action"]
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                "<int:tournament_id>/score-final-picks/",
+                self.admin_site.admin_view(self.score_final_picks_view),
+                name="tournaments_tournament_score_final_picks",
+            ),
+        ]
+        return custom + urls
+
+    @admin.action(description="Score final picks (champion + top scorer)")
+    def score_final_picks_action(self, request: HttpRequest, queryset) -> HttpResponse | None:
+        if queryset.count() != 1:
+            self.message_user(request, "Select exactly one tournament.", level=messages.ERROR)
+            return None
+        tournament = queryset.first()
+        return HttpResponseRedirect(
+            reverse("admin:tournaments_tournament_score_final_picks", args=[tournament.pk])
+        )
+
+    def score_final_picks_view(self, request: HttpRequest, tournament_id: int) -> HttpResponse:
+        tournament = get_object_or_404(Tournament, pk=tournament_id)
+        if request.method == "POST":
+            form = ScoreFinalPicksForm(request.POST)
+            if form.is_valid():
+                champion = form.cleaned_data["official_champion"]
+                top_scorer = form.cleaned_data["official_top_scorer_name"]
+                try:
+                    from apps.leaderboard.tasks import score_final_picks  # noqa: PLC0415
+                    score_final_picks.delay(tournament_id, champion.pk, top_scorer)
+                    self.message_user(request, "Scoring task queued successfully.")
+                except ImportError:
+                    self.message_user(
+                        request, "Leaderboard tasks not yet available.", level=messages.WARNING
+                    )
+                return HttpResponseRedirect(reverse("admin:tournaments_tournament_changelist"))
+        else:
+            form = ScoreFinalPicksForm()
+
+        context = {
+            **self.admin_site.each_context(request),
+            "title": f"Score Final Picks — {tournament}",
+            "form": form,
+            "tournament": tournament,
+            "opts": self.model._meta,
+        }
+        return render(request, "admin/tournaments/score_final_picks.html", context)
 
 
 @admin.register(Team)
@@ -26,3 +85,16 @@ class MatchAdmin(admin.ModelAdmin):
     list_display = ["tournament", "stage", "group_letter", "home_team", "away_team", "status", "home_score", "away_score"]
     list_filter = ["tournament", "stage", "status", "group_letter"]
     search_fields = ["home_team__name", "away_team__name"]
+
+    def save_model(self, request: HttpRequest, obj: Match, form, change: bool) -> None:
+        super().save_model(request, obj, form, change)
+        if (
+            obj.home_score is not None
+            and obj.away_score is not None
+            and obj.status == Match.Status.COMPLETED
+        ):
+            try:
+                from apps.leaderboard.tasks import recalculate_pool_scores  # noqa: PLC0415
+                recalculate_pool_scores.delay(obj.pk)
+            except ImportError:
+                pass

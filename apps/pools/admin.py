@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 
 from .models import (
     LeaderboardEntry,
@@ -17,11 +18,24 @@ class PoolMembershipInline(admin.TabularInline):
     readonly_fields = ["joined_at"]
 
 
+@admin.action(description="Lock selected pools")
+def lock_pools(modeladmin, request, queryset):
+    queryset.update(status=Pool.Status.LOCKED)
+
+
 @admin.register(Pool)
 class PoolAdmin(admin.ModelAdmin):
-    list_display = ["name", "tournament", "status", "lock_deadline"]
+    list_display = ["name", "tournament", "status", "member_count", "lock_deadline"]
     list_filter = ["status", "tournament"]
     inlines = [PoolMembershipInline]
+    actions = [lock_pools]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_member_count=Count("memberships"))
+
+    @admin.display(ordering="_member_count", description="Members")
+    def member_count(self, obj: Pool) -> int:
+        return obj._member_count  # type: ignore[attr-defined]
 
 
 @admin.register(PoolMembership)
