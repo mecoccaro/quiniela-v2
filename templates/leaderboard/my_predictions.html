@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Mis predicciones — {{ pool.name }}{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">Mis predicciones</h1>
+  <div class="flex items-center gap-2">
+    {% if membership.predictions_submitted %}
+      <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium sticky top-2">Bloqueado</span>
+    {% endif %}
+    <span class="text-sm text-gray-500">{{ pool.name }}</span>
+  </div>
+</div>
+
+{% for stage in stages %}
+<div class="mb-8">
+  <h2 class="text-lg font-semibold text-gray-700 mb-3">{{ stage.label }}</h2>
+  <div class="bg-white rounded-xl shadow divide-y divide-gray-100">
+    {% for pred in stage.predictions %}
+    <div class="px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3 min-w-0">
+        <span class="text-sm text-gray-700 truncate">
+          {{ pred.match.home_team }} vs {{ pred.match.away_team }}
+        </span>
+        {% if pred.match.stage != "group" and pred.predicted_winner %}
+          <span class="text-xs text-blue-600">(penales: {{ pred.predicted_winner }})</span>
+        {% endif %}
+      </div>
+      <div class="flex items-center gap-4 shrink-0 ml-4">
+        <span class="font-mono font-semibold text-gray-900">
+          {{ pred.predicted_home_score }} – {{ pred.predicted_away_score }}
+        </span>
+        {% if pred.points_awarded is not None %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full
+            {% if pred.points_awarded > 0 %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+            {{ pred.points_awarded }} pts
+          </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% empty %}
+<div class="bg-white rounded-xl shadow p-8 text-center text-gray-500">No hay predicciones todavía.</div>
+{% endfor %}
+
+{% if champion_pick or top_scorer_pick %}
+<div class="mb-8">
+  <h2 class="text-lg font-semibold text-gray-700 mb-3">Picks finales</h2>
+  <div class="bg-white rounded-xl shadow divide-y divide-gray-100">
+    {% if champion_pick %}
+    <div class="px-4 py-3 flex items-center justify-between">
+      <span class="text-sm text-gray-700">Campeón</span>
+      <div class="flex items-center gap-4">
+        <span class="font-medium text-gray-900">{{ champion_pick.team }}</span>
+        {% if champion_pick.points_awarded is not None %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full
+            {% if champion_pick.points_awarded > 0 %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+            {{ champion_pick.points_awarded }} pts
+          </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+    {% if top_scorer_pick %}
+    <div class="px-4 py-3 flex items-center justify-between">
+      <span class="text-sm text-gray-700">Goleador</span>
+      <div class="flex items-center gap-4">
+        <span class="font-medium text-gray-900">{{ top_scorer_pick.player_name }}</span>
+        {% if top_scorer_pick.points_awarded is not None %}
+          <span class="text-xs font-medium px-2 py-0.5 rounded-full
+            {% if top_scorer_pick.points_awarded > 0 %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+            {{ top_scorer_pick.points_awarded }} pts
+          </span>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="mt-4 flex gap-2 text-sm">
+  <a href="{% url 'leaderboard' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Tabla de posiciones</a>
+  <a href="{% url 'participants' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Participantes</a>
+</div>
+{% endblock %}
