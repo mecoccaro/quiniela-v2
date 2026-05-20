@@ -69,7 +69,7 @@ LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 LANGUAGE_CODE = "es"
-TIME_ZONE = "America/Buenos_Aires"
+TIME_ZONE = "America/Caracas"
 USE_I18N = True
 USE_TZ = True
 
