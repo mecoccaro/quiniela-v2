@@ -1,0 +1,45 @@
+<div class="bg-white rounded-xl shadow overflow-hidden"
+     hx-get="{% url 'leaderboard' pool.pk %}"
+     hx-trigger="every 60s"
+     hx-target="this"
+     hx-swap="outerHTML">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+      <tr>
+        <th class="px-4 py-3 text-left w-8">#</th>
+        <th class="px-4 py-3 text-left w-8"></th>
+        <th class="px-4 py-3 text-left">Jugador</th>
+        <th class="px-4 py-3 text-right">Pts</th>
+        <th class="px-4 py-3 text-center hidden sm:table-cell">Estado</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-100">
+      {% for entry in entries %}
+      <tr class="{% if entry.user == request.user %}bg-green-50{% endif %} hover:bg-gray-50">
+        <td class="px-4 py-3 font-bold text-gray-500">{{ entry.rank }}</td>
+        <td class="px-2 py-3 text-center w-8">
+          {% if entry.rank_change is not None %}
+            {% if entry.rank_change > 0 %}
+              <span class="text-green-500 font-bold text-sm" title="Subió {{ entry.rank_change }} puesto{{ entry.rank_change|pluralize }}">↑</span>
+            {% elif entry.rank_change < 0 %}
+              <span class="text-red-500 font-bold text-sm" title="Bajó {{ entry.rank_change|stringformat:'d'|slice:'1:' }} puesto{{ entry.rank_change|stringformat:'d'|slice:'1:'|length|pluralize }}">↓</span>
+            {% else %}
+              <span class="text-gray-400 text-sm" title="Sin cambios">=</span>
+            {% endif %}
+          {% endif %}
+        </td>
+        <td class="px-4 py-3 font-medium text-gray-800">
+          {{ entry.user.nickname }}
+          {% if entry.user == request.user %}<span class="text-xs text-green-600 ml-1">(vos)</span>{% endif %}
+        </td>
+        <td class="px-4 py-3 text-right font-bold text-gray-900">{{ entry.total_points }}</td>
+        <td class="px-4 py-3 text-center hidden sm:table-cell">
+          {% if entry.user.pk in submitted_ids %}
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Enviado</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

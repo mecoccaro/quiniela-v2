@@ -1,0 +1,49 @@
+<!-- How-to Modal -->
+<div id="howto-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/50" onclick="closeModal('howto-modal')"></div>
+  <div class="relative bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100">
+      <h2 class="text-xl font-bold text-gray-800">¿Cómo jugar?</h2>
+      <button onclick="closeModal('howto-modal')" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    </div>
+    <div class="p-5 space-y-6">
+
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Completá los 72 partidos de grupos</h3>
+          <p class="text-sm text-gray-600">Ingresá el resultado que predecís para cada partido de los 12 grupos (A–L). Podés hacerlo de a poco — tus predicciones se guardan automáticamente.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Construí tu bracket de eliminatorias</h3>
+          <p class="text-sm text-gray-600">Una vez completados todos los grupos, el bracket de Ronda de 32 se arma automáticamente según tus predicciones. Seguí prediciendo ronda por ronda hasta la Final. Si predecís empate en un partido de eliminatorias, elegí también el ganador por penales.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Elegí el goleador del torneo</h3>
+          <p class="text-sm text-gray-600">Escribí el nombre del jugador que creés que será el máximo goleador de la Copa del Mundo 2026.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <div class="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
+        <div>
+          <h3 class="font-semibold text-gray-800 mb-1">Confirmá y enviá</h3>
+          <p class="text-sm text-gray-600">Cuando tengas todo completo, hacé click en "Confirmar y enviar". <strong>¡Cuidado! Esta acción es irreversible.</strong> Una vez enviadas, las predicciones quedan bloqueadas.</p>
+        </div>
+      </div>
+
+      <div class="bg-green-50 rounded-xl p-4 text-sm text-green-800">
+        💡 <strong>Tip:</strong> Los puntos se actualizan automáticamente a medida que el admin va cargando los resultados oficiales. Revisá la tabla de posiciones para ver cómo vas.
+      </div>
+
+    </div>
+  </div>
+</div>

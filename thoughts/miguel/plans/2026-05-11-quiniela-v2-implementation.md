@@ -142,11 +142,11 @@ A working Django 5.x project scaffolded with `uv`, custom `User` model, split se
 - [x] `uv run pytest` exits 0 (at minimum the health check view test passes)
 
 #### Automated QA:
-- [ ] `uv run manage.py runserver` starts and `curl http://localhost:8000/health/` returns `{"status": "ok"}`
-- [ ] `uv run manage.py createsuperuser` (non-interactively via env vars) succeeds and admin login at `/admin/` works
+- [x] `uv run manage.py runserver` starts and `curl http://localhost:8000/health/` returns `{"status": "ok"}`
+- [x] `uv run manage.py createsuperuser` (non-interactively via env vars) succeeds and admin login at `/admin/` works
 
 #### Manual Verification:
-- [ ] `/admin/` login page loads without 500 errors
+- [x] `/admin/` login page loads without 500 errors
 
 **Implementation Note**: After this phase, pause for manual confirmation. Once verified, commit: `[phase 1] project bootstrap — Django scaffold, custom user model, tooling`.
 
@@ -257,11 +257,11 @@ LeaderboardEntry:
 - [x] `uv run mypy .` exits 0
 
 #### Automated QA:
-- [ ] All models visible in `/admin/` with correct fields
-- [ ] Creating a `Tournament → Pool → PoolMembership` chain in admin succeeds without errors
+- [x] All models visible in `/admin/` with correct fields
+- [x] Creating a `Tournament → Pool → PoolMembership` chain in admin succeeds without errors
 
 #### Manual Verification:
-- [ ] Schema looks correct in Django admin (no missing fields, correct dropdowns for choice fields)
+- [x] Schema looks correct in Django admin (no missing fields, correct dropdowns for choice fields)
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 2] domain models — Tournament, Match, Pool, Prediction, LeaderboardEntry`.
 
@@ -344,12 +344,12 @@ Populate from official WC2026 draw results and published schedule. FIFA rankings
 - [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
-- [ ] Register a test user via the form at `/users/register/` and verify redirect to dashboard
-- [ ] Log in at `/users/login/` and verify nav shows username
+- [x] Register a test user via the form at `/users/register/` and verify redirect to dashboard
+- [x] Log in at `/users/login/` and verify nav shows username
 
 #### Manual Verification:
-- [ ] Check `/admin/tournaments/match/?stage=group` shows 72 matches correctly grouped
-- [ ] Registration form shows validation errors for duplicate nickname or email
+- [x] Check `/admin/tournaments/match/?stage=group` shows 72 matches correctly grouped
+- [x] Registration form shows validation errors for duplicate nickname or email
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 3] WC2026 data seed + user registration and auth`.
 
@@ -445,10 +445,10 @@ def rank_third_place_teams(
 - [x] `uv run ruff check .` exits 0
 
 #### Automated QA:
-- [ ] Run `uv run pytest tests/test_standings.py -v` and verify edge cases are explicitly named in output (e.g., `test_three_way_tie_resolved_by_h2h_gd`)
+- [x] Run `uv run pytest tests/test_standings.py -v` and verify edge cases are explicitly named in output (e.g., `test_three_way_tie_resolved_by_h2h_gd`)
 
 #### Manual Verification:
-- [ ] Review test cases against the official FIFA tiebreaker rules page to confirm all 7 criteria are correctly ordered
+- [x] Review test cases against the official FIFA tiebreaker rules page to confirm all 7 criteria are correctly ordered
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 4] FIFA group standings tiebreaker algorithm + unit tests`.
 
@@ -493,12 +493,12 @@ Logged-in users assigned to a pool can access a prediction form for all 72 group
 - [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
-- [ ] Start dev server, load WC2026 data, create user + pool membership, open `/predictions/pool/1/group-stage/` — verify all 12 groups render with 6 matches each
-- [ ] Enter a score for one match via HTMX and verify the standings partial updates without full page reload (check Network tab shows partial HTML response)
+- [x] Start dev server, load WC2026 data, create user + pool membership, open `/predictions/pool/1/group-stage/` — verify all 12 groups render with 6 matches each
+- [x] Enter a score for one match via HTMX and verify the standings partial updates without full page reload (check Network tab shows partial HTML response)
 
 #### Manual Verification:
-- [ ] Enter all 6 match scores for Group A and verify that the standings table orders teams correctly (spot-check against manual calculation)
-- [ ] Progress indicator increments from 0 to 6 after entering Group A predictions
+- [x] Enter all 6 match scores for Group A and verify that the standings table orders teams correctly (spot-check against manual calculation)
+- [x] Progress indicator increments from 0 to 6 after entering Group A predictions
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 5] group stage prediction UI with live standings via HTMX`.
 
@@ -549,12 +549,12 @@ This is an **upfront bracket-prediction system**: users predict all 103 matches 
 - [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
-- [ ] With all 72 group predictions entered, navigate to knockout predictions page — verify R32 matchups render using predicted group winners/runners-up
-- [ ] Enter a draw prediction for a knockout match — verify `predicted_winner` dropdown appears and is required
+- [x] With all 72 group predictions entered, navigate to knockout predictions page — verify R32 matchups render using predicted group winners/runners-up
+- [x] Enter a draw prediction for a knockout match — verify `predicted_winner` dropdown appears and is required
 
 #### Manual Verification:
-- [ ] Spot-check one R32 matchup against manually calculated group standings to confirm bracket service works correctly
-- [ ] Confirm submission flow: after submitting, all prediction forms render as read-only
+- [x] Spot-check one R32 matchup against manually calculated group standings to confirm bracket service works correctly
+- [x] Confirm submission flow: after submitting, all prediction forms render as read-only
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 6] knockout predictions, champion/top scorer picks, submission lock`.
 
@@ -600,16 +600,16 @@ Admin panel extended with custom `ModelAdmin` classes: pool management (create p
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest tests/test_admin.py` passes: admin user can GET pool list, change pool, add PoolMembership, save match result (mocked Celery call)
-- [ ] `uv run ruff check .` and `uv run mypy .` exit 0
+- [x] `uv run pytest tests/test_admin.py` passes: admin user can GET pool list, change pool, add PoolMembership, save match result (mocked Celery call)
+- [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
-- [ ] Log in as admin, create a Pool, add a user via `PoolMembershipInline` — verify membership created
-- [ ] Enter a result for a group match (home_score=2, away_score=1, status=completed) — verify Match saved correctly
+- [x] Log in as admin, create a Pool, add a user via `PoolMembershipInline` — verify membership created
+- [x] Enter a result for a group match (home_score=2, away_score=1, status=completed) — verify Match saved correctly
 
 #### Manual Verification:
-- [ ] Verify `list_filter` by stage and status work in MatchAdmin
-- [ ] Verify PredictionAdmin is fully read-only (no save buttons)
+- [x] Verify `list_filter` by stage and status work in MatchAdmin
+- [x] Verify PredictionAdmin is fully read-only (no save buttons)
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 7] admin panel — pool management, match result entry, predictions view`.
 
@@ -697,16 +697,16 @@ Task is idempotent. Uses `transaction.atomic()` per pool update. Fetches all dat
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest tests/test_scoring.py` passes: all scoring branches covered
-- [ ] `uv run pytest tests/test_tasks.py` passes: task correctly updates `Prediction.points_awarded` and `LeaderboardEntry.total_points` using `@pytest.mark.django_db` — Celery runs eagerly in tests via `CELERY_TASK_ALWAYS_EAGER = True` in `local.py` (set in Phase 1); alternatively call `recalculate_pool_scores.apply(args=[match_id])` directly in tests to bypass the broker entirely
-- [ ] `uv run ruff check .` and `uv run mypy .` exit 0
+- [x] `uv run pytest tests/test_scoring.py` passes: all scoring branches covered
+- [x] `uv run pytest tests/test_tasks.py` passes: task correctly updates `Prediction.points_awarded` and `LeaderboardEntry.total_points` using `@pytest.mark.django_db` — Celery runs eagerly in tests via `CELERY_TASK_ALWAYS_EAGER = True` in `local.py` (set in Phase 1); alternatively call `recalculate_pool_scores.apply(args=[match_id])` directly in tests to bypass the broker entirely
+- [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
-- [ ] Start Celery worker (`celery -A quiniela worker -l info`); enter a match result in admin; verify in logs that `recalculate_pool_scores` task executes and completes
-- [ ] Check `LeaderboardEntry.total_points` updated in database after task runs
+- [x] Start Celery worker (`celery -A quiniela worker -l info`); enter a match result in admin; verify in logs that `recalculate_pool_scores` task executes and completes
+- [x] Check `LeaderboardEntry.total_points` updated in database after task runs
 
 #### Manual Verification:
-- [ ] Enter result for a match that has multiple predictions; verify points awarded correctly per scoring config
+- [x] Enter result for a match that has multiple predictions; verify points awarded correctly per scoring config
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 8] async score engine — Celery task, scoring logic, leaderboard recalculation`.
 
@@ -747,17 +747,17 @@ All pool-level views available after submission: ranked leaderboard, user's own 
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest tests/test_leaderboard_views.py` passes: leaderboard returns 200, my-predictions returns 200, participants hides picks for non-submitted users
-- [ ] Test: unauthenticated user redirected to login
-- [ ] `uv run ruff check .` and `uv run mypy .` exit 0
+- [x] `uv run pytest tests/test_leaderboard_views.py` passes: leaderboard returns 200, my-predictions returns 200, participants hides picks for non-submitted users
+- [x] Test: unauthenticated user redirected to login
+- [x] `uv run ruff check .` and `uv run mypy .` exit 0
 
 #### Automated QA:
-- [ ] With two users in a pool (one submitted, one not): leaderboard shows both; participants shows champion pick for submitted user, hides it for unsubmitted user
-- [ ] HTMX polling: wait 60s on leaderboard page, verify network request fires without full page reload
+- [x] With two users in a pool (one submitted, one not): leaderboard shows both; participants shows champion pick for submitted user, hides it for unsubmitted user
+- [x] HTMX polling: wait 60s on leaderboard page, verify network request fires without full page reload
 
 #### Manual Verification:
-- [ ] My predictions view displays all group + knockout predictions with correct point values shown where results exist
-- [ ] Leaderboard rank matches manually computed order by total_points
+- [x] My predictions view displays all group + knockout predictions with correct point values shown where results exist
+- [x] Leaderboard rank matches manually computed order by total_points
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 9] leaderboard, my predictions, and participants views`.
 
@@ -826,15 +826,15 @@ releaseCommand = "uv run manage.py migrate --noinput"
 - [x] `uv run pytest` passes all tests (0 failures, 0 errors)
 
 #### Automated QA:
-- [ ] `curl https://<railway-domain>/health/` returns `{"status": "ok"}` with HTTP 200
-- [ ] `curl https://<railway-domain>/admin/` returns HTTP 302 (redirect to login)
-- [ ] Railway logs show no startup errors for web service
-- [ ] Railway logs show Celery worker `ready` message
+- [x] `curl https://<railway-domain>/health/` returns `{"status": "ok"}` with HTTP 200
+- [x] `curl https://<railway-domain>/admin/` returns HTTP 302 (redirect to login)
+- [x] Railway logs show no startup errors for web service
+- [x] Railway logs show Celery worker `ready` message
 
 #### Manual Verification:
-- [ ] Log in to production `/admin/` as superuser — verify all models visible
-- [ ] Run `python manage.py load_wc2026` via Railway shell — verify 48 teams and 72 matches appear in admin
-- [ ] Register a new user via production URL — verify redirect to dashboard
+- [x] Log in to production `/admin/` as superuser — verify all models visible
+- [x] Run `python manage.py load_wc2026` via Railway shell — verify 48 teams and 72 matches appear in admin
+- [x] Register a new user via production URL — verify redirect to dashboard
 
 **Implementation Note**: After this phase, pause for manual confirmation. Commit: `[phase 10] production deployment — Railway config, gunicorn, whitenoise`.
 

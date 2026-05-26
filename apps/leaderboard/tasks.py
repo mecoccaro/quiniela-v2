@@ -108,5 +108,6 @@ def _recalculate_leaderboard(pool_id: int) -> None:
         for i, entry in enumerate(entries):
             if i > 0 and entry.total_points < entries[i - 1].total_points:
                 rank = i + 1
+            entry.previous_rank = entry.rank if entry.rank != 0 else None
             entry.rank = rank
-            entry.save(update_fields=["rank"])
+            entry.save(update_fields=["rank", "previous_rank"])

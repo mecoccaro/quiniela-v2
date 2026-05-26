@@ -17,11 +17,12 @@
 <div class="mb-8">
   <h2 class="text-lg font-semibold text-gray-700 mb-3">{{ stage.label }}</h2>
   <div class="bg-white rounded-xl shadow divide-y divide-gray-100">
-    {% for pred in stage.predictions %}
+    {% for pred_data in stage.predictions %}
+    {% with pred=pred_data.pred %}
     <div class="px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3 min-w-0">
         <span class="text-sm text-gray-700 truncate">
-          {{ pred.match.home_team }} vs {{ pred.match.away_team }}
+          {{ pred_data.home_team|default:"TBD" }} vs {{ pred_data.away_team|default:"TBD" }}
         </span>
         {% if pred.match.stage != "group" and pred.predicted_winner %}
           <span class="text-xs text-blue-600">(penales: {{ pred.predicted_winner }})</span>
@@ -39,6 +40,7 @@
         {% endif %}
       </div>
     </div>
+    {% endwith %}
     {% endfor %}
   </div>
 </div>

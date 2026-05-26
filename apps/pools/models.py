@@ -86,10 +86,18 @@ class LeaderboardEntry(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="leaderboard_entries")
     total_points = models.IntegerField(default=0)
     rank = models.PositiveIntegerField(default=0)
+    previous_rank = models.PositiveIntegerField(null=True, blank=True)
     last_calculated_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = [("pool", "user")]
+
+    @property
+    def rank_change(self) -> int | None:
+        """Positive = moved up, negative = moved down, 0 = no change, None = first calculation."""
+        if self.previous_rank is None:
+            return None
+        return self.previous_rank - self.rank
 
     def __str__(self) -> str:
         return f"{self.user} — {self.pool} (rank {self.rank}, {self.total_points} pts)"

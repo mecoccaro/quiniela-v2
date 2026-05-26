@@ -5,6 +5,9 @@
 {% block content %}
 <div class="flex items-center justify-between mb-6">
   <div>
+    <a href="{% url 'group_predictions' pool.pk %}" class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-1">
+      ← Fase de grupos
+    </a>
     <h1 class="text-2xl font-bold text-gray-800">{{ pool.name }}</h1>
     <p class="text-sm text-gray-500">Eliminatorias — {{ pool.tournament.name }}</p>
   </div>

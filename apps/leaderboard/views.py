@@ -11,6 +11,7 @@ from apps.pools.models import (
     PoolTopScorerPick,
     Prediction,
 )
+from apps.tournaments.services import build_predicted_knockout_bracket
 from apps.users.models import User
 
 STAGE_LABELS = {
@@ -38,11 +39,15 @@ class LeaderboardView(LoginRequiredMixin, View):
             PoolMembership.objects.filter(pool=pool, predictions_submitted=True)
             .values_list("user_id", flat=True)
         )
-        return render(request, "leaderboard/leaderboard.html", {
+        context = {
             "pool": pool,
             "entries": entries,
             "submitted_ids": submitted_ids,
-        })
+        }
+        # Return only the polling partial when requested via HTMX to avoid nesting
+        if request.headers.get("HX-Request"):
+            return render(request, "leaderboard/partials/leaderboard_table.html", context)
+        return render(request, "leaderboard/leaderboard.html", context)
 
 
 class MyPredictionsView(LoginRequiredMixin, View):
@@ -57,17 +62,41 @@ class MyPredictionsView(LoginRequiredMixin, View):
             .order_by("match__stage", "match__group_letter", "match__id")
         )
 
+        # Build knockout bracket to resolve actual team names for knockout slots
+        # (knockout Match records have home_team/away_team = None until official results)
+        ko_team_map: dict[int, tuple] = {}
+        try:
+            bracket = build_predicted_knockout_bracket(user, pool)
+            for stage_slots in bracket.values():
+                for slot in stage_slots:
+                    if slot.match:
+                        ko_team_map[slot.match.pk] = (slot.home_team, slot.away_team)
+        except Exception:
+            pass  # bracket may fail if group predictions are incomplete
+
         stage_order = ["group", "r32", "r16", "qf", "sf", "third_place", "final"]
         grouped: dict[str, list] = {}
         for pred in predictions:
             stage = pred.match.stage
             grouped.setdefault(stage, []).append(pred)
 
-        stages = [
-            {"key": s, "label": STAGE_LABELS.get(s, s), "predictions": grouped[s]}
-            for s in stage_order
-            if s in grouped
-        ]
+        stages = []
+        for s in stage_order:
+            if s not in grouped:
+                continue
+            enriched = []
+            for pred in grouped[s]:
+                if pred.match.stage != "group" and pred.match.pk in ko_team_map:
+                    home_team, away_team = ko_team_map[pred.match.pk]
+                else:
+                    home_team = pred.match.home_team
+                    away_team = pred.match.away_team
+                enriched.append({
+                    "pred": pred,
+                    "home_team": home_team,
+                    "away_team": away_team,
+                })
+            stages.append({"key": s, "label": STAGE_LABELS.get(s, s), "predictions": enriched})
 
         champion_pick = PoolChampionPick.objects.filter(user=user, pool=pool).first()
         top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=pool).first()

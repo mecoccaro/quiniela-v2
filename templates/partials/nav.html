@@ -1,7 +1,9 @@
 <nav class="bg-green-700 text-white shadow">
   <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
     <a href="{% url 'dashboard' %}" class="font-bold text-lg tracking-wide">⚽ Quiniela 2026</a>
-    <div class="flex items-center gap-4 text-sm">
+    <div class="flex items-center gap-3 text-sm">
+      <button onclick="openModal('howto-modal')" class="text-green-200 hover:text-white hidden sm:inline">¿Cómo jugar?</button>
+      <button onclick="openModal('faq-modal')" class="text-green-200 hover:text-white hidden sm:inline">FAQ</button>
       {% if user.is_authenticated %}
         <span class="text-green-200">{{ user.nickname }}</span>
         <form method="post" action="{% url 'logout' %}">

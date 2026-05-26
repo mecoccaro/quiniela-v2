@@ -9,6 +9,8 @@
 </head>
 <body class="bg-gray-50 min-h-screen" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   {% include "partials/nav.html" %}
+  {% include "partials/faq_modal.html" %}
+  {% include "partials/howto_modal.html" %}
 
   {% if messages %}
     <div class="max-w-4xl mx-auto mt-4 px-4">
@@ -23,5 +25,24 @@
   <main class="max-w-4xl mx-auto py-8 px-4">
     {% block content %}{% endblock %}
   </main>
+
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('[id$="-modal"]').forEach(function(m) {
+          m.classList.add('hidden');
+        });
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
 </body>
 </html>

@@ -9,39 +9,7 @@
 </div>
 
 {% if entries %}
-<div class="bg-white rounded-xl shadow overflow-hidden"
-     hx-get="{% url 'leaderboard' pool.pk %}"
-     hx-trigger="every 60s"
-     hx-target="this"
-     hx-swap="outerHTML">
-  <table class="w-full text-sm">
-    <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
-      <tr>
-        <th class="px-4 py-3 text-left w-12">#</th>
-        <th class="px-4 py-3 text-left">Jugador</th>
-        <th class="px-4 py-3 text-right">Pts</th>
-        <th class="px-4 py-3 text-center hidden sm:table-cell">Estado</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      {% for entry in entries %}
-      <tr class="{% if entry.user == request.user %}bg-green-50{% endif %} hover:bg-gray-50">
-        <td class="px-4 py-3 font-bold text-gray-500">{{ entry.rank }}</td>
-        <td class="px-4 py-3 font-medium text-gray-800">
-          {{ entry.user.nickname }}
-          {% if entry.user == request.user %}<span class="text-xs text-green-600 ml-1">(vos)</span>{% endif %}
-        </td>
-        <td class="px-4 py-3 text-right font-bold text-gray-900">{{ entry.total_points }}</td>
-        <td class="px-4 py-3 text-center hidden sm:table-cell">
-          {% if entry.user.pk in submitted_ids %}
-            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Enviado</span>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+  {% include "leaderboard/partials/leaderboard_table.html" %}
 {% else %}
 <div class="bg-white rounded-xl shadow p-8 text-center text-gray-500">
   <p>Aún no hay puntos registrados. Los resultados aparecerán cuando el admin cargue los resultados oficiales.</p>

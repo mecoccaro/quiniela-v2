@@ -82,7 +82,10 @@ class GroupPredictionsView(LoginRequiredMixin, TemplateView):
         ctx["pool"] = self.pool
         ctx["group_data"] = group_data
         ctx["predictions_submitted"] = self.membership.predictions_submitted
-        ctx["total_predicted"] = len(pred_map)
+        # Count only group-stage predictions for the progress counter.
+        # pred_map contains all predictions (including knockout) so we filter by group match ids.
+        group_match_ids = {m.pk for m in all_matches}
+        ctx["total_predicted"] = sum(1 for mid in pred_map if mid in group_match_ids)
         ctx["total_matches"] = all_matches.count()
         return ctx
 
@@ -314,7 +317,10 @@ class SubmitPredictionsView(LoginRequiredMixin, View):
             if stored:
                 predicted_champion = stored.team
         top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=self.pool).first()
-        total_matches = Match.objects.filter(tournament=self.pool.tournament).count()
+        # Exclude third_place matches — they are not shown in the knockout UI
+        total_matches = Match.objects.filter(
+            tournament=self.pool.tournament
+        ).exclude(stage=Match.Stage.THIRD_PLACE).count()
         user_predictions = Prediction.objects.filter(user=user, pool=self.pool).count()
         return render(request, "predictions/submission_confirm.html", {
             "pool": self.pool,
@@ -330,8 +336,10 @@ class SubmitPredictionsView(LoginRequiredMixin, View):
         if self.membership.predictions_submitted:
             return redirect("group_predictions", pool_id=self.pool.pk)
 
-        # Require all matches to be predicted
-        total_matches = Match.objects.filter(tournament=self.pool.tournament).count()
+        # Require all matches to be predicted (excluding third_place — not in the UI)
+        total_matches = Match.objects.filter(
+            tournament=self.pool.tournament
+        ).exclude(stage=Match.Stage.THIRD_PLACE).count()
         user_predictions = Prediction.objects.filter(user=user, pool=self.pool).count()
         if user_predictions < total_matches:
             messages.error(
