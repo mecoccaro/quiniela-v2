@@ -87,14 +87,6 @@ class MatchAdmin(admin.ModelAdmin):
     search_fields = ["home_team__name", "away_team__name"]
 
     def save_model(self, request: HttpRequest, obj: Match, form, change: bool) -> None:
+        # The post_save signal on Match already triggers recalculate_pool_scores,
+        # so no explicit call needed here — calling it twice would wipe previous_rank.
         super().save_model(request, obj, form, change)
-        if (
-            obj.home_score is not None
-            and obj.away_score is not None
-            and obj.status == Match.Status.COMPLETED
-        ):
-            try:
-                from apps.leaderboard.tasks import recalculate_pool_scores  # noqa: PLC0415
-                recalculate_pool_scores.delay(obj.pk)
-            except ImportError:
-                pass
