@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
+from django.utils.dateparse import parse_datetime
 
 from apps.tournaments.models import Match, Team, Tournament, TournamentTeam
 
@@ -96,6 +97,20 @@ class Command(BaseCommand):
 
         total_group = Match.objects.filter(tournament=tournament, stage=Match.Stage.GROUP).count()
         self.stdout.write(f"{match_count} new group matches created. Total: {total_group}")
+
+        # Schedule dates — populate Match.scheduled_at for group matches
+        schedule_count = 0
+        for item in data.get("schedule", []):
+            dt = parse_datetime(item["date"])
+            updated = Match.objects.filter(
+                tournament=tournament,
+                stage=Match.Stage.GROUP,
+                home_team__fifa_code=item["home"],
+                away_team__fifa_code=item["away"],
+            ).update(scheduled_at=dt)
+            schedule_count += updated
+
+        self.stdout.write(f"{schedule_count} group matches updated with scheduled_at dates")
 
         # Knockout placeholder matches — one per bracket slot
         bracket_path = DATA_DIR / "knockout_bracket.json"

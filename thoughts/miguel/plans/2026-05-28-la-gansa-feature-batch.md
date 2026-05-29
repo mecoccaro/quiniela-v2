@@ -613,8 +613,8 @@ path("pool/<int:pool_id>/day/", PoolDayView.as_view(), name="pool_day"),
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Tests pass: `uv run pytest`
-- [ ] Lint passes: `uv run ruff check .`
+- [x] Tests pass: `uv run pytest`
+- [x] Lint passes: `uv run ruff check .`
 - [ ] Loader assigns dates: after running `uv run manage.py load_wc2026`, confirm `Match.objects.filter(scheduled_at__isnull=False).count() > 0`
 
 #### Automated QA:

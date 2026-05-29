@@ -37,6 +37,8 @@
           {% endif %}
           <a href="{% url 'leaderboard' membership.pool.pk %}"
              class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Tabla</a>
+          <a href="{% url 'pool_day' membership.pool.pk %}"
+             class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Partidos</a>
         </div>
       </div>
     {% endfor %}
