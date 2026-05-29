@@ -23,26 +23,23 @@ def recalculate_pool_scores(match_id: int) -> None:
 
     for prediction in predictions:
         config = get_scoring_config(prediction.pool)
-        points = score_prediction(
-            predicted_home=prediction.predicted_home_score,
-            predicted_away=prediction.predicted_away_score,
-            official_home=match.home_score,
-            official_away=match.away_score,
-            stage=match.stage,
-            predicted_winner_id=prediction.predicted_winner_id,
-            official_knockout_winner_id=match.knockout_winner_id,
-            config=config,
-        )
+
+        if match.stage == Match.Stage.GROUP:
+            points = score_prediction(
+                predicted_home=prediction.predicted_home_score,
+                predicted_away=prediction.predicted_away_score,
+                official_home=match.home_score,
+                official_away=match.away_score,
+                stage=match.stage,
+                predicted_winner_id=prediction.predicted_winner_id,
+                official_knockout_winner_id=match.knockout_winner_id,
+                config=config,
+            )
+            slot_bonus = 0
+        else:
+            points, slot_bonus = _score_knockout_prediction(prediction, match, config)
+
         prediction.points_awarded = points
-        slot_bonus = 0
-        if (
-            match.stage != Match.Stage.GROUP
-            and match.bracket_slot
-            and match.knockout_winner_id
-            and match.home_team_id
-            and match.away_team_id
-        ):
-            slot_bonus = _compute_slot_bonus(prediction, match, config)
         prediction.slot_bonus_awarded = slot_bonus
         prediction.save(update_fields=["points_awarded", "slot_bonus_awarded"])
 
@@ -79,60 +76,55 @@ def score_final_picks(tournament_id: int, official_champion_id: int, official_to
         _recalculate_leaderboard(pool.pk)
 
 
-def _compute_slot_bonus(prediction, match, config) -> int:
-    """Award slot bonus only when both predicted teams occupy the correct bracket slot
-    AND the user predicted the correct winner.
+def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
+    """Score a knockout prediction, gating result points on team correctness.
 
-    Builds the user's predicted bracket to verify which teams they expected in this
-    slot — avoids rewarding users who predicted completely different teams.
+    Returns (points_awarded, slot_bonus_awarded).
+
+    Scoring tiers:
+    - 0 correct teams in slot → (0, 0)
+    - 1 correct team           → (0, correct_slot × 1)
+    - 2 correct teams          → (result/score pts, correct_slot × 2)
     """
-    from apps.leaderboard.scoring import get_slot_bonus
+    from apps.leaderboard.scoring import get_slot_bonus, score_prediction
     from apps.tournaments.services import build_predicted_knockout_bracket
 
+    slot_pts = get_slot_bonus(match.stage, config)
+
+    # Can't check team placement without both actual teams assigned
+    if not match.home_team_id or not match.away_team_id or not match.bracket_slot:
+        return 0, 0
+
     bracket = build_predicted_knockout_bracket(prediction.user, prediction.pool)
-    stage_slots = bracket.get(match.stage, [])
     predicted_slot = next(
-        (s for s in stage_slots if s.slot_key == match.bracket_slot), None
+        (s for s in bracket.get(match.stage, []) if s.slot_key == match.bracket_slot),
+        None,
     )
-    if not predicted_slot:
-        return 0
 
-    pred_home_id = predicted_slot.home_team.pk if predicted_slot.home_team else None
-    pred_away_id = predicted_slot.away_team.pk if predicted_slot.away_team else None
-    if pred_home_id != match.home_team_id or pred_away_id != match.away_team_id:
-        return 0
+    num_correct = 0
+    if predicted_slot:
+        if predicted_slot.home_team and predicted_slot.home_team.pk == match.home_team_id:
+            num_correct += 1
+        if predicted_slot.away_team and predicted_slot.away_team.pk == match.away_team_id:
+            num_correct += 1
 
-    # Both teams correct — check winner using predicted teams
-    predicted_w = _get_predicted_winner_for_slot(prediction, pred_home_id, pred_away_id)
-    if predicted_w == match.knockout_winner_id:
-        return get_slot_bonus(match.stage, config)
-    return 0
+    slot_bonus = slot_pts * num_correct
 
+    if num_correct < 2:
+        return 0, slot_bonus
 
-def _get_predicted_winner_for_slot(prediction, pred_home_id: int, pred_away_id: int) -> int | None:
-    """Derive predicted winner using the user's predicted teams (not actual match teams)."""
-    if prediction.predicted_winner_id:
-        return prediction.predicted_winner_id
-    h, a = prediction.predicted_home_score, prediction.predicted_away_score
-    if h is not None and a is not None:
-        if h > a:
-            return pred_home_id
-        if a > h:
-            return pred_away_id
-    return None
-
-
-def _get_predicted_winner(prediction, match) -> int | None:
-    """Return the predicted winner team ID using actual match teams (used for points_awarded)."""
-    if prediction.predicted_winner_id:
-        return prediction.predicted_winner_id
-    h, a = prediction.predicted_home_score, prediction.predicted_away_score
-    if h is not None and a is not None:
-        if h > a:
-            return match.home_team_id
-        if a > h:
-            return match.away_team_id
-    return None
+    # Both teams correct — apply normal result/score scoring
+    points = score_prediction(
+        predicted_home=prediction.predicted_home_score,
+        predicted_away=prediction.predicted_away_score,
+        official_home=match.home_score,
+        official_away=match.away_score,
+        stage=match.stage,
+        predicted_winner_id=prediction.predicted_winner_id,
+        official_knockout_winner_id=match.knockout_winner_id,
+        config=config,
+    )
+    return points, slot_bonus
 
 
 def _recalculate_leaderboard(pool_id: int) -> None:
