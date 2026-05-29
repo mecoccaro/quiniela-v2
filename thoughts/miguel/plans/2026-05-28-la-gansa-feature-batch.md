@@ -665,8 +665,8 @@ DEFAULT_SCORING_CONFIG = {
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Tests pass: `uv run pytest` (existing scoring tests should reflect new values OR be updated)
-- [ ] Lint passes: `uv run ruff check .`
+- [x] Tests pass: `uv run pytest` (existing scoring tests should reflect new values OR be updated)
+- [x] Lint passes: `uv run ruff check .`
 
 #### Automated QA:
 - [ ] In a pool with `scoring_config=None`, score a group match exact → 3 points

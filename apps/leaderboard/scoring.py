@@ -9,15 +9,15 @@ if TYPE_CHECKING:
 # Each stage key maps to a dict with exact_score, correct_result, and (for knockout) pens_winner.
 # champion and top_scorer remain top-level keys.
 DEFAULT_SCORING_CONFIG: dict = {
-    "group":       {"exact_score": 3, "correct_result": 1},
-    "r32":         {"exact_score": 4, "correct_result": 2, "pens_winner": 1},
-    "r16":         {"exact_score": 5, "correct_result": 2, "pens_winner": 1},
-    "qf":          {"exact_score": 6, "correct_result": 3, "pens_winner": 1},
-    "sf":          {"exact_score": 7, "correct_result": 3, "pens_winner": 1},
-    "third_place": {"exact_score": 5, "correct_result": 2, "pens_winner": 1},
-    "final":       {"exact_score": 10, "correct_result": 4, "pens_winner": 2},
-    "champion":    5,
-    "top_scorer":  3,
+    "group":       {"exact_score": 3, "correct_result": 5},
+    "r32":         {"exact_score": 4, "correct_result": 6, "pens_winner": 1},
+    "r16":         {"exact_score": 5, "correct_result": 7, "pens_winner": 1},
+    "qf":          {"exact_score": 6, "correct_result": 8, "pens_winner": 1},
+    "sf":          {"exact_score": 7, "correct_result": 9, "pens_winner": 1},
+    "third_place": {"exact_score": 5, "correct_result": 7, "pens_winner": 1},
+    "final":       {"exact_score": 10, "correct_result": 12, "pens_winner": 2},
+    "champion":    10,
+    "top_scorer":  5,
 }
 
 
