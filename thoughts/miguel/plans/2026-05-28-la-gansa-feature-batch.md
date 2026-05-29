@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: completed
 ---
 
 # La Gansa — Feature Batch Implementation Plan
