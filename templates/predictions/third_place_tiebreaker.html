@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load tournament_tags %}
+
+{% block title %}Desempate terceros — {{ pool.name }}{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <a href="{% url 'group_predictions' pool.pk %}" class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-1">
+    ← Volver a predicciones de grupos
+  </a>
+  <h1 class="text-2xl font-bold text-gray-800">{{ pool.name }}</h1>
+  <p class="text-sm text-gray-500">Desempate de terceros — {{ pool.tournament.name }}</p>
+</div>
+
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+  <h2 class="font-bold text-amber-800 text-base mb-2">Se necesita un desempate</h2>
+  <p class="text-sm text-amber-700">
+    Dos o más equipos que terminaron terceros en su grupo tienen los mismos puntos,
+    diferencia de gol y goles a favor. Según las reglas FIFA, el siguiente criterio
+    es la puntuación disciplinaria (tarjetas), pero como tus predicciones no incluyen
+    tarjetas, debes ordenar estos equipos manualmente.
+  </p>
+  <p class="text-sm text-amber-700 mt-2">
+    Asigna a cada equipo un número de orden (1 = mejor tercero de este grupo empatado).
+    El equipo con el número más bajo tendrá prioridad para clasificar como tercero avanzante.
+  </p>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  <div class="bg-white rounded-xl shadow divide-y divide-gray-100 mb-6">
+    {% for team in tied_teams %}
+    <div class="flex items-center justify-between px-5 py-4">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl">{{ team.fifa_code|flag_emoji }}</span>
+        <span class="font-medium text-gray-800">{{ team.name }}</span>
+        <span class="text-xs text-gray-400 uppercase">{{ team.fifa_code }}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <label for="rank_{{ team.pk }}" class="text-sm text-gray-500">Orden:</label>
+        <select
+          id="rank_{{ team.pk }}"
+          name="rank_{{ team.pk }}"
+          class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+          required>
+          <option value="">—</option>
+          {% for i in tied_teams %}
+          <option value="{{ forloop.counter }}"
+            {% if existing_picks|get_item:team.pk == forloop.counter %}selected{% endif %}>
+            {{ forloop.counter }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="flex gap-3">
+    <button
+      type="submit"
+      class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2.5 rounded-xl transition">
+      Confirmar orden y continuar →
+    </button>
+    <a
+      href="{% url 'group_predictions' pool.pk %}"
+      class="border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium px-5 py-2.5 rounded-xl transition text-sm flex items-center">
+      Cancelar
+    </a>
+  </div>
+</form>
+{% endblock %}

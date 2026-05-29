@@ -21,6 +21,7 @@ class TeamStanding:
     goal_difference: int = field(default=0)
     points: int = field(default=0)
     position: int = field(default=0)
+    conduct_score: int = field(default=0)
 
 
 def _compute_h2h(
@@ -80,6 +81,7 @@ def _overall_sort(
         key=lambda t: (
             -overall[t].goal_difference,
             -overall[t].goals_for,
+            overall[t].conduct_score,
             rankings.get(t, 9999),
         ),
     )
@@ -112,6 +114,7 @@ def _break_ties(
 def calculate_group_standings(
     matches: list[MatchResult],
     fifa_rankings: dict[int, int],
+    conduct_scores: "dict[int, int] | None" = None,
 ) -> list[TeamStanding]:
     """Apply FIFA tiebreaker rules to produce ordered standings for one group."""
     team_ids: set[int] = set()
@@ -146,6 +149,8 @@ def calculate_group_standings(
 
     for s in standings.values():
         s.goal_difference = s.goals_for - s.goals_against
+        if conduct_scores:
+            s.conduct_score = conduct_scores.get(s.team_id, 0)
 
     by_points = sorted(team_ids, key=lambda t: -standings[t].points)
 
@@ -177,13 +182,14 @@ def rank_third_place_teams(
     third_place_teams: list[TeamStanding],
     fifa_rankings: dict[int, int],
 ) -> list[TeamStanding]:
-    """Rank all third-place teams by points, GD, GF, FIFA ranking to find best 8."""
+    """Rank all third-place teams by points, GD, GF, conduct score, FIFA ranking to find best 8."""
     return sorted(
         third_place_teams,
         key=lambda t: (
             -t.points,
             -t.goal_difference,
             -t.goals_for,
+            t.conduct_score,
             fifa_rankings.get(t.team_id, 9999),
         ),
     )

@@ -20,6 +20,14 @@ FIFA_TO_ISO2 = {
 
 
 @register.filter
+def get_item(dictionary, key):
+    """Return dictionary[key], or None if not found. Usage: {{ dict|get_item:key }}"""
+    if dictionary is None:
+        return None
+    return dictionary.get(key)
+
+
+@register.filter
 def flag_emoji(fifa_code):
     if not fifa_code:
         return ""

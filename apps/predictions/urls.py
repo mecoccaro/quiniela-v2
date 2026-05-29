@@ -19,6 +19,11 @@ urlpatterns = [
         name="knockout_predictions",
     ),
     path(
+        "pool/<int:pool_id>/third-place-tiebreaker/",
+        views.ThirdPlaceTiebreakerView.as_view(),
+        name="third_place_tiebreaker",
+    ),
+    path(
         "pool/<int:pool_id>/knockout/match/<int:match_id>/",
         views.SaveKnockoutPredictionView.as_view(),
         name="save_knockout_prediction",

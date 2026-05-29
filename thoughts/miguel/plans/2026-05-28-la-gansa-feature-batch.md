@@ -837,10 +837,10 @@ When a user's group predictions result in a conduct-level tie among third-place 
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Migrations generate cleanly: `uv run manage.py makemigrations --check`
-- [ ] Apply migrations: `uv run manage.py migrate`
-- [ ] Tests pass: `uv run pytest`
-- [ ] Lint passes: `uv run ruff check .`
+- [x] Migrations generate cleanly: `uv run manage.py makemigrations --check`
+- [x] Apply migrations: `uv run manage.py migrate`
+- [x] Tests pass: `uv run pytest`
+- [x] Lint passes: `uv run ruff check .`
 
 #### Automated QA:
 - [ ] Simulate group predictions that result in a conduct-level tie at position 8/9 — `needs_conduct_tiebreaker()` returns `True`

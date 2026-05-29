@@ -55,15 +55,76 @@ def get_predicted_group_standings(
         and match.away_team_id is not None
     ]
 
+    tournament_teams = TournamentTeam.objects.filter(
+        tournament=tournament,
+        group_letter=group_letter,
+    )
+    fifa_rankings = {tt.team_id: tt.fifa_ranking for tt in tournament_teams}
+    conduct_scores = {tt.team_id: tt.conduct_score for tt in tournament_teams}
+
+    return calculate_group_standings(match_results, fifa_rankings, conduct_scores)
+
+
+def _get_all_third_place_standings(
+    user: "User",
+    pool: "Pool",
+) -> "tuple[list[TeamStanding], dict[int, int]]":
+    """Return (third_place_standings, fifa_rankings) across all groups."""
+    from apps.tournaments.models import Match, TournamentTeam
+
+    tournament = pool.tournament
+    group_letters = sorted(
+        Match.objects.filter(tournament=tournament, stage=Match.Stage.GROUP)
+        .values_list("group_letter", flat=True)
+        .distinct()
+    )
     fifa_rankings = {
         tt.team_id: tt.fifa_ranking
-        for tt in TournamentTeam.objects.filter(
-            tournament=tournament,
-            group_letter=group_letter,
-        )
+        for tt in TournamentTeam.objects.filter(tournament=tournament)
     }
+    third_place_standings = []
+    for letter in group_letters:
+        group_standings = get_predicted_group_standings(user, pool, letter)
+        for s in group_standings:
+            if s.position == 3:
+                third_place_standings.append(s)
+    return third_place_standings, fifa_rankings
 
-    return calculate_group_standings(match_results, fifa_rankings)
+
+def needs_conduct_tiebreaker(user: "User", pool: "Pool") -> bool:
+    """Return True if the user's third-place rankings have a conduct-level tie at position 8/9."""
+    third_place_standings, fifa_rankings = _get_all_third_place_standings(user, pool)
+    if len(third_place_standings) < 9:
+        return False
+    ranked = rank_third_place_teams(third_place_standings, fifa_rankings)
+    t8 = ranked[7]
+    t9 = ranked[8]
+    return (
+        t8.points == t9.points
+        and t8.goal_difference == t9.goal_difference
+        and t8.goals_for == t9.goals_for
+        and t8.conduct_score == 0
+        and t9.conduct_score == 0
+    )
+
+
+def get_conduct_tied_thirds(user: "User", pool: "Pool") -> "list":
+    """Return the Team objects involved in the conduct-level tie for the 8th-place third."""
+    from apps.tournaments.models import Team
+
+    third_place_standings, fifa_rankings = _get_all_third_place_standings(user, pool)
+    if len(third_place_standings) < 9:
+        return []
+    ranked = rank_third_place_teams(third_place_standings, fifa_rankings)
+    t8 = ranked[7]
+    tied_team_ids = [
+        s.team_id
+        for s in ranked
+        if s.points == t8.points
+        and s.goal_difference == t8.goal_difference
+        and s.goals_for == t8.goals_for
+    ]
+    return list(Team.objects.filter(pk__in=tied_team_ids))
 
 
 @dataclass
@@ -111,11 +172,9 @@ def build_predicted_knockout_bracket(
         .distinct()
     )
 
-    # FIFA rankings for tiebreaker
-    fifa_rankings = {
-        tt.team_id: tt.fifa_ranking
-        for tt in TournamentTeam.objects.filter(tournament=tournament)
-    }
+    # FIFA rankings for tiebreaker (used in rank_third_place_teams)
+    all_tournament_teams = TournamentTeam.objects.filter(tournament=tournament)
+    fifa_rankings = {tt.team_id: tt.fifa_ranking for tt in all_tournament_teams}
 
     # All teams in this tournament
     all_teams: dict[int, Team] = {
@@ -136,6 +195,17 @@ def build_predicted_knockout_bracket(
 
     # Rank best 8 third-place teams
     ranked_third = rank_third_place_teams(third_place_standings, fifa_rankings)
+
+    # Apply tiebreaker picks if the user has submitted them
+    from apps.pools.models import ThirdPlaceTiebreakerPick
+
+    tiebreaker_picks = {
+        p.team_id: p.predicted_rank
+        for p in ThirdPlaceTiebreakerPick.objects.filter(user=user, pool=pool)
+    }
+    if tiebreaker_picks:
+        ranked_third.sort(key=lambda s: tiebreaker_picks.get(s.team_id, 999))
+
     third_ids: list[int | None] = [s.team_id for s in ranked_third[:8]]
     while len(third_ids) < 8:
         third_ids.append(None)

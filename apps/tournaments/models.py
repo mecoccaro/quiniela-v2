@@ -34,6 +34,7 @@ class TournamentTeam(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="tournament_teams")
     group_letter = models.CharField(max_length=1)
     fifa_ranking = models.PositiveIntegerField()
+    conduct_score = models.IntegerField(default=0)
 
     class Meta:
         unique_together = [("tournament", "team")]

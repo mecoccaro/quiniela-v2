@@ -82,6 +82,19 @@ class PoolTopScorerPick(models.Model):
         return f"{self.user} picks {self.player_name} ({self.pool})"
 
 
+class ThirdPlaceTiebreakerPick(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    pool = models.ForeignKey(Pool, on_delete=models.CASCADE)
+    team = models.ForeignKey("tournaments.Team", on_delete=models.CASCADE)
+    predicted_rank = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = [("user", "pool", "team")]
+
+    def __str__(self) -> str:
+        return f"{self.user} ranks {self.team} #{self.predicted_rank} ({self.pool})"
+
+
 class LeaderboardEntry(models.Model):
     pool = models.ForeignKey(Pool, on_delete=models.CASCADE, related_name="leaderboard_entries")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="leaderboard_entries")
