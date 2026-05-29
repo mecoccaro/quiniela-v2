@@ -143,7 +143,7 @@ class KnockoutPredictionsView(LoginRequiredMixin, View):
             user=request.user, pool=pool, match__stage=Match.Stage.GROUP
         ).count()
         if user_group < total_group:
-            messages.warning(request, "Completá todas las predicciones de fase de grupos primero.")
+            messages.warning(request, "Completa todas las predicciones de fase de grupos primero.")
             return redirect("group_predictions", pool_id=pool.pk)
 
         self.pool = pool
@@ -344,13 +344,13 @@ class SubmitPredictionsView(LoginRequiredMixin, View):
         if user_predictions < total_matches:
             messages.error(
                 request,
-                f"Faltan predicciones: tenés {user_predictions} de {total_matches} partidos completados.",
+                f"Faltan predicciones: tienes {user_predictions} de {total_matches} partidos completados.",
             )
             return redirect("submit_predictions", pool_id=self.pool.pk)
 
         # Require top scorer pick
         if not PoolTopScorerPick.objects.filter(user=user, pool=self.pool).exists():
-            messages.error(request, "Tenés que elegir un goleador antes de confirmar.")
+            messages.error(request, "Tienes que elegir un goleador antes de confirmar.")
             return redirect("picks", pool_id=self.pool.pk)
 
         # Auto-derive champion from Final prediction

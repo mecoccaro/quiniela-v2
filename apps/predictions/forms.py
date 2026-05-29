@@ -26,7 +26,7 @@ class KnockoutPredictionForm(forms.Form):
         winner = data.get("predicted_winner")
         if home is not None and away is not None and home == away and not winner:
             raise forms.ValidationError(
-                "Tenés que elegir un ganador cuando el resultado es empate."
+                "Tienes que elegir un ganador cuando el resultado es empate."
             )
         return data
 
