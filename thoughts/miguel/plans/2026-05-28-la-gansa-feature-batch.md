@@ -615,7 +615,7 @@ path("pool/<int:pool_id>/day/", PoolDayView.as_view(), name="pool_day"),
 #### Automated Verification:
 - [x] Tests pass: `uv run pytest`
 - [x] Lint passes: `uv run ruff check .`
-- [ ] Loader assigns dates: after running `uv run manage.py load_wc2026`, confirm `Match.objects.filter(scheduled_at__isnull=False).count() > 0`
+- [x] Loader assigns dates: after running `uv run manage.py load_wc2026`, confirm `Match.objects.filter(scheduled_at__isnull=False).count() > 0`
 
 #### Automated QA:
 - [ ] Navigate to `/pool/1/day/` — page loads, shows matches for today (or nearest match day)
