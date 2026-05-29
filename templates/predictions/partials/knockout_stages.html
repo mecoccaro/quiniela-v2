@@ -1,4 +1,6 @@
+{% load tournament_tags %}
 {% for stage in stages %}
+<div data-ko-stage="{{ stage.key }}">
 <details class="bg-white rounded-xl shadow overflow-hidden" {% if forloop.first %}open{% endif %}>
   <summary class="flex items-center justify-between px-5 py-4 cursor-pointer select-none hover:bg-gray-50">
     <span class="font-bold text-gray-800 text-lg">{{ stage.label }}</span>
@@ -11,7 +13,7 @@
       <span class="text-xs text-gray-400 w-20 shrink-0">{{ slot.slot_key }}</span>
 
       <span class="text-sm text-gray-700 w-28 text-right truncate" title="{{ slot.home_team.name|default:'TBD' }}">
-        {{ slot.home_team.name|default:"TBD" }}
+        {{ slot.home_team.fifa_code|flag_emoji }} {{ slot.home_team.name|default:"TBD" }}
       </span>
 
       {% if slot.match and not predictions_submitted %}
@@ -66,10 +68,11 @@
       {% endif %}
 
       <span class="text-sm text-gray-700 w-28 truncate" title="{{ slot.away_team.name|default:'TBD' }}">
-        {{ slot.away_team.name|default:"TBD" }}
+        {{ slot.away_team.fifa_code|flag_emoji }} {{ slot.away_team.name|default:"TBD" }}
       </span>
     </div>
     {% endfor %}
   </div>
 </details>
+</div>
 {% endfor %}

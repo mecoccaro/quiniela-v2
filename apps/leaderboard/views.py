@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
@@ -11,6 +13,7 @@ from apps.pools.models import (
     PoolTopScorerPick,
     Prediction,
 )
+from apps.tournaments.models import Match
 from apps.tournaments.services import build_predicted_knockout_bracket
 from apps.users.models import User
 
@@ -145,4 +148,60 @@ class ParticipantsView(LoginRequiredMixin, View):
         return render(request, "leaderboard/participants.html", {
             "pool": pool,
             "participants": participants,
+        })
+
+
+class PoolDayView(LoginRequiredMixin, View):
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        pool = get_object_or_404(Pool, pk=pool_id)
+        get_object_or_404(PoolMembership, pool=pool, user=request.user)
+
+        date_str = request.GET.get("date")
+        selected_date = datetime.date.fromisoformat(date_str) if date_str else datetime.date.today()
+
+        matches = (
+            Match.objects.filter(
+                tournament=pool.tournament,
+                scheduled_at__date=selected_date,
+            )
+            .select_related("home_team", "away_team")
+            .order_by("scheduled_at")
+        )
+
+        memberships = PoolMembership.objects.filter(
+            pool=pool, predictions_submitted=True
+        ).select_related("user")
+
+        match_data = []
+        for match in matches:
+            preds = Prediction.objects.filter(
+                pool=pool, match=match
+            ).select_related("user", "predicted_winner")
+            pred_by_user = {p.user_id: p for p in preds}
+            participants = [
+                {"user": m.user, "prediction": pred_by_user.get(m.user_id)}
+                for m in memberships
+            ]
+            match_data.append({"match": match, "participants": participants})
+
+        available_dates = list(
+            Match.objects.filter(tournament=pool.tournament, scheduled_at__isnull=False)
+            .dates("scheduled_at", "day")
+        )
+
+        prev_date = None
+        next_date = None
+        for d in available_dates:
+            if d < selected_date:
+                prev_date = d
+            elif d > selected_date and next_date is None:
+                next_date = d
+
+        return render(request, "leaderboard/pool_day.html", {
+            "pool": pool,
+            "selected_date": selected_date,
+            "match_data": match_data,
+            "available_dates": available_dates,
+            "prev_date": prev_date,
+            "next_date": next_date,
         })

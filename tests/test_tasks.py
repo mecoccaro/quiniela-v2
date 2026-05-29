@@ -79,7 +79,7 @@ def test_recalculate_creates_leaderboard_entry(pool, user, membership, group_mat
     group_match.save()
 
     entry = LeaderboardEntry.objects.get(pool=pool, user=user)
-    assert entry.total_points == 1  # correct result only
+    assert entry.total_points == 5  # correct result only
     assert entry.rank == 1
 
 
@@ -98,7 +98,7 @@ def test_recalculate_direct_call(pool, user, membership, group_match):
     recalculate_pool_scores.apply(args=[group_match.pk])
 
     pred = Prediction.objects.get(user=user, pool=pool, match=group_match)
-    assert pred.points_awarded == 1  # correct result (away win)
+    assert pred.points_awarded == 5  # correct result (away win)
 
 
 @pytest.mark.django_db
@@ -135,7 +135,7 @@ def test_score_final_picks_champion(pool, user, membership, teams, tournament):
     score_final_picks.apply(args=[tournament.pk, ta.pk, "Messi"])
 
     pick = PoolChampionPick.objects.get(user=user, pool=pool)
-    assert pick.points_awarded == 5
+    assert pick.points_awarded == 10
 
 
 @pytest.mark.django_db
@@ -145,7 +145,7 @@ def test_score_final_picks_top_scorer_case_insensitive(pool, user, membership, t
     score_final_picks.apply(args=[tournament.pk, 999, "Messi"])
 
     pick = PoolTopScorerPick.objects.get(user=user, pool=pool)
-    assert pick.points_awarded == 3
+    assert pick.points_awarded == 5
 
 
 @pytest.mark.django_db

@@ -1,11 +1,12 @@
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, FormView, TemplateView
 
 from apps.pools.models import LeaderboardEntry, PoolMembership
 
-from .forms import RegistrationForm
+from .forms import PasswordRecoveryForm, RegistrationForm, SetNewPasswordForm
 from .models import User
 
 
@@ -19,6 +20,42 @@ class RegisterView(CreateView):
         response = super().form_valid(form)
         login(self.request, self.object)
         return response
+
+
+class PasswordRecoveryView(FormView):
+    template_name = "users/password_recovery.html"
+    form_class = PasswordRecoveryForm
+
+    def form_valid(self, form):
+        try:
+            user = User.objects.get(
+                email=form.cleaned_data["email"],
+                nickname=form.cleaned_data["nickname"],
+            )
+        except User.DoesNotExist:
+            form.add_error(None, "No encontramos una cuenta con esos datos.")
+            return self.form_invalid(form)
+        self.request.session["password_recovery_user_id"] = user.pk
+        return redirect("set_new_password")
+
+
+class SetNewPasswordView(FormView):
+    template_name = "users/set_password.html"
+    form_class = SetNewPasswordForm
+    success_url = reverse_lazy("dashboard")
+
+    def dispatch(self, request, *args, **kwargs):
+        if "password_recovery_user_id" not in request.session:
+            return redirect("password_recovery")
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        user = get_object_or_404(User, pk=self.request.session["password_recovery_user_id"])
+        user.set_password(form.cleaned_data["password1"])
+        user.save()
+        del self.request.session["password_recovery_user_id"]
+        login(self.request, user)
+        return super().form_valid(form)
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):

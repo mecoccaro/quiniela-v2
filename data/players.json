@@ -1,0 +1,1350 @@
+[
+  {"name": "Lionel Messi", "team": "ARG", "position": "Delantero"},
+  {"name": "Lautaro Martínez", "team": "ARG", "position": "Delantero"},
+  {"name": "Julián Álvarez", "team": "ARG", "position": "Delantero"},
+  {"name": "Paulo Dybala", "team": "ARG", "position": "Delantero"},
+  {"name": "Ángel Di María", "team": "ARG", "position": "Delantero"},
+  {"name": "Nicolás González", "team": "ARG", "position": "Delantero"},
+  {"name": "Rodrigo De Paul", "team": "ARG", "position": "Mediocampista"},
+  {"name": "Alexis Mac Allister", "team": "ARG", "position": "Mediocampista"},
+  {"name": "Giovani Lo Celso", "team": "ARG", "position": "Mediocampista"},
+  {"name": "Enzo Fernández", "team": "ARG", "position": "Mediocampista"},
+  {"name": "Leandro Paredes", "team": "ARG", "position": "Mediocampista"},
+  {"name": "Nicolás Otamendi", "team": "ARG", "position": "Defensor"},
+  {"name": "Cristian Romero", "team": "ARG", "position": "Defensor"},
+  {"name": "Lisandro Martínez", "team": "ARG", "position": "Defensor"},
+  {"name": "Nahuel Molina", "team": "ARG", "position": "Defensor"},
+  {"name": "Marcos Acuña", "team": "ARG", "position": "Defensor"},
+  {"name": "Emiliano Martínez", "team": "ARG", "position": "Arquero"},
+  {"name": "Thiago Almada", "team": "ARG", "position": "Mediocampista"},
+  {"name": "Valentín Carboni", "team": "ARG", "position": "Delantero"},
+
+  {"name": "Harry Kane", "team": "ENG", "position": "Delantero"},
+  {"name": "Marcus Rashford", "team": "ENG", "position": "Delantero"},
+  {"name": "Bukayo Saka", "team": "ENG", "position": "Delantero"},
+  {"name": "Phil Foden", "team": "ENG", "position": "Mediocampista"},
+  {"name": "Jude Bellingham", "team": "ENG", "position": "Mediocampista"},
+  {"name": "Declan Rice", "team": "ENG", "position": "Mediocampista"},
+  {"name": "Jordan Henderson", "team": "ENG", "position": "Mediocampista"},
+  {"name": "Trent Alexander-Arnold", "team": "ENG", "position": "Defensor"},
+  {"name": "Kieran Trippier", "team": "ENG", "position": "Defensor"},
+  {"name": "John Stones", "team": "ENG", "position": "Defensor"},
+  {"name": "Harry Maguire", "team": "ENG", "position": "Defensor"},
+  {"name": "Jordan Pickford", "team": "ENG", "position": "Arquero"},
+  {"name": "Cole Palmer", "team": "ENG", "position": "Mediocampista"},
+  {"name": "Anthony Gordon", "team": "ENG", "position": "Delantero"},
+  {"name": "Ollie Watkins", "team": "ENG", "position": "Delantero"},
+
+  {"name": "Kylian Mbappé", "team": "FRA", "position": "Delantero"},
+  {"name": "Antoine Griezmann", "team": "FRA", "position": "Delantero"},
+  {"name": "Ousmane Dembélé", "team": "FRA", "position": "Delantero"},
+  {"name": "Olivier Giroud", "team": "FRA", "position": "Delantero"},
+  {"name": "Marcus Thuram", "team": "FRA", "position": "Delantero"},
+  {"name": "N'Golo Kanté", "team": "FRA", "position": "Mediocampista"},
+  {"name": "Aurélien Tchouaméni", "team": "FRA", "position": "Mediocampista"},
+  {"name": "Eduardo Camavinga", "team": "FRA", "position": "Mediocampista"},
+  {"name": "Adrien Rabiot", "team": "FRA", "position": "Mediocampista"},
+  {"name": "Théo Hernández", "team": "FRA", "position": "Defensor"},
+  {"name": "Lucas Hernández", "team": "FRA", "position": "Defensor"},
+  {"name": "Raphaël Varane", "team": "FRA", "position": "Defensor"},
+  {"name": "Jules Koundé", "team": "FRA", "position": "Defensor"},
+  {"name": "Dayot Upamecano", "team": "FRA", "position": "Defensor"},
+  {"name": "Mike Maignan", "team": "FRA", "position": "Arquero"},
+  {"name": "Bradley Barcola", "team": "FRA", "position": "Delantero"},
+  {"name": "Warren Zaïre-Emery", "team": "FRA", "position": "Mediocampista"},
+
+  {"name": "Vinicius Júnior", "team": "BRA", "position": "Delantero"},
+  {"name": "Neymar", "team": "BRA", "position": "Delantero"},
+  {"name": "Rodrygo", "team": "BRA", "position": "Delantero"},
+  {"name": "Richarlison", "team": "BRA", "position": "Delantero"},
+  {"name": "Gabriel Martinelli", "team": "BRA", "position": "Delantero"},
+  {"name": "Raphinha", "team": "BRA", "position": "Delantero"},
+  {"name": "Lucas Paquetá", "team": "BRA", "position": "Mediocampista"},
+  {"name": "Bruno Guimarães", "team": "BRA", "position": "Mediocampista"},
+  {"name": "Casemiro", "team": "BRA", "position": "Mediocampista"},
+  {"name": "Gerson", "team": "BRA", "position": "Mediocampista"},
+  {"name": "Marquinhos", "team": "BRA", "position": "Defensor"},
+  {"name": "Éder Militão", "team": "BRA", "position": "Defensor"},
+  {"name": "Gabriel Magalhães", "team": "BRA", "position": "Defensor"},
+  {"name": "Danilo", "team": "BRA", "position": "Defensor"},
+  {"name": "Alisson Becker", "team": "BRA", "position": "Arquero"},
+  {"name": "Endrick", "team": "BRA", "position": "Delantero"},
+  {"name": "Savinho", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Pedri", "team": "ESP", "position": "Mediocampista"},
+  {"name": "Gavi", "team": "ESP", "position": "Mediocampista"},
+  {"name": "Rodri", "team": "ESP", "position": "Mediocampista"},
+  {"name": "Álvaro Morata", "team": "ESP", "position": "Delantero"},
+  {"name": "Ferran Torres", "team": "ESP", "position": "Delantero"},
+  {"name": "Dani Olmo", "team": "ESP", "position": "Mediocampista"},
+  {"name": "Lamine Yamal", "team": "ESP", "position": "Delantero"},
+  {"name": "Nico Williams", "team": "ESP", "position": "Delantero"},
+  {"name": "Mikel Oyarzabal", "team": "ESP", "position": "Delantero"},
+  {"name": "Fabián Ruiz", "team": "ESP", "position": "Mediocampista"},
+  {"name": "Dani Carvajal", "team": "ESP", "position": "Defensor"},
+  {"name": "Alejandro Balde", "team": "ESP", "position": "Defensor"},
+  {"name": "Pau Cubarsí", "team": "ESP", "position": "Defensor"},
+  {"name": "Aymeric Laporte", "team": "ESP", "position": "Defensor"},
+  {"name": "Unai Simón", "team": "ESP", "position": "Arquero"},
+  {"name": "Yeremy Pino", "team": "ESP", "position": "Delantero"},
+  {"name": "Bryan Gil", "team": "ESP", "position": "Delantero"},
+
+  {"name": "Cristiano Ronaldo", "team": "POR", "position": "Delantero"},
+  {"name": "Bruno Fernandes", "team": "POR", "position": "Mediocampista"},
+  {"name": "Bernardo Silva", "team": "POR", "position": "Mediocampista"},
+  {"name": "João Félix", "team": "POR", "position": "Delantero"},
+  {"name": "Rafael Leão", "team": "POR", "position": "Delantero"},
+  {"name": "Diogo Jota", "team": "POR", "position": "Delantero"},
+  {"name": "Vitinha", "team": "POR", "position": "Mediocampista"},
+  {"name": "Rúben Neves", "team": "POR", "position": "Mediocampista"},
+  {"name": "João Cancelo", "team": "POR", "position": "Defensor"},
+  {"name": "Rúben Dias", "team": "POR", "position": "Defensor"},
+  {"name": "Pepe", "team": "POR", "position": "Defensor"},
+  {"name": "Diogo Dalot", "team": "POR", "position": "Defensor"},
+  {"name": "Rui Patrício", "team": "POR", "position": "Arquero"},
+  {"name": "Pedro Gonçalves", "team": "POR", "position": "Mediocampista"},
+  {"name": "Gonçalo Ramos", "team": "POR", "position": "Delantero"},
+
+  {"name": "Thomas Müller", "team": "GER", "position": "Delantero"},
+  {"name": "Kai Havertz", "team": "GER", "position": "Delantero"},
+  {"name": "Leroy Sané", "team": "GER", "position": "Delantero"},
+  {"name": "Serge Gnabry", "team": "GER", "position": "Delantero"},
+  {"name": "Florian Wirtz", "team": "GER", "position": "Mediocampista"},
+  {"name": "Jamal Musiala", "team": "GER", "position": "Mediocampista"},
+  {"name": "Toni Kroos", "team": "GER", "position": "Mediocampista"},
+  {"name": "Joshua Kimmich", "team": "GER", "position": "Mediocampista"},
+  {"name": "Leon Goretzka", "team": "GER", "position": "Mediocampista"},
+  {"name": "Antonio Rüdiger", "team": "GER", "position": "Defensor"},
+  {"name": "David Raum", "team": "GER", "position": "Defensor"},
+  {"name": "Benjamin Pavard", "team": "GER", "position": "Defensor"},
+  {"name": "Manuel Neuer", "team": "GER", "position": "Arquero"},
+  {"name": "Niclas Füllkrug", "team": "GER", "position": "Delantero"},
+  {"name": "Deniz Undav", "team": "GER", "position": "Delantero"},
+
+  {"name": "Romelu Lukaku", "team": "BEL", "position": "Delantero"},
+  {"name": "Kevin De Bruyne", "team": "BEL", "position": "Mediocampista"},
+  {"name": "Dries Mertens", "team": "BEL", "position": "Delantero"},
+  {"name": "Yannick Carrasco", "team": "BEL", "position": "Delantero"},
+  {"name": "Axel Witsel", "team": "BEL", "position": "Mediocampista"},
+  {"name": "Youri Tielemans", "team": "BEL", "position": "Mediocampista"},
+  {"name": "Leandro Trossard", "team": "BEL", "position": "Delantero"},
+  {"name": "Lois Openda", "team": "BEL", "position": "Delantero"},
+  {"name": "Jeremy Doku", "team": "BEL", "position": "Delantero"},
+  {"name": "Jan Vertonghen", "team": "BEL", "position": "Defensor"},
+  {"name": "Toby Alderweireld", "team": "BEL", "position": "Defensor"},
+  {"name": "Thomas Meunier", "team": "BEL", "position": "Defensor"},
+  {"name": "Thibaut Courtois", "team": "BEL", "position": "Arquero"},
+  {"name": "Arthur Theate", "team": "BEL", "position": "Defensor"},
+
+  {"name": "Robert Lewandowski", "team": "POL", "position": "Delantero"},
+  {"name": "Piotr Zielinski", "team": "POL", "position": "Mediocampista"},
+  {"name": "Arkadiusz Milik", "team": "POL", "position": "Delantero"},
+  {"name": "Kamil Grosicki", "team": "POL", "position": "Delantero"},
+  {"name": "Jakub Kiwior", "team": "POL", "position": "Defensor"},
+
+  {"name": "Ciro Immobile", "team": "ITA", "position": "Delantero"},
+  {"name": "Federico Chiesa", "team": "ITA", "position": "Delantero"},
+  {"name": "Nicolo Barella", "team": "ITA", "position": "Mediocampista"},
+  {"name": "Marco Verratti", "team": "ITA", "position": "Mediocampista"},
+  {"name": "Jorginho", "team": "ITA", "position": "Mediocampista"},
+  {"name": "Lorenzo Pellegrini", "team": "ITA", "position": "Mediocampista"},
+  {"name": "Giacomo Raspadori", "team": "ITA", "position": "Delantero"},
+  {"name": "Davide Frattesi", "team": "ITA", "position": "Mediocampista"},
+  {"name": "Sandro Tonali", "team": "ITA", "position": "Mediocampista"},
+  {"name": "Giorgio Scalvini", "team": "ITA", "position": "Defensor"},
+  {"name": "Alessandro Bastoni", "team": "ITA", "position": "Defensor"},
+  {"name": "Giovanni Di Lorenzo", "team": "ITA", "position": "Defensor"},
+  {"name": "Federico Dimarco", "team": "ITA", "position": "Defensor"},
+  {"name": "Gianluigi Donnarumma", "team": "ITA", "position": "Arquero"},
+  {"name": "Mateo Retegui", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Luis Díaz", "team": "COL", "position": "Delantero"},
+  {"name": "James Rodríguez", "team": "COL", "position": "Mediocampista"},
+  {"name": "Falcao García", "team": "COL", "position": "Delantero"},
+  {"name": "Radamel Falcao", "team": "COL", "position": "Delantero"},
+  {"name": "Juan Cuadrado", "team": "COL", "position": "Delantero"},
+  {"name": "Jhon Arias", "team": "COL", "position": "Delantero"},
+  {"name": "Richard Ríos", "team": "COL", "position": "Mediocampista"},
+  {"name": "Jefferson Lerma", "team": "COL", "position": "Mediocampista"},
+  {"name": "Yerry Mina", "team": "COL", "position": "Defensor"},
+  {"name": "Dávinson Sánchez", "team": "COL", "position": "Defensor"},
+  {"name": "Daniel Muñoz", "team": "COL", "position": "Defensor"},
+  {"name": "David Ospina", "team": "COL", "position": "Arquero"},
+  {"name": "Jhon Jáder Durán", "team": "COL", "position": "Delantero"},
+  {"name": "Lerma", "team": "COL", "position": "Mediocampista"},
+
+  {"name": "Darwin Núñez", "team": "URU", "position": "Delantero"},
+  {"name": "Federico Valverde", "team": "URU", "position": "Mediocampista"},
+  {"name": "Luis Suárez", "team": "URU", "position": "Delantero"},
+  {"name": "Edinson Cavani", "team": "URU", "position": "Delantero"},
+  {"name": "Rodrigo Bentancur", "team": "URU", "position": "Mediocampista"},
+  {"name": "Matías Vecino", "team": "URU", "position": "Mediocampista"},
+  {"name": "Ronald Araújo", "team": "URU", "position": "Defensor"},
+  {"name": "José María Giménez", "team": "URU", "position": "Defensor"},
+  {"name": "Mathías Olivera", "team": "URU", "position": "Defensor"},
+  {"name": "Fernando Muslera", "team": "URU", "position": "Arquero"},
+  {"name": "Facundo Pellistri", "team": "URU", "position": "Delantero"},
+  {"name": "Agustín Canobbio", "team": "URU", "position": "Delantero"},
+
+  {"name": "Enner Valencia", "team": "ECU", "position": "Delantero"},
+  {"name": "Michael Estrada", "team": "ECU", "position": "Delantero"},
+  {"name": "Gonzalo Plata", "team": "ECU", "position": "Delantero"},
+  {"name": "Pervis Estupiñán", "team": "ECU", "position": "Defensor"},
+  {"name": "Moisés Caicedo", "team": "ECU", "position": "Mediocampista"},
+  {"name": "Carlos Gruezo", "team": "ECU", "position": "Mediocampista"},
+  {"name": "Jeremy Sarmiento", "team": "ECU", "position": "Delantero"},
+  {"name": "Piero Hincapié", "team": "ECU", "position": "Defensor"},
+  {"name": "Robert Arboleda", "team": "ECU", "position": "Defensor"},
+  {"name": "Alexander Domínguez", "team": "ECU", "position": "Arquero"},
+
+  {"name": "Alexis Sánchez", "team": "CHI", "position": "Delantero"},
+  {"name": "Arturo Vidal", "team": "CHI", "position": "Mediocampista"},
+  {"name": "Charles Aránguiz", "team": "CHI", "position": "Mediocampista"},
+  {"name": "Eduardo Vargas", "team": "CHI", "position": "Delantero"},
+  {"name": "Gary Medel", "team": "CHI", "position": "Defensor"},
+  {"name": "Alexis Sánchez", "team": "CHI", "position": "Delantero"},
+
+  {"name": "Erling Haaland", "team": "NOR", "position": "Delantero"},
+  {"name": "Martin Ødegaard", "team": "NOR", "position": "Mediocampista"},
+  {"name": "Alexander Sørloth", "team": "NOR", "position": "Delantero"},
+
+  {"name": "Virgil van Dijk", "team": "NED", "position": "Defensor"},
+  {"name": "Memphis Depay", "team": "NED", "position": "Delantero"},
+  {"name": "Cody Gakpo", "team": "NED", "position": "Delantero"},
+  {"name": "Frenkie de Jong", "team": "NED", "position": "Mediocampista"},
+  {"name": "Xavi Simons", "team": "NED", "position": "Mediocampista"},
+  {"name": "Teun Koopmeiners", "team": "NED", "position": "Mediocampista"},
+  {"name": "Wout Weghorst", "team": "NED", "position": "Delantero"},
+  {"name": "Denzel Dumfries", "team": "NED", "position": "Defensor"},
+  {"name": "Matthijs de Ligt", "team": "NED", "position": "Defensor"},
+  {"name": "Nathan Aké", "team": "NED", "position": "Defensor"},
+  {"name": "Bart Verbruggen", "team": "NED", "position": "Arquero"},
+  {"name": "Georginio Wijnaldum", "team": "NED", "position": "Mediocampista"},
+  {"name": "Donyell Malen", "team": "NED", "position": "Delantero"},
+  {"name": "Brian Brobbey", "team": "NED", "position": "Delantero"},
+
+  {"name": "Luka Modrić", "team": "CRO", "position": "Mediocampista"},
+  {"name": "Ivan Perišić", "team": "CRO", "position": "Delantero"},
+  {"name": "Marcelo Brozović", "team": "CRO", "position": "Mediocampista"},
+  {"name": "Mateo Kovačić", "team": "CRO", "position": "Mediocampista"},
+  {"name": "Andrej Kramarić", "team": "CRO", "position": "Delantero"},
+  {"name": "Bruno Petković", "team": "CRO", "position": "Delantero"},
+  {"name": "Dejan Lovren", "team": "CRO", "position": "Defensor"},
+  {"name": "Joško Gvardiol", "team": "CRO", "position": "Defensor"},
+  {"name": "Dominik Livaković", "team": "CRO", "position": "Arquero"},
+  {"name": "Nikola Vlašić", "team": "CRO", "position": "Mediocampista"},
+  {"name": "Ante Budimir", "team": "CRO", "position": "Delantero"},
+
+  {"name": "Son Heung-min", "team": "KOR", "position": "Delantero"},
+  {"name": "Hwang Hee-chan", "team": "KOR", "position": "Delantero"},
+  {"name": "Lee Kang-in", "team": "KOR", "position": "Mediocampista"},
+  {"name": "Kim Min-jae", "team": "KOR", "position": "Defensor"},
+  {"name": "Hwang In-beom", "team": "KOR", "position": "Mediocampista"},
+  {"name": "Cho Gue-sung", "team": "KOR", "position": "Delantero"},
+  {"name": "Jung Woo-young", "team": "KOR", "position": "Mediocampista"},
+  {"name": "Kim Young-gwon", "team": "KOR", "position": "Defensor"},
+  {"name": "Kim Jin-su", "team": "KOR", "position": "Defensor"},
+  {"name": "Seung-gyu Kim", "team": "KOR", "position": "Arquero"},
+  {"name": "Oh Hyeon-gyu", "team": "KOR", "position": "Delantero"},
+
+  {"name": "Hiroki Sakai", "team": "JPN", "position": "Defensor"},
+  {"name": "Ritsu Doan", "team": "JPN", "position": "Delantero"},
+  {"name": "Takumi Minamino", "team": "JPN", "position": "Delantero"},
+  {"name": "Kaoru Mitoma", "team": "JPN", "position": "Delantero"},
+  {"name": "Wataru Endo", "team": "JPN", "position": "Mediocampista"},
+  {"name": "Junya Ito", "team": "JPN", "position": "Delantero"},
+  {"name": "Daichi Kamada", "team": "JPN", "position": "Mediocampista"},
+  {"name": "Maya Yoshida", "team": "JPN", "position": "Defensor"},
+  {"name": "Yuto Nagatomo", "team": "JPN", "position": "Defensor"},
+  {"name": "Shūichi Gonda", "team": "JPN", "position": "Arquero"},
+  {"name": "Ko Itakura", "team": "JPN", "position": "Defensor"},
+  {"name": "Keito Nakamura", "team": "JPN", "position": "Delantero"},
+  {"name": "Ao Tanaka", "team": "JPN", "position": "Mediocampista"},
+
+  {"name": "Sadio Mané", "team": "SEN", "position": "Delantero"},
+  {"name": "Cheikhou Kouyaté", "team": "SEN", "position": "Mediocampista"},
+  {"name": "Idrissa Gueye", "team": "SEN", "position": "Mediocampista"},
+  {"name": "Kalidou Koulibaly", "team": "SEN", "position": "Defensor"},
+  {"name": "Famara Diédhiou", "team": "SEN", "position": "Delantero"},
+  {"name": "Ismaïla Sarr", "team": "SEN", "position": "Delantero"},
+  {"name": "Pape Gueye", "team": "SEN", "position": "Mediocampista"},
+  {"name": "Boulaye Dia", "team": "SEN", "position": "Delantero"},
+  {"name": "Lamine Camara", "team": "SEN", "position": "Mediocampista"},
+  {"name": "Édouard Mendy", "team": "SEN", "position": "Arquero"},
+  {"name": "Habib Diallo", "team": "SEN", "position": "Delantero"},
+
+  {"name": "Riyad Mahrez", "team": "ALG", "position": "Delantero"},
+  {"name": "Islam Slimani", "team": "ALG", "position": "Delantero"},
+  {"name": "Sofiane Feghouli", "team": "ALG", "position": "Delantero"},
+  {"name": "Youcef Atal", "team": "ALG", "position": "Defensor"},
+  {"name": "Said Benrahma", "team": "ALG", "position": "Mediocampista"},
+  {"name": "Houssem Aouar", "team": "ALG", "position": "Mediocampista"},
+  {"name": "Nabil Bentaleb", "team": "ALG", "position": "Mediocampista"},
+  {"name": "Djamel Benlamri", "team": "ALG", "position": "Defensor"},
+  {"name": "Rémi Ouédraogo", "team": "ALG", "position": "Mediocampista"},
+  {"name": "Rais M'Bolhi", "team": "ALG", "position": "Arquero"},
+  {"name": "Baghdad Bounedjah", "team": "ALG", "position": "Delantero"},
+
+  {"name": "Achraf Hakimi", "team": "MAR", "position": "Defensor"},
+  {"name": "Hakim Ziyech", "team": "MAR", "position": "Mediocampista"},
+  {"name": "Youssef En-Nesyri", "team": "MAR", "position": "Delantero"},
+  {"name": "Sofyan Amrabat", "team": "MAR", "position": "Mediocampista"},
+  {"name": "Azzedine Ounahi", "team": "MAR", "position": "Mediocampista"},
+  {"name": "Noussair Mazraoui", "team": "MAR", "position": "Defensor"},
+  {"name": "Romain Saïss", "team": "MAR", "position": "Defensor"},
+  {"name": "Abdelhamid Sabiri", "team": "MAR", "position": "Mediocampista"},
+  {"name": "Yassine Bounou", "team": "MAR", "position": "Arquero"},
+  {"name": "Ilias Chair", "team": "MAR", "position": "Mediocampista"},
+  {"name": "Abde Ezzalzouli", "team": "MAR", "position": "Delantero"},
+  {"name": "Soufiane Rahimi", "team": "MAR", "position": "Delantero"},
+
+  {"name": "Mohamed Salah", "team": "EGY", "position": "Delantero"},
+  {"name": "Omar Marmoush", "team": "EGY", "position": "Delantero"},
+  {"name": "Mostafa Mohamed", "team": "EGY", "position": "Delantero"},
+  {"name": "Amr El Solia", "team": "EGY", "position": "Mediocampista"},
+  {"name": "Ahmed Hegazi", "team": "EGY", "position": "Defensor"},
+  {"name": "Ahmed El Shenawy", "team": "EGY", "position": "Arquero"},
+  {"name": "Trezeguet", "team": "EGY", "position": "Delantero"},
+  {"name": "Emam Ashour", "team": "EGY", "position": "Mediocampista"},
+  {"name": "Mohamed Elneny", "team": "EGY", "position": "Mediocampista"},
+  {"name": "Mahmoud Hassan", "team": "EGY", "position": "Delantero"},
+
+  {"name": "Victor Osimhen", "team": "NGA", "position": "Delantero"},
+  {"name": "Kelechi Iheanacho", "team": "NGA", "position": "Delantero"},
+  {"name": "Wilfried Ndidi", "team": "NGA", "position": "Mediocampista"},
+  {"name": "Alex Iwobi", "team": "NGA", "position": "Mediocampista"},
+  {"name": "Samuel Chukwueze", "team": "NGA", "position": "Delantero"},
+  {"name": "Taiwo Awoniyi", "team": "NGA", "position": "Delantero"},
+  {"name": "Joe Aribo", "team": "NGA", "position": "Mediocampista"},
+  {"name": "William Troost-Ekong", "team": "NGA", "position": "Defensor"},
+  {"name": "Zaidu Sanusi", "team": "NGA", "position": "Defensor"},
+  {"name": "Stanley Nwabali", "team": "NGA", "position": "Arquero"},
+  {"name": "Ademola Lookman", "team": "NGA", "position": "Delantero"},
+
+  {"name": "Eric Maxim Choupo-Moting", "team": "CMR", "position": "Delantero"},
+  {"name": "Vincent Aboubakar", "team": "CMR", "position": "Delantero"},
+  {"name": "André-Frank Zambo Anguissa", "team": "CMR", "position": "Mediocampista"},
+  {"name": "Bryan Mbeumo", "team": "CMR", "position": "Delantero"},
+  {"name": "Christian Bassogog", "team": "CMR", "position": "Delantero"},
+  {"name": "Martin Hongla", "team": "CMR", "position": "Mediocampista"},
+  {"name": "Nicolas Nkoulou", "team": "CMR", "position": "Defensor"},
+  {"name": "Harold Moukoudi", "team": "CMR", "position": "Defensor"},
+  {"name": "Devis Epassy", "team": "CMR", "position": "Arquero"},
+
+  {"name": "Sébastien Haller", "team": "CIV", "position": "Delantero"},
+  {"name": "Nicolas Pépé", "team": "CIV", "position": "Delantero"},
+  {"name": "Wilfried Zaha", "team": "CIV", "position": "Delantero"},
+  {"name": "Franck Kessié", "team": "CIV", "position": "Mediocampista"},
+  {"name": "Serge Aurier", "team": "CIV", "position": "Defensor"},
+  {"name": "Jean-Philippe Gbamin", "team": "CIV", "position": "Mediocampista"},
+  {"name": "Ibrahim Sangaré", "team": "CIV", "position": "Mediocampista"},
+  {"name": "Gradel", "team": "CIV", "position": "Delantero"},
+  {"name": "Youssouf Dao", "team": "CIV", "position": "Defensor"},
+  {"name": "Simon Adingra", "team": "CIV", "position": "Delantero"},
+  {"name": "Jean-Louis Leca", "team": "CIV", "position": "Arquero"},
+
+  {"name": "Percy Tau", "team": "RSA", "position": "Delantero"},
+  {"name": "Themba Zwane", "team": "RSA", "position": "Delantero"},
+  {"name": "Bongani Zungu", "team": "RSA", "position": "Mediocampista"},
+  {"name": "Lyle Foster", "team": "RSA", "position": "Delantero"},
+  {"name": "Ronwen Williams", "team": "RSA", "position": "Arquero"},
+  {"name": "Itumeleng Khune", "team": "RSA", "position": "Arquero"},
+  {"name": "Lebohang Maboe", "team": "RSA", "position": "Mediocampista"},
+  {"name": "Evidence Makgopa", "team": "RSA", "position": "Delantero"},
+  {"name": "Teboho Mokoena", "team": "RSA", "position": "Mediocampista"},
+
+  {"name": "Wahbi Khazri", "team": "TUN", "position": "Delantero"},
+  {"name": "Anis Ben Slimane", "team": "TUN", "position": "Mediocampista"},
+  {"name": "Hannibal Mejbri", "team": "TUN", "position": "Mediocampista"},
+  {"name": "Seifeddine Jaziri", "team": "TUN", "position": "Delantero"},
+  {"name": "Dylan Bronn", "team": "TUN", "position": "Defensor"},
+  {"name": "Montassar Talbi", "team": "TUN", "position": "Defensor"},
+  {"name": "Aymen Dahmen", "team": "TUN", "position": "Arquero"},
+  {"name": "Ellyes Skhiri", "team": "TUN", "position": "Mediocampista"},
+  {"name": "Issam Jebali", "team": "TUN", "position": "Delantero"},
+
+  {"name": "Mehdi Taremi", "team": "IRN", "position": "Delantero"},
+  {"name": "Sardar Azmoun", "team": "IRN", "position": "Delantero"},
+  {"name": "Karim Ansarifard", "team": "IRN", "position": "Delantero"},
+  {"name": "Alireza Jahanbakhsh", "team": "IRN", "position": "Delantero"},
+  {"name": "Ali Gholizadeh", "team": "IRN", "position": "Delantero"},
+  {"name": "Saman Ghoddos", "team": "IRN", "position": "Mediocampista"},
+  {"name": "Saeid Ezatolahi", "team": "IRN", "position": "Mediocampista"},
+  {"name": "Ali Beiranvand", "team": "IRN", "position": "Arquero"},
+  {"name": "Ehsan Hajsafi", "team": "IRN", "position": "Defensor"},
+
+  {"name": "Saleh Al-Shehri", "team": "KSA", "position": "Delantero"},
+  {"name": "Salem Al-Dawsari", "team": "KSA", "position": "Delantero"},
+  {"name": "Mohammed Al-Owais", "team": "KSA", "position": "Arquero"},
+  {"name": "Firas Al-Buraikan", "team": "KSA", "position": "Delantero"},
+  {"name": "Sami Al-Najei", "team": "KSA", "position": "Mediocampista"},
+  {"name": "Mohammed Al-Qasem", "team": "KSA", "position": "Mediocampista"},
+  {"name": "Ali Al-Bulayhi", "team": "KSA", "position": "Defensor"},
+  {"name": "Yasser Al-Shahrani", "team": "KSA", "position": "Defensor"},
+  {"name": "Hattan Bahebri", "team": "KSA", "position": "Delantero"},
+
+  {"name": "Hussein Ali Mousa", "team": "IRQ", "position": "Delantero"},
+  {"name": "Amjed Atwan", "team": "IRQ", "position": "Mediocampista"},
+  {"name": "Ayman Hussein", "team": "IRQ", "position": "Delantero"},
+  {"name": "Ali Adnan", "team": "IRQ", "position": "Defensor"},
+  {"name": "Jalal Hasan", "team": "IRQ", "position": "Mediocampista"},
+  {"name": "Mohanad Ali", "team": "IRQ", "position": "Delantero"},
+  {"name": "Fahad Tariq", "team": "IRQ", "position": "Arquero"},
+
+  {"name": "Ziyodulloh Hamroyev", "team": "UZB", "position": "Delantero"},
+  {"name": "Eldor Shomurodov", "team": "UZB", "position": "Delantero"},
+  {"name": "Abbosbek Fayzullayev", "team": "UZB", "position": "Delantero"},
+  {"name": "Jaloliddin Masharipov", "team": "UZB", "position": "Delantero"},
+  {"name": "Dostonbek Khamdamov", "team": "UZB", "position": "Mediocampista"},
+  {"name": "Oston Urunov", "team": "UZB", "position": "Mediocampista"},
+  {"name": "Sanjar Tursunov", "team": "UZB", "position": "Arquero"},
+  {"name": "Akramjon Komilov", "team": "UZB", "position": "Defensor"},
+
+  {"name": "Ahmad Nurhidayat", "team": "IDN", "position": "Mediocampista"},
+  {"name": "Ragnar Oratmangoen", "team": "IDN", "position": "Delantero"},
+  {"name": "Thom Haye", "team": "IDN", "position": "Mediocampista"},
+  {"name": "Jay Idzes", "team": "IDN", "position": "Defensor"},
+  {"name": "Maarten Paes", "team": "IDN", "position": "Arquero"},
+  {"name": "Rafael Struick", "team": "IDN", "position": "Delantero"},
+  {"name": "Marselino Ferdinan", "team": "IDN", "position": "Mediocampista"},
+  {"name": "Ivar Jenner", "team": "IDN", "position": "Mediocampista"},
+  {"name": "Sandy Walsh", "team": "IDN", "position": "Defensor"},
+  {"name": "Nathan Tjoe-A-On", "team": "IDN", "position": "Defensor"},
+
+  {"name": "Takefusa Kubo", "team": "JPN", "position": "Delantero"},
+
+  {"name": "Christian Pulisic", "team": "USA", "position": "Delantero"},
+  {"name": "Gio Reyna", "team": "USA", "position": "Mediocampista"},
+  {"name": "Brenden Aaronson", "team": "USA", "position": "Mediocampista"},
+  {"name": "Weston McKennie", "team": "USA", "position": "Mediocampista"},
+  {"name": "Tyler Adams", "team": "USA", "position": "Mediocampista"},
+  {"name": "Josh Sargent", "team": "USA", "position": "Delantero"},
+  {"name": "Ricardo Pepi", "team": "USA", "position": "Delantero"},
+  {"name": "Yunus Musah", "team": "USA", "position": "Mediocampista"},
+  {"name": "Sergiño Dest", "team": "USA", "position": "Defensor"},
+  {"name": "Antonee Robinson", "team": "USA", "position": "Defensor"},
+  {"name": "Matt Turner", "team": "USA", "position": "Arquero"},
+  {"name": "Walker Zimmerman", "team": "USA", "position": "Defensor"},
+  {"name": "Tim Ream", "team": "USA", "position": "Defensor"},
+  {"name": "Folarin Balogun", "team": "USA", "position": "Delantero"},
+  {"name": "Joe Scally", "team": "USA", "position": "Defensor"},
+
+  {"name": "Alphonso Davies", "team": "CAN", "position": "Defensor"},
+  {"name": "Jonathan David", "team": "CAN", "position": "Delantero"},
+  {"name": "Cyle Larin", "team": "CAN", "position": "Delantero"},
+  {"name": "Tajon Buchanan", "team": "CAN", "position": "Delantero"},
+  {"name": "Stephen Eustaquio", "team": "CAN", "position": "Mediocampista"},
+  {"name": "Richie Laryea", "team": "CAN", "position": "Defensor"},
+  {"name": "Kamal Miller", "team": "CAN", "position": "Defensor"},
+  {"name": "Milan Borjan", "team": "CAN", "position": "Arquero"},
+  {"name": "Alistair Johnston", "team": "CAN", "position": "Defensor"},
+  {"name": "Atiba Hutchinson", "team": "CAN", "position": "Mediocampista"},
+  {"name": "Junior Hoilett", "team": "CAN", "position": "Delantero"},
+  {"name": "Lucas Cavallini", "team": "CAN", "position": "Delantero"},
+
+  {"name": "Hirving Lozano", "team": "MEX", "position": "Delantero"},
+  {"name": "Carlos Vela", "team": "MEX", "position": "Delantero"},
+  {"name": "Raúl Jiménez", "team": "MEX", "position": "Delantero"},
+  {"name": "Henry Martín", "team": "MEX", "position": "Delantero"},
+  {"name": "Santiago Giménez", "team": "MEX", "position": "Delantero"},
+  {"name": "Edson Álvarez", "team": "MEX", "position": "Mediocampista"},
+  {"name": "Héctor Herrera", "team": "MEX", "position": "Mediocampista"},
+  {"name": "Andrés Guardado", "team": "MEX", "position": "Mediocampista"},
+  {"name": "Guillermo Ochoa", "team": "MEX", "position": "Arquero"},
+  {"name": "Jorge Sánchez", "team": "MEX", "position": "Defensor"},
+  {"name": "Johan Vásquez", "team": "MEX", "position": "Defensor"},
+  {"name": "César Montes", "team": "MEX", "position": "Defensor"},
+  {"name": "Roberto Alvarado", "team": "MEX", "position": "Mediocampista"},
+  {"name": "Uriel Antuna", "team": "MEX", "position": "Delantero"},
+  {"name": "Alexis Vega", "team": "MEX", "position": "Delantero"},
+
+  {"name": "Rolando Blackburn", "team": "PAN", "position": "Delantero"},
+  {"name": "Abdiel Ayarza", "team": "PAN", "position": "Delantero"},
+  {"name": "Édgar Bárcenas", "team": "PAN", "position": "Delantero"},
+  {"name": "Adalberto Carrasquilla", "team": "PAN", "position": "Mediocampista"},
+  {"name": "Rodrigo Schlotterbeck", "team": "PAN", "position": "Defensor"},
+  {"name": "Luis Mejía", "team": "PAN", "position": "Arquero"},
+  {"name": "Ernesto Walker", "team": "PAN", "position": "Defensor"},
+  {"name": "Ismael Díaz", "team": "PAN", "position": "Delantero"},
+
+  {"name": "José Rivas", "team": "HON", "position": "Delantero"},
+  {"name": "Alberth Elis", "team": "HON", "position": "Delantero"},
+  {"name": "Romell Quioto", "team": "HON", "position": "Delantero"},
+  {"name": "Jorge Benguché", "team": "HON", "position": "Delantero"},
+  {"name": "Andy Najar", "team": "HON", "position": "Defensor"},
+  {"name": "Edrick Menjívar", "team": "HON", "position": "Arquero"},
+  {"name": "Carlos Pineda", "team": "HON", "position": "Mediocampista"},
+  {"name": "Luis Palma", "team": "HON", "position": "Delantero"},
+
+  {"name": "Bryan Ruiz", "team": "GUA", "position": "Mediocampista"},
+  {"name": "Carlos Ruiz", "team": "GUA", "position": "Delantero"},
+  {"name": "Rubio Rubín", "team": "GUA", "position": "Delantero"},
+  {"name": "José Pinto", "team": "GUA", "position": "Arquero"},
+  {"name": "Oscar Castellanos", "team": "GUA", "position": "Mediocampista"},
+  {"name": "Darwin Lom", "team": "GUA", "position": "Mediocampista"},
+  {"name": "Alejandro Galindo", "team": "GUA", "position": "Defensor"},
+
+  {"name": "Shamar Nicholson", "team": "JAM", "position": "Delantero"},
+  {"name": "Leon Bailey", "team": "JAM", "position": "Delantero"},
+  {"name": "Michail Antonio", "team": "JAM", "position": "Delantero"},
+  {"name": "Bobby Reid", "team": "JAM", "position": "Mediocampista"},
+  {"name": "Daniel Johnson", "team": "JAM", "position": "Mediocampista"},
+  {"name": "Andre Blake", "team": "JAM", "position": "Arquero"},
+  {"name": "Damion Lowe", "team": "JAM", "position": "Defensor"},
+  {"name": "Kemar Lawrence", "team": "JAM", "position": "Defensor"},
+  {"name": "Lamar Walker", "team": "JAM", "position": "Mediocampista"},
+
+  {"name": "Darwin Machís", "team": "VEN", "position": "Delantero"},
+  {"name": "Josef Martínez", "team": "VEN", "position": "Delantero"},
+  {"name": "Salomón Rondón", "team": "VEN", "position": "Delantero"},
+  {"name": "Tomás Rincón", "team": "VEN", "position": "Mediocampista"},
+  {"name": "Yangel Herrera", "team": "VEN", "position": "Mediocampista"},
+  {"name": "Yeferson Soteldo", "team": "VEN", "position": "Delantero"},
+  {"name": "Wuilker Faríñez", "team": "VEN", "position": "Arquero"},
+  {"name": "Jon Aramburu", "team": "VEN", "position": "Defensor"},
+  {"name": "Jhon Chancellor", "team": "VEN", "position": "Defensor"},
+
+  {"name": "Aleksandar Mitrović", "team": "SRB", "position": "Delantero"},
+  {"name": "Dušan Vlahović", "team": "SRB", "position": "Delantero"},
+  {"name": "Filip Kostić", "team": "SRB", "position": "Delantero"},
+  {"name": "Sergej Milinković-Savić", "team": "SRB", "position": "Mediocampista"},
+  {"name": "Nikola Milenković", "team": "SRB", "position": "Defensor"},
+  {"name": "Nemanja Gudelj", "team": "SRB", "position": "Mediocampista"},
+  {"name": "Predrag Rajković", "team": "SRB", "position": "Arquero"},
+  {"name": "Strahinja Pavlović", "team": "SRB", "position": "Defensor"},
+  {"name": "Andrija Živković", "team": "SRB", "position": "Delantero"},
+  {"name": "Luka Jović", "team": "SRB", "position": "Delantero"},
+
+  {"name": "Burak Yılmaz", "team": "TUR", "position": "Delantero"},
+  {"name": "Hakan Çalhanoğlu", "team": "TUR", "position": "Mediocampista"},
+  {"name": "Kerem Aktürkoğlu", "team": "TUR", "position": "Delantero"},
+  {"name": "Arda Güler", "team": "TUR", "position": "Mediocampista"},
+  {"name": "Yusuf Yazıcı", "team": "TUR", "position": "Mediocampista"},
+  {"name": "Cenk Tosun", "team": "TUR", "position": "Delantero"},
+  {"name": "Çağlar Söyüncü", "team": "TUR", "position": "Defensor"},
+  {"name": "Zeki Çelik", "team": "TUR", "position": "Defensor"},
+  {"name": "Altay Bayındır", "team": "TUR", "position": "Arquero"},
+  {"name": "Samet Akaydın", "team": "TUR", "position": "Defensor"},
+  {"name": "Ferdi Kadıoğlu", "team": "TUR", "position": "Defensor"},
+  {"name": "Serdar Dursun", "team": "TUR", "position": "Delantero"},
+
+  {"name": "Ruslan Malinovskyi", "team": "UKR", "position": "Mediocampista"},
+  {"name": "Oleksandr Zinchenko", "team": "UKR", "position": "Defensor"},
+  {"name": "Artem Dovbyk", "team": "UKR", "position": "Delantero"},
+  {"name": "Andriy Yarmolenko", "team": "UKR", "position": "Delantero"},
+  {"name": "Mykhailo Mudryk", "team": "UKR", "position": "Delantero"},
+  {"name": "Viktor Tsygankov", "team": "UKR", "position": "Mediocampista"},
+  {"name": "Oleksandr Tymchyk", "team": "UKR", "position": "Defensor"},
+  {"name": "Mykola Matvienko", "team": "UKR", "position": "Defensor"},
+  {"name": "Andriy Pyatov", "team": "UKR", "position": "Arquero"},
+  {"name": "Georgiy Bushchan", "team": "UKR", "position": "Arquero"},
+  {"name": "Georgi Sudakov", "team": "UKR", "position": "Mediocampista"},
+
+  {"name": "Andreas Granqvist", "team": "SWE", "position": "Defensor"},
+  {"name": "Emil Forsberg", "team": "SWE", "position": "Mediocampista"},
+  {"name": "Alexander Isak", "team": "SWE", "position": "Delantero"},
+  {"name": "Viktor Gyökeres", "team": "SWE", "position": "Delantero"},
+  {"name": "Dejan Kulusevski", "team": "SWE", "position": "Delantero"},
+
+  {"name": "Christian Eriksen", "team": "DEN", "position": "Mediocampista"},
+  {"name": "Kasper Dolberg", "team": "DEN", "position": "Delantero"},
+  {"name": "Andreas Cornelius", "team": "DEN", "position": "Delantero"},
+  {"name": "Pierre-Emile Højbjerg", "team": "DEN", "position": "Mediocampista"},
+  {"name": "Martin Braithwaite", "team": "DEN", "position": "Delantero"},
+  {"name": "Rasmus Hojlund", "team": "DEN", "position": "Delantero"},
+  {"name": "Yussuf Poulsen", "team": "DEN", "position": "Delantero"},
+  {"name": "Joachim Andersen", "team": "DEN", "position": "Defensor"},
+  {"name": "Joakim Mæhle", "team": "DEN", "position": "Defensor"},
+  {"name": "Kasper Schmeichel", "team": "DEN", "position": "Arquero"},
+  {"name": "Simon Kjaer", "team": "DEN", "position": "Defensor"},
+
+  {"name": "Aleksandar Dragović", "team": "AUT", "position": "Defensor"},
+  {"name": "David Alaba", "team": "AUT", "position": "Defensor"},
+  {"name": "Marcel Sabitzer", "team": "AUT", "position": "Mediocampista"},
+  {"name": "Marko Arnautović", "team": "AUT", "position": "Delantero"},
+  {"name": "Christoph Baumgartner", "team": "AUT", "position": "Mediocampista"},
+  {"name": "Konrad Laimer", "team": "AUT", "position": "Mediocampista"},
+  {"name": "Michael Gregoritsch", "team": "AUT", "position": "Delantero"},
+  {"name": "Andreas Weimann", "team": "AUT", "position": "Delantero"},
+  {"name": "Patrick Wimmer", "team": "AUT", "position": "Mediocampista"},
+  {"name": "Philipp Lienhart", "team": "AUT", "position": "Defensor"},
+  {"name": "Patrick Pentz", "team": "AUT", "position": "Arquero"},
+
+  {"name": "Tim Cahill", "team": "AUS", "position": "Mediocampista"},
+  {"name": "Mathew Ryan", "team": "AUS", "position": "Arquero"},
+  {"name": "Mat Leckie", "team": "AUS", "position": "Delantero"},
+  {"name": "Awer Mabil", "team": "AUS", "position": "Delantero"},
+  {"name": "Mitchell Duke", "team": "AUS", "position": "Delantero"},
+  {"name": "Jackson Irvine", "team": "AUS", "position": "Mediocampista"},
+  {"name": "Riley McGree", "team": "AUS", "position": "Mediocampista"},
+  {"name": "Ajdin Hrustic", "team": "AUS", "position": "Mediocampista"},
+  {"name": "Milos Degenek", "team": "AUS", "position": "Defensor"},
+  {"name": "Aziz Behich", "team": "AUS", "position": "Defensor"},
+  {"name": "Harry Souttar", "team": "AUS", "position": "Defensor"},
+  {"name": "Ben Folami", "team": "AUS", "position": "Delantero"},
+  {"name": "Marco Tilio", "team": "AUS", "position": "Delantero"},
+
+  {"name": "Andrew Redmayne", "team": "AUS", "position": "Arquero"},
+
+  {"name": "Chris Wood", "team": "NZL", "position": "Delantero"},
+  {"name": "Liberato Cacace", "team": "NZL", "position": "Defensor"},
+  {"name": "Clayton Lewis", "team": "NZL", "position": "Mediocampista"},
+  {"name": "Ryan Thomas", "team": "NZL", "position": "Mediocampista"},
+  {"name": "Bill Tuilagi", "team": "NZL", "position": "Delantero"},
+  {"name": "Matthew Garbett", "team": "NZL", "position": "Mediocampista"},
+  {"name": "Joe Bell", "team": "NZL", "position": "Mediocampista"},
+  {"name": "Nando de Wijs", "team": "NZL", "position": "Defensor"},
+  {"name": "Michael Boxall", "team": "NZL", "position": "Defensor"},
+  {"name": "Oliver Sail", "team": "NZL", "position": "Arquero"},
+
+  {"name": "Hussein Mansour", "team": "JOR", "position": "Mediocampista"},
+  {"name": "Musa Al-Taamari", "team": "JOR", "position": "Delantero"},
+  {"name": "Nour Ali Sabri", "team": "JOR", "position": "Arquero"},
+  {"name": "Baha Abdel-Rahman", "team": "JOR", "position": "Defensor"},
+  {"name": "Ehsan Haddad", "team": "JOR", "position": "Mediocampista"},
+  {"name": "Yazan Al-Naimat", "team": "JOR", "position": "Delantero"},
+  {"name": "Amer Shafi", "team": "JOR", "position": "Arquero"},
+
+  {"name": "Sergio Ramos", "team": "ESP", "position": "Defensor"},
+
+  {"name": "Paulo Gazzaniga", "team": "ARG", "position": "Arquero"},
+
+  {"name": "Nicolas Jackson", "team": "SEN", "position": "Delantero"},
+  {"name": "Ismaila Sarr", "team": "SEN", "position": "Delantero"},
+
+  {"name": "Dani Leal", "team": "POR", "position": "Delantero"},
+
+  {"name": "Ibrahim Mbaye", "team": "SEN", "position": "Defensor"},
+
+  {"name": "Callum Wilson", "team": "ENG", "position": "Delantero"},
+  {"name": "Jarrod Bowen", "team": "ENG", "position": "Delantero"},
+
+  {"name": "Gabriel Jesus", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Aitor Paredes", "team": "ESP", "position": "Defensor"},
+
+  {"name": "Ángel Correa", "team": "ARG", "position": "Delantero"},
+
+  {"name": "Jonatan Girard", "team": "CAN", "position": "Defensor"},
+
+  {"name": "Diego Gómez", "team": "PAN", "position": "Mediocampista"},
+
+  {"name": "Yohan Boli", "team": "CIV", "position": "Delantero"},
+
+  {"name": "Omar El Abdellaoui", "team": "MAR", "position": "Mediocampista"},
+
+  {"name": "Moussa Sissako", "team": "MLI", "position": "Defensor"},
+
+  {"name": "Alou Kuol", "team": "AUS", "position": "Delantero"},
+
+  {"name": "Romain Métanire", "team": "MAD", "position": "Defensor"},
+
+  {"name": "Stanislav Lobotka", "team": "SVK", "position": "Mediocampista"},
+  {"name": "Marek Hamšík", "team": "SVK", "position": "Mediocampista"},
+
+  {"name": "Mirlind Daku", "team": "ALB", "position": "Delantero"},
+  {"name": "Jasir Asani", "team": "ALB", "position": "Delantero"},
+  {"name": "Armando Broja", "team": "ALB", "position": "Delantero"},
+
+  {"name": "Nikola Krstović", "team": "MNE", "position": "Delantero"},
+
+  {"name": "Romário Baró", "team": "CPV", "position": "Mediocampista"},
+  {"name": "Garry Rodrigues", "team": "CPV", "position": "Delantero"},
+
+  {"name": "Nnamdi Collins", "team": "GER", "position": "Defensor"},
+  {"name": "Leroy Sane", "team": "GER", "position": "Delantero"},
+
+  {"name": "Federico Valverde", "team": "URU", "position": "Mediocampista"},
+
+  {"name": "Razvan Marin", "team": "ROM", "position": "Mediocampista"},
+  {"name": "Nicolae Stanciu", "team": "ROM", "position": "Mediocampista"},
+  {"name": "Denis Drăguș", "team": "ROM", "position": "Delantero"},
+  {"name": "Florinel Coman", "team": "ROM", "position": "Delantero"},
+  {"name": "Denis Man", "team": "ROM", "position": "Delantero"},
+  {"name": "George Puscas", "team": "ROM", "position": "Delantero"},
+  {"name": "Vlad Chiricheș", "team": "ROM", "position": "Defensor"},
+  {"name": "Andrei Rațiu", "team": "ROM", "position": "Defensor"},
+  {"name": "Florin Nițǎ", "team": "ROM", "position": "Arquero"},
+
+  {"name": "Andrew Robertson", "team": "SCO", "position": "Defensor"},
+  {"name": "Scott McTominay", "team": "SCO", "position": "Mediocampista"},
+  {"name": "Kieran Tierney", "team": "SCO", "position": "Defensor"},
+  {"name": "Ryan Christie", "team": "SCO", "position": "Mediocampista"},
+  {"name": "John McGinn", "team": "SCO", "position": "Mediocampista"},
+  {"name": "Stuart Armstrong", "team": "SCO", "position": "Mediocampista"},
+  {"name": "Che Adams", "team": "SCO", "position": "Delantero"},
+  {"name": "Lyndon Dykes", "team": "SCO", "position": "Delantero"},
+  {"name": "Ryan Jack", "team": "SCO", "position": "Mediocampista"},
+  {"name": "Grant Hanley", "team": "SCO", "position": "Defensor"},
+  {"name": "Craig Gordon", "team": "SCO", "position": "Arquero"},
+  {"name": "Lawrence Shankland", "team": "SCO", "position": "Delantero"},
+
+  {"name": "Duván Zapata", "team": "COL", "position": "Delantero"},
+
+  {"name": "Oscar Duarte", "team": "CRC", "position": "Defensor"},
+  {"name": "Bryan Ruiz", "team": "CRC", "position": "Mediocampista"},
+  {"name": "Keylor Navas", "team": "CRC", "position": "Arquero"},
+  {"name": "Joel Campbell", "team": "CRC", "position": "Delantero"},
+  {"name": "Johan Venegas", "team": "CRC", "position": "Delantero"},
+  {"name": "Celso Borges", "team": "CRC", "position": "Mediocampista"},
+  {"name": "Kendall Waston", "team": "CRC", "position": "Defensor"},
+
+  {"name": "Nahitan Nández", "team": "URU", "position": "Mediocampista"},
+  {"name": "Brian Rodríguez", "team": "URU", "position": "Delantero"},
+
+  {"name": "Aleksandar Kolarov", "team": "SRB", "position": "Defensor"},
+
+  {"name": "Marcel Halstenberg", "team": "GER", "position": "Defensor"},
+
+  {"name": "José Arnaud Dina Ebimbe", "team": "CMR", "position": "Mediocampista"},
+
+  {"name": "Amel Majri", "team": "ALG", "position": "Mediocampista"},
+
+  {"name": "Amine Harit", "team": "MAR", "position": "Mediocampista"},
+
+  {"name": "Abdallah Sima", "team": "SEN", "position": "Delantero"},
+
+  {"name": "Wahbi Khazri", "team": "TUN", "position": "Delantero"},
+
+  {"name": "Wissam Ben Yedder", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Martin Skrtel", "team": "SVK", "position": "Defensor"},
+
+  {"name": "Anderson Talisca", "team": "BRA", "position": "Mediocampista"},
+
+  {"name": "Christian Benteke", "team": "BEL", "position": "Delantero"},
+
+  {"name": "Adam Buksa", "team": "POL", "position": "Delantero"},
+
+  {"name": "Jakub Moder", "team": "POL", "position": "Mediocampista"},
+  {"name": "Kamil Jozwiak", "team": "POL", "position": "Delantero"},
+
+  {"name": "Amine Gouiri", "team": "ALG", "position": "Delantero"},
+
+  {"name": "Elye Wahi", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Randal Kolo Muani", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Michael Olise", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Edouard Osque", "team": "CIV", "position": "Delantero"},
+
+  {"name": "Jesper Lindstrom", "team": "DEN", "position": "Mediocampista"},
+
+  {"name": "Kristoffer Haugen", "team": "NOR", "position": "Defensor"},
+
+  {"name": "Hwang Ui-jo", "team": "KOR", "position": "Delantero"},
+  {"name": "Kwon Chang-hoon", "team": "KOR", "position": "Mediocampista"},
+
+  {"name": "Masashi Oguro", "team": "JPN", "position": "Delantero"},
+
+  {"name": "Andy Carroll", "team": "ENG", "position": "Delantero"},
+
+  {"name": "Paulo Dybala", "team": "ARG", "position": "Delantero"},
+
+  {"name": "Anthony Martial", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Iker Casillas", "team": "ESP", "position": "Arquero"},
+
+  {"name": "Pedro Neto", "team": "POR", "position": "Delantero"},
+  {"name": "João Neves", "team": "POR", "position": "Mediocampista"},
+
+  {"name": "Luca Pellegrini", "team": "ITA", "position": "Defensor"},
+  {"name": "Giacomo Bonaventura", "team": "ITA", "position": "Mediocampista"},
+  {"name": "Gianluca Scamacca", "team": "ITA", "position": "Delantero"},
+  {"name": "Lorenzo Lucca", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Granit Xhaka", "team": "SUI", "position": "Mediocampista"},
+  {"name": "Xherdan Shaqiri", "team": "SUI", "position": "Delantero"},
+  {"name": "Breel Embolo", "team": "SUI", "position": "Delantero"},
+  {"name": "Haris Seferović", "team": "SUI", "position": "Delantero"},
+  {"name": "Manuel Akanji", "team": "SUI", "position": "Defensor"},
+  {"name": "Remo Freuler", "team": "SUI", "position": "Mediocampista"},
+  {"name": "Denis Zakaria", "team": "SUI", "position": "Mediocampista"},
+  {"name": "Yann Sommer", "team": "SUI", "position": "Arquero"},
+  {"name": "Ricardo Rodriguez", "team": "SUI", "position": "Defensor"},
+  {"name": "Fabian Schär", "team": "SUI", "position": "Defensor"},
+  {"name": "Noah Okafor", "team": "SUI", "position": "Delantero"},
+
+  {"name": "Sardar Azmoun", "team": "IRN", "position": "Delantero"},
+
+  {"name": "Talles Magno", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Yaser Asprilla", "team": "COL", "position": "Delantero"},
+
+  {"name": "Luciano Rodríguez", "team": "URU", "position": "Delantero"},
+
+  {"name": "Alireza Beiranvand", "team": "IRN", "position": "Arquero"},
+
+  {"name": "Aleksandr Golovin", "team": "RUS", "position": "Mediocampista"},
+
+  {"name": "Georgiy Tsitaishvili", "team": "GEO", "position": "Delantero"},
+  {"name": "Giorgi Mikautadze", "team": "GEO", "position": "Delantero"},
+  {"name": "Khvicha Kvaratskhelia", "team": "GEO", "position": "Delantero"},
+
+  {"name": "Arnor Sigurdsson", "team": "ISL", "position": "Mediocampista"},
+  {"name": "Albert Gudmundsson", "team": "ISL", "position": "Delantero"},
+
+  {"name": "Ante Rebić", "team": "CRO", "position": "Delantero"},
+
+  {"name": "Goncalo Guedes", "team": "POR", "position": "Delantero"},
+
+  {"name": "Bryan Zaragoza", "team": "ESP", "position": "Delantero"},
+
+  {"name": "Carlos Soler", "team": "ESP", "position": "Mediocampista"},
+
+  {"name": "João Palhinha", "team": "POR", "position": "Mediocampista"},
+
+  {"name": "Maxence Lacroix", "team": "FRA", "position": "Defensor"},
+
+  {"name": "Gleison Bremer", "team": "BRA", "position": "Defensor"},
+
+  {"name": "Pedri González", "team": "ESP", "position": "Mediocampista"},
+
+  {"name": "Mikel Merino", "team": "ESP", "position": "Mediocampista"},
+
+  {"name": "Eric García", "team": "ESP", "position": "Defensor"},
+
+  {"name": "Joao Costa", "team": "POR", "position": "Defensor"},
+
+  {"name": "David Silva", "team": "ESP", "position": "Mediocampista"},
+
+  {"name": "Daniele De Rossi", "team": "ITA", "position": "Mediocampista"},
+
+  {"name": "Cesc Fàbregas", "team": "ESP", "position": "Mediocampista"},
+
+  {"name": "Raheem Sterling", "team": "ENG", "position": "Delantero"},
+
+  {"name": "Ruben Loftus-Cheek", "team": "ENG", "position": "Mediocampista"},
+
+  {"name": "Harvey Elliott", "team": "ENG", "position": "Mediocampista"},
+
+  {"name": "Alex Scott", "team": "ENG", "position": "Mediocampista"},
+
+  {"name": "Eddie Nketiah", "team": "ENG", "position": "Delantero"},
+
+  {"name": "Myles Lewis-Skelly", "team": "ENG", "position": "Defensor"},
+
+  {"name": "Kobbie Mainoo", "team": "ENG", "position": "Mediocampista"},
+
+  {"name": "Lewis Hall", "team": "ENG", "position": "Defensor"},
+
+  {"name": "Bernardo Silva", "team": "POR", "position": "Mediocampista"},
+
+  {"name": "Lucas Moura", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Roberto Firmino", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Thiago Silva", "team": "BRA", "position": "Defensor"},
+
+  {"name": "Felipe Anderson", "team": "BRA", "position": "Delantero"},
+
+  {"name": "John Brooks", "team": "USA", "position": "Defensor"},
+
+  {"name": "Malik Tillman", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Matthew Hoppe", "team": "USA", "position": "Delantero"},
+
+  {"name": "Luca de la Torre", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Jonathan Gomez", "team": "USA", "position": "Defensor"},
+
+  {"name": "Alejandro Zendejas", "team": "MEX", "position": "Delantero"},
+
+  {"name": "Orbelin Pineda", "team": "MEX", "position": "Mediocampista"},
+
+  {"name": "Kevin Alvarez", "team": "MEX", "position": "Defensor"},
+
+  {"name": "Chucky Lozano", "team": "MEX", "position": "Delantero"},
+
+  {"name": "Tajon Buchanan", "team": "CAN", "position": "Delantero"},
+
+  {"name": "Derek Cornelius", "team": "CAN", "position": "Defensor"},
+
+  {"name": "Mark-Anthony Kaye", "team": "CAN", "position": "Mediocampista"},
+
+  {"name": "Liam Millar", "team": "CAN", "position": "Delantero"},
+
+  {"name": "Scott Kennedy", "team": "CAN", "position": "Defensor"},
+
+  {"name": "Theo Bair", "team": "CAN", "position": "Delantero"},
+
+  {"name": "Bassam Dergham", "team": "JOR", "position": "Mediocampista"},
+
+  {"name": "Al-Hassan Toure", "team": "SEN", "position": "Defensor"},
+
+  {"name": "Alfa Semedo", "team": "GNB", "position": "Mediocampista"},
+
+  {"name": "Mama Baldé", "team": "GNB", "position": "Delantero"},
+
+  {"name": "Hervé Koffi", "team": "BFA", "position": "Arquero"},
+  {"name": "Bertrand Traoré", "team": "BFA", "position": "Delantero"},
+  {"name": "Dango Ouattara", "team": "BFA", "position": "Delantero"},
+
+  {"name": "Ignatius Ganago", "team": "CMR", "position": "Delantero"},
+
+  {"name": "Julio Enciso", "team": "PAR", "position": "Delantero"},
+  {"name": "Miguel Almirón", "team": "PAR", "position": "Mediocampista"},
+  {"name": "Gustavo Gómez", "team": "PAR", "position": "Defensor"},
+  {"name": "Antonio Sanabria", "team": "PAR", "position": "Delantero"},
+  {"name": "Óscar Romero", "team": "PAR", "position": "Mediocampista"},
+  {"name": "Alejandro Romero Gamarra", "team": "PAR", "position": "Mediocampista"},
+  {"name": "Antony Silva", "team": "PAR", "position": "Arquero"},
+  {"name": "Alberto Espínola", "team": "PAR", "position": "Defensor"},
+  {"name": "Richard Sánchez", "team": "PAR", "position": "Mediocampista"},
+  {"name": "Blas Riveros", "team": "PAR", "position": "Defensor"},
+
+  {"name": "Giacomo Raspadori", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Fikayo Tomori", "team": "ENG", "position": "Defensor"},
+
+  {"name": "Conor Gallagher", "team": "ENG", "position": "Mediocampista"},
+
+  {"name": "Pedro", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Gleison Bremer", "team": "BRA", "position": "Defensor"},
+
+  {"name": "Wendell", "team": "BRA", "position": "Defensor"},
+
+  {"name": "Gabriel Martinelli", "team": "BRA", "position": "Delantero"},
+
+  {"name": "David Raum", "team": "GER", "position": "Defensor"},
+
+  {"name": "Pascal Gross", "team": "GER", "position": "Mediocampista"},
+
+  {"name": "Jonas Wind", "team": "DEN", "position": "Delantero"},
+
+  {"name": "Mathias Jensen", "team": "DEN", "position": "Mediocampista"},
+
+  {"name": "Mikkel Damsgaard", "team": "DEN", "position": "Mediocampista"},
+
+  {"name": "Youri Tielemans", "team": "BEL", "position": "Mediocampista"},
+
+  {"name": "Charles De Ketelaere", "team": "BEL", "position": "Delantero"},
+
+  {"name": "Albert Sambi Lokonga", "team": "BEL", "position": "Mediocampista"},
+
+  {"name": "Wout Faes", "team": "BEL", "position": "Defensor"},
+
+  {"name": "Zeno Debast", "team": "BEL", "position": "Defensor"},
+
+  {"name": "Julien Duranville", "team": "BEL", "position": "Delantero"},
+
+  {"name": "Aster Vranckx", "team": "BEL", "position": "Mediocampista"},
+
+  {"name": "Hannes Wolf", "team": "AUT", "position": "Mediocampista"},
+
+  {"name": "Sasa Kalajdzic", "team": "AUT", "position": "Delantero"},
+
+  {"name": "Nicolas Seiwald", "team": "AUT", "position": "Mediocampista"},
+
+  {"name": "Romano Schmid", "team": "AUT", "position": "Mediocampista"},
+
+  {"name": "Maximilian Wöber", "team": "AUT", "position": "Defensor"},
+
+  {"name": "Stefan Posch", "team": "AUT", "position": "Defensor"},
+
+  {"name": "Jan Thielmann", "team": "GER", "position": "Delantero"},
+
+  {"name": "Lovro Majer", "team": "CRO", "position": "Mediocampista"},
+
+  {"name": "Luka Ivanušec", "team": "CRO", "position": "Mediocampista"},
+
+  {"name": "Ivan Rakitić", "team": "CRO", "position": "Mediocampista"},
+
+  {"name": "Marin Pongračić", "team": "CRO", "position": "Defensor"},
+
+  {"name": "Tomislav Sajber", "team": "CRO", "position": "Arquero"},
+
+  {"name": "Junior Messias", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Zack Steffen", "team": "USA", "position": "Arquero"},
+
+  {"name": "Reggie Cannon", "team": "USA", "position": "Defensor"},
+
+  {"name": "Cameron Carter-Vickers", "team": "USA", "position": "Defensor"},
+
+  {"name": "Ben Lederman", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Brahim Díaz", "team": "MAR", "position": "Mediocampista"},
+
+  {"name": "Anass Zaroury", "team": "MAR", "position": "Delantero"},
+
+  {"name": "Selim Amallah", "team": "MAR", "position": "Mediocampista"},
+
+  {"name": "Sébastien Aholou", "team": "CIV", "position": "Mediocampista"},
+
+  {"name": "Wilfried Bony", "team": "CIV", "position": "Delantero"},
+
+  {"name": "Serge Aurier", "team": "CIV", "position": "Defensor"},
+
+  {"name": "Abdou Diallo", "team": "SEN", "position": "Defensor"},
+
+  {"name": "Moussa Diaby", "team": "CIV", "position": "Delantero"},
+
+  {"name": "Orel Mangala", "team": "BEL", "position": "Mediocampista"},
+
+  {"name": "Bilal El Khannouss", "team": "MAR", "position": "Mediocampista"},
+
+  {"name": "Achraf Dari", "team": "MAR", "position": "Defensor"},
+
+  {"name": "Sofiane Boufal", "team": "MAR", "position": "Delantero"},
+
+  {"name": "Ola Solbakken", "team": "NOR", "position": "Delantero"},
+
+  {"name": "Mohamed Elyounoussi", "team": "NOR", "position": "Delantero"},
+
+  {"name": "Sander Berge", "team": "NOR", "position": "Mediocampista"},
+
+  {"name": "Fredrik Aursnes", "team": "NOR", "position": "Mediocampista"},
+
+  {"name": "Vágner Love", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Serhou Guirassy", "team": "GUI", "position": "Delantero"},
+  {"name": "Naby Keïta", "team": "GUI", "position": "Mediocampista"},
+  {"name": "Ibrahima Konaté", "team": "GUI", "position": "Defensor"},
+  {"name": "Mohamed Bayo", "team": "GUI", "position": "Delantero"},
+
+  {"name": "Borja Iglesias", "team": "ESP", "position": "Delantero"},
+
+  {"name": "Víctor Roque", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Antoine Semenyo", "team": "GHA", "position": "Delantero"},
+  {"name": "Kudus Mohammed", "team": "GHA", "position": "Mediocampista"},
+  {"name": "Jordan Ayew", "team": "GHA", "position": "Delantero"},
+  {"name": "Thomas Partey", "team": "GHA", "position": "Mediocampista"},
+  {"name": "Inaki Williams", "team": "GHA", "position": "Delantero"},
+  {"name": "André Ayew", "team": "GHA", "position": "Delantero"},
+  {"name": "Alexander Djiku", "team": "GHA", "position": "Defensor"},
+  {"name": "Lawrence Ati-Zigi", "team": "GHA", "position": "Arquero"},
+
+  {"name": "Ismaël Koné", "team": "CAN", "position": "Mediocampista"},
+
+  {"name": "Amine Adli", "team": "MAR", "position": "Mediocampista"},
+
+  {"name": "Felipe Melo", "team": "BRA", "position": "Mediocampista"},
+
+  {"name": "Rony", "team": "BRA", "position": "Delantero"},
+
+  {"name": "Francisco Conceição", "team": "POR", "position": "Delantero"},
+
+  {"name": "Vitinha Ferreira", "team": "POR", "position": "Mediocampista"},
+
+  {"name": "Toti Gomes", "team": "POR", "position": "Defensor"},
+
+  {"name": "Nuno Mendes", "team": "POR", "position": "Defensor"},
+
+  {"name": "Andoni Gorosabel", "team": "ESP", "position": "Defensor"},
+
+  {"name": "Marcus Edwards", "team": "POR", "position": "Delantero"},
+
+  {"name": "Andriy Lunin", "team": "UKR", "position": "Arquero"},
+
+  {"name": "Vitaliy Mykolenko", "team": "UKR", "position": "Defensor"},
+
+  {"name": "Yukhym Konoplia", "team": "UKR", "position": "Defensor"},
+
+  {"name": "Oleksandr Karavaev", "team": "UKR", "position": "Defensor"},
+
+  {"name": "Volodymyr Brazhko", "team": "UKR", "position": "Mediocampista"},
+
+  {"name": "Artem Bondarenko", "team": "UKR", "position": "Mediocampista"},
+
+  {"name": "Danylo Sikan", "team": "UKR", "position": "Delantero"},
+
+  {"name": "Andriy Yarmolenko", "team": "UKR", "position": "Delantero"},
+
+  {"name": "Marcos Llorente", "team": "ESP", "position": "Mediocampista"},
+
+  {"name": "Martin Terrier", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Alexis Beka Beka", "team": "CMR", "position": "Mediocampista"},
+
+  {"name": "Tanguy Ndombele", "team": "FRA", "position": "Mediocampista"},
+
+  {"name": "Mamadou Sakho", "team": "SEN", "position": "Defensor"},
+
+  {"name": "Omar Daf", "team": "SEN", "position": "Defensor"},
+
+  {"name": "Hans Hateboer", "team": "NED", "position": "Defensor"},
+
+  {"name": "Calvin Stengs", "team": "NED", "position": "Delantero"},
+
+  {"name": "Noa Lang", "team": "NED", "position": "Delantero"},
+
+  {"name": "Tijjani Reijnders", "team": "NED", "position": "Mediocampista"},
+
+  {"name": "Stefan de Vrij", "team": "NED", "position": "Defensor"},
+
+  {"name": "Lutsharel Geertruida", "team": "NED", "position": "Defensor"},
+
+  {"name": "Justin Bijlow", "team": "NED", "position": "Arquero"},
+
+  {"name": "Joshua Brenet", "team": "NED", "position": "Defensor"},
+
+  {"name": "Quinten Timber", "team": "NED", "position": "Mediocampista"},
+
+  {"name": "Ryan Gravenberch", "team": "NED", "position": "Mediocampista"},
+
+  {"name": "Micky van de Ven", "team": "NED", "position": "Defensor"},
+
+  {"name": "Nathan Tella", "team": "NGA", "position": "Delantero"},
+
+  {"name": "Tolu Arokodare", "team": "NGA", "position": "Delantero"},
+
+  {"name": "Fisayo Dele-Bashiru", "team": "NGA", "position": "Mediocampista"},
+
+  {"name": "Ola Aina", "team": "NGA", "position": "Defensor"},
+
+  {"name": "Benjamin Tetteh", "team": "GHA", "position": "Delantero"},
+
+  {"name": "Mohammed Kudus", "team": "GHA", "position": "Mediocampista"},
+
+  {"name": "Stephan Ambrosius", "team": "GHA", "position": "Defensor"},
+
+  {"name": "Kamaldeen Sulemana", "team": "GHA", "position": "Delantero"},
+
+  {"name": "Bafétimbi Gomis", "team": "SEN", "position": "Delantero"},
+
+  {"name": "Adama Diallo", "team": "SEN", "position": "Defensor"},
+
+  {"name": "Mohamed Camara", "team": "MLI", "position": "Mediocampista"},
+  {"name": "Moussa Djenepo", "team": "MLI", "position": "Delantero"},
+  {"name": "Sékou Koïta", "team": "MLI", "position": "Delantero"},
+  {"name": "Cheick Doucouré", "team": "MLI", "position": "Mediocampista"},
+
+  {"name": "Omar Colley", "team": "GAM", "position": "Defensor"},
+  {"name": "Musa Barrow", "team": "GAM", "position": "Delantero"},
+
+  {"name": "Willy Boly", "team": "CIV", "position": "Defensor"},
+
+  {"name": "Cheick Tioté", "team": "CIV", "position": "Mediocampista"},
+
+  {"name": "Aubin Kader Aïssa", "team": "CIV", "position": "Arquero"},
+
+  {"name": "Habib Maïga", "team": "MLI", "position": "Delantero"},
+
+  {"name": "Gideon Mensah", "team": "GHA", "position": "Defensor"},
+
+  {"name": "Elisha Owusu", "team": "GHA", "position": "Mediocampista"},
+
+  {"name": "Ransford-Yeboah Königsdörffer", "team": "GHA", "position": "Delantero"},
+
+  {"name": "Ernest Nuamah", "team": "GHA", "position": "Delantero"},
+
+  {"name": "Daniel Kofi Kyereh", "team": "GHA", "position": "Mediocampista"},
+
+  {"name": "Salis Abdul Samed", "team": "GHA", "position": "Mediocampista"},
+
+  {"name": "Issa Kaboré", "team": "BFA", "position": "Defensor"},
+
+  {"name": "Désiré Doué", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Axel Disasi", "team": "FRA", "position": "Defensor"},
+
+  {"name": "Benjamin Pavard", "team": "FRA", "position": "Defensor"},
+
+  {"name": "Ibrahima Konaté", "team": "FRA", "position": "Defensor"},
+
+  {"name": "Matteo Guendouzi", "team": "FRA", "position": "Mediocampista"},
+
+  {"name": "Moussa Diaby", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Kingsley Coman", "team": "FRA", "position": "Delantero"},
+
+  {"name": "Hugo Lloris", "team": "FRA", "position": "Arquero"},
+
+  {"name": "Patrick Cutrone", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Jonathan Ikone", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Sandro Tonali", "team": "ITA", "position": "Mediocampista"},
+
+  {"name": "Wilfried Gnonto", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Destiny Udogie", "team": "ITA", "position": "Defensor"},
+
+  {"name": "Andrea Belotti", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Stephan El Shaarawy", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Vittorio Osimhen", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Weston McKennie", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Brendan Aaronson", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Chris Richards", "team": "USA", "position": "Defensor"},
+
+  {"name": "Erik Palmer-Brown", "team": "USA", "position": "Defensor"},
+
+  {"name": "George Bello", "team": "USA", "position": "Defensor"},
+
+  {"name": "Cade Cowell", "team": "USA", "position": "Delantero"},
+
+  {"name": "Jordan Pefok", "team": "USA", "position": "Delantero"},
+
+  {"name": "Andrés Torres", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Konrad de la Fuente", "team": "USA", "position": "Delantero"},
+
+  {"name": "Emeka Eneli", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Gianluca Busio", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Freddy Vargas", "team": "VEN", "position": "Mediocampista"},
+
+  {"name": "Jan-Carlo Simons", "team": "VEN", "position": "Delantero"},
+
+  {"name": "Nahuel Ferraresi", "team": "VEN", "position": "Defensor"},
+
+  {"name": "José Moya", "team": "VEN", "position": "Delantero"},
+
+  {"name": "Darwin Machis", "team": "VEN", "position": "Delantero"},
+
+  {"name": "Rancel Díaz", "team": "VEN", "position": "Mediocampista"},
+
+  {"name": "Luca Orellano", "team": "VEN", "position": "Mediocampista"},
+
+  {"name": "Roberto Rosales", "team": "VEN", "position": "Defensor"},
+
+  {"name": "Jhon Murillo", "team": "VEN", "position": "Delantero"},
+
+  {"name": "Hernán Galíndez", "team": "ECU", "position": "Arquero"},
+
+  {"name": "Byron Castillo", "team": "ECU", "position": "Defensor"},
+
+  {"name": "Ángelo Preciado", "team": "ECU", "position": "Defensor"},
+
+  {"name": "Diego Palacios", "team": "ECU", "position": "Defensor"},
+
+  {"name": "Sebas Méndez", "team": "ECU", "position": "Mediocampista"},
+
+  {"name": "Ayrton Preciado", "team": "ECU", "position": "Delantero"},
+
+  {"name": "Kevin Rodríguez", "team": "ECU", "position": "Delantero"},
+
+  {"name": "Djordje Mihailovic", "team": "USA", "position": "Mediocampista"},
+
+  {"name": "Patrick Schulte", "team": "USA", "position": "Arquero"},
+
+  {"name": "Kaoru Mitoma", "team": "JPN", "position": "Delantero"},
+
+  {"name": "Yuya Osako", "team": "JPN", "position": "Delantero"},
+
+  {"name": "Tomoki Iwata", "team": "JPN", "position": "Mediocampista"},
+
+  {"name": "Hiroki Ito", "team": "JPN", "position": "Defensor"},
+
+  {"name": "Shogo Taniguchi", "team": "JPN", "position": "Defensor"},
+
+  {"name": "Hisashi Tachikawa", "team": "JPN", "position": "Mediocampista"},
+
+  {"name": "Zion Suzuki", "team": "JPN", "position": "Arquero"},
+
+  {"name": "Ayase Ueda", "team": "JPN", "position": "Delantero"},
+
+  {"name": "Reo Hatate", "team": "JPN", "position": "Mediocampista"},
+
+  {"name": "Moïse Kean", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Nicolo Zaniolo", "team": "ITA", "position": "Delantero"},
+
+  {"name": "Marco Asensio", "team": "ESP", "position": "Mediocampista"},
+
+  {"name": "Fernando Alonso Torres", "team": "COL", "position": "Delantero"},
+
+  {"name": "Sebastián Villa", "team": "COL", "position": "Delantero"},
+
+  {"name": "Gustavo Puerta", "team": "COL", "position": "Mediocampista"},
+
+  {"name": "Boyata Dedryck", "team": "BEL", "position": "Defensor"},
+
+  {"name": "Amadou Onana", "team": "BEL", "position": "Mediocampista"},
+
+  {"name": "Roméo Lavia", "team": "BEL", "position": "Mediocampista"},
+
+  {"name": "Maxim De Cuyper", "team": "BEL", "position": "Defensor"},
+
+  {"name": "Axel Witsel", "team": "BEL", "position": "Mediocampista"},
+
+  {"name": "Koen Casteels", "team": "BEL", "position": "Arquero"},
+
+  {"name": "Loïs Openda", "team": "BEL", "position": "Delantero"},
+
+  {"name": "Christos Tzolis", "team": "GRE", "position": "Delantero"},
+  {"name": "Vangelis Pavlidis", "team": "GRE", "position": "Delantero"},
+  {"name": "Kostas Tsimikas", "team": "GRE", "position": "Defensor"},
+  {"name": "Giorgos Masouras", "team": "GRE", "position": "Delantero"},
+
+  {"name": "Peter Pekarík", "team": "SVK", "position": "Defensor"},
+  {"name": "Dávid Hancko", "team": "SVK", "position": "Defensor"},
+  {"name": "Milan Škriniar", "team": "SVK", "position": "Defensor"},
+  {"name": "Ivan Schranz", "team": "SVK", "position": "Delantero"},
+  {"name": "Lukáš Haraslín", "team": "SVK", "position": "Delantero"},
+  {"name": "Dávid Strelec", "team": "SVK", "position": "Delantero"},
+
+  {"name": "Robert Mak", "team": "SVK", "position": "Delantero"},
+
+  {"name": "Salim Khelifi", "team": "TUN", "position": "Delantero"},
+  {"name": "Nader Ghandri", "team": "TUN", "position": "Defensor"},
+  {"name": "Yassine Meriah", "team": "TUN", "position": "Defensor"},
+  {"name": "Naim Sliti", "team": "TUN", "position": "Mediocampista"},
+
+  {"name": "Loïc Rémy", "team": "COD", "position": "Delantero"},
+  {"name": "Yannick Bolasie", "team": "COD", "position": "Delantero"},
+  {"name": "Cédric Bakambu", "team": "COD", "position": "Delantero"},
+  {"name": "Paul-José M'Poku", "team": "COD", "position": "Mediocampista"},
+  {"name": "Chancel Mbemba", "team": "COD", "position": "Defensor"},
+
+  {"name": "Afimico Pululu", "team": "ANG", "position": "Delantero"},
+  {"name": "Gelson Dala", "team": "ANG", "position": "Delantero"},
+
+  {"name": "Diogo Costa", "team": "POR", "position": "Arquero"},
+
+  {"name": "Goncalo Inácio", "team": "POR", "position": "Defensor"},
+
+  {"name": "Rodrigo Moreno", "team": "ESP", "position": "Delantero"},
+
+  {"name": "Jonathan Clauss", "team": "FRA", "position": "Defensor"},
+
+  {"name": "William Saliba", "team": "FRA", "position": "Defensor"},
+
+  {"name": "Jules Koundé", "team": "FRA", "position": "Defensor"},
+
+  {"name": "Lucas Chevalier", "team": "FRA", "position": "Arquero"},
+
+  {"name": "Rayan Cherki", "team": "FRA", "position": "Mediocampista"},
+
+  {"name": "Mamadou Sarr", "team": "FRA", "position": "Defensor"},
+
+  {"name": "Ferland Mendy", "team": "FRA", "position": "Defensor"},
+
+  {"name": "Yann Mvogo", "team": "SUI", "position": "Arquero"},
+
+  {"name": "Silvan Widmer", "team": "SUI", "position": "Defensor"},
+
+  {"name": "Dan Ndoye", "team": "SUI", "position": "Delantero"},
+
+  {"name": "Ardon Jashari", "team": "SUI", "position": "Mediocampista"},
+
+  {"name": "Kwadwo Duah", "team": "SUI", "position": "Delantero"},
+
+  {"name": "Edimilson Fernandes", "team": "SUI", "position": "Mediocampista"},
+
+  {"name": "Gregor Kobel", "team": "SUI", "position": "Arquero"},
+
+  {"name": "Zeki Amdouni", "team": "SUI", "position": "Delantero"},
+
+  {"name": "Rubén Vargas", "team": "SUI", "position": "Delantero"},
+
+  {"name": "Michel Aebischer", "team": "SUI", "position": "Mediocampista"},
+
+  {"name": "Cédric Zesiger", "team": "SUI", "position": "Defensor"},
+
+  {"name": "Nico Elvedi", "team": "SUI", "position": "Defensor"},
+
+  {"name": "Vincent Sierro", "team": "SUI", "position": "Mediocampista"},
+
+  {"name": "Djibril Sow", "team": "SUI", "position": "Mediocampista"}
+]

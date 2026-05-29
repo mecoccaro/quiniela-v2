@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
@@ -12,15 +15,20 @@ from apps.pools.models import (
     PoolMembership,
     PoolTopScorerPick,
     Prediction,
+    ThirdPlaceTiebreakerPick,
 )
 from apps.tournaments.models import Match, Team
 from apps.tournaments.services import (
     build_predicted_knockout_bracket,
+    get_conduct_tied_thirds,
     get_predicted_group_standings,
+    needs_conduct_tiebreaker,
 )
 from apps.users.models import User
 
 from .forms import ChampionPickForm, KnockoutPredictionForm, MatchPredictionForm, TopScorerPickForm
+
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
 STAGE_LABELS = {
     "r32": "Ronda de 32",
@@ -143,8 +151,15 @@ class KnockoutPredictionsView(LoginRequiredMixin, View):
             user=request.user, pool=pool, match__stage=Match.Stage.GROUP
         ).count()
         if user_group < total_group:
-            messages.warning(request, "Completá todas las predicciones de fase de grupos primero.")
+            messages.warning(request, "Completa todas las predicciones de fase de grupos primero.")
             return redirect("group_predictions", pool_id=pool.pk)
+
+        if needs_conduct_tiebreaker(request.user, pool):
+            has_picks = ThirdPlaceTiebreakerPick.objects.filter(
+                user=request.user, pool=pool
+            ).exists()
+            if not has_picks:
+                return redirect("third_place_tiebreaker", pool_id=pool.pk)
 
         self.pool = pool
         return super().dispatch(request, *args, **kwargs)
@@ -162,6 +177,41 @@ class KnockoutPredictionsView(LoginRequiredMixin, View):
             "stages": stages,
             "predictions_submitted": self.membership.predictions_submitted,
         })
+
+
+class ThirdPlaceTiebreakerView(LoginRequiredMixin, View):
+
+    def dispatch(self, request: HttpRequest, *args, **kwargs) -> HttpResponseBase:
+        if not request.user.is_authenticated:
+            return super().dispatch(request, *args, **kwargs)
+        self.pool = get_object_or_404(Pool, pk=kwargs["pool_id"])
+        self.membership = get_object_or_404(PoolMembership, pool=self.pool, user=request.user)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        tied_teams = get_conduct_tied_thirds(request.user, self.pool)
+        existing_picks = {
+            p.team_id: p.predicted_rank
+            for p in ThirdPlaceTiebreakerPick.objects.filter(user=request.user, pool=self.pool)
+        }
+        return render(request, "predictions/third_place_tiebreaker.html", {
+            "pool": self.pool,
+            "tied_teams": tied_teams,
+            "existing_picks": existing_picks,
+        })
+
+    def post(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        tied_teams = get_conduct_tied_thirds(request.user, self.pool)
+        for team in tied_teams:
+            rank_val = request.POST.get(f"rank_{team.pk}")
+            if rank_val:
+                ThirdPlaceTiebreakerPick.objects.update_or_create(
+                    user=request.user,
+                    pool=self.pool,
+                    team=team,
+                    defaults={"predicted_rank": int(rank_val)},
+                )
+        return redirect("knockout_predictions", pool_id=self.pool.pk)
 
 
 class SaveKnockoutPredictionView(LoginRequiredMixin, View):
@@ -236,11 +286,14 @@ class PicksView(LoginRequiredMixin, View):
                 elif pred.predicted_away_score > pred.predicted_home_score:
                     predicted_champion = final_slots[0].away_team
         top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=self.pool).first()
+        players_path = DATA_DIR / "players.json"
+        players = json.loads(players_path.read_text()) if players_path.exists() else []
         return render(request, "predictions/picks.html", {
             "pool": self.pool,
             "predicted_champion": predicted_champion,
             "top_scorer_pick": top_scorer_pick,
             "predictions_submitted": self.membership.predictions_submitted,
+            "players": players,
         })
 
 
@@ -344,13 +397,13 @@ class SubmitPredictionsView(LoginRequiredMixin, View):
         if user_predictions < total_matches:
             messages.error(
                 request,
-                f"Faltan predicciones: tenés {user_predictions} de {total_matches} partidos completados.",
+                f"Faltan predicciones: tienes {user_predictions} de {total_matches} partidos completados.",
             )
             return redirect("submit_predictions", pool_id=self.pool.pk)
 
         # Require top scorer pick
         if not PoolTopScorerPick.objects.filter(user=user, pool=self.pool).exists():
-            messages.error(request, "Tenés que elegir un goleador antes de confirmar.")
+            messages.error(request, "Tienes que elegir un goleador antes de confirmar.")
             return redirect("picks", pool_id=self.pool.pk)
 
         # Auto-derive champion from Final prediction

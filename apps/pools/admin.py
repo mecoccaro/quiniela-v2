@@ -29,6 +29,14 @@ class PoolAdmin(admin.ModelAdmin):
     list_filter = ["status", "tournament"]
     inlines = [PoolMembershipInline]
     actions = [lock_pools]
+    fieldsets = [
+        (None, {"fields": ["name", "tournament", "status", "lock_deadline"]}),
+        ("Scoring config (overrides tournament)", {
+            "fields": ["scoring_config"],
+            "description": "Leave empty to inherit the tournament's scoring config.",
+            "classes": ["collapse"],
+        }),
+    ]
 
     def get_queryset(self, request):
         return super().get_queryset(request).annotate(_member_count=Count("memberships"))

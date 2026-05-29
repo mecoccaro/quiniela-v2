@@ -9,15 +9,15 @@ if TYPE_CHECKING:
 # Each stage key maps to a dict with exact_score, correct_result, and (for knockout) pens_winner.
 # champion and top_scorer remain top-level keys.
 DEFAULT_SCORING_CONFIG: dict = {
-    "group":       {"exact_score": 3, "correct_result": 1},
-    "r32":         {"exact_score": 4, "correct_result": 2, "pens_winner": 1},
-    "r16":         {"exact_score": 5, "correct_result": 2, "pens_winner": 1},
-    "qf":          {"exact_score": 6, "correct_result": 3, "pens_winner": 1},
-    "sf":          {"exact_score": 7, "correct_result": 3, "pens_winner": 1},
-    "third_place": {"exact_score": 5, "correct_result": 2, "pens_winner": 1},
-    "final":       {"exact_score": 10, "correct_result": 4, "pens_winner": 2},
-    "champion":    5,
-    "top_scorer":  3,
+    "group":       {"exact_score": 3, "correct_result": 5},
+    "r32":         {"exact_score": 4, "correct_result": 6, "pens_winner": 1, "correct_slot": 2},
+    "r16":         {"exact_score": 5, "correct_result": 7, "pens_winner": 1, "correct_slot": 3},
+    "qf":          {"exact_score": 6, "correct_result": 8, "pens_winner": 1, "correct_slot": 4},
+    "sf":          {"exact_score": 7, "correct_result": 9, "pens_winner": 1, "correct_slot": 5},
+    "third_place": {"exact_score": 5, "correct_result": 7, "pens_winner": 1, "correct_slot": 3},
+    "final":       {"exact_score": 10, "correct_result": 12, "pens_winner": 2, "correct_slot": 6},
+    "champion":    10,
+    "top_scorer":  5,
 }
 
 
@@ -86,3 +86,11 @@ def score_prediction(
         points += pens_pts
 
     return points
+
+
+def get_slot_bonus(stage: str, config: dict) -> int:
+    """Return the correct_slot bonus for the given stage, or 0 if not defined."""
+    stage_cfg = config.get(stage, {})
+    if isinstance(stage_cfg, dict):
+        return stage_cfg.get("correct_slot", 0)
+    return 0

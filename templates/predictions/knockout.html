@@ -12,7 +12,7 @@
     <p class="text-sm text-gray-500">Eliminatorias — {{ pool.tournament.name }}</p>
   </div>
   {% if not predictions_submitted %}
-  <a href="{% url 'picks' pool.pk %}" class="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-semibold">
+  <a id="ko-next-btn" href="{% url 'picks' pool.pk %}" class="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-semibold" style="display:none">
     Goleador y confirmar →
   </a>
   {% endif %}
@@ -20,9 +20,21 @@
 
 {% if predictions_submitted %}
 <div class="bg-green-100 text-green-800 rounded-lg p-4 mb-6 text-sm font-medium">
-  ✅ Tus predicciones ya fueron enviadas. Solo podés ver los resultados.
+  ✅ Tus predicciones ya fueron enviadas. Solo puedes ver los resultados.
 </div>
 {% endif %}
+
+<div id="ko-tabs" class="flex gap-2 mb-4 overflow-x-auto">
+  {% for stage in stages %}
+    <button
+      onclick="switchKoStage('{{ stage.key }}')"
+      id="ko-tab-{{ stage.key }}"
+      class="ko-tab px-3 py-1.5 rounded text-sm font-medium whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-800"
+      data-stage="{{ stage.key }}">
+      {{ stage.label }}
+    </button>
+  {% endfor %}
+</div>
 
 <div id="ko-bracket" class="space-y-4">
   {% include "predictions/partials/knockout_stages.html" %}
@@ -30,13 +42,34 @@
 
 {% if not predictions_submitted %}
 <div class="mt-6 flex justify-end">
-  <a href="{% url 'picks' pool.pk %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700">
+  <a id="ko-next-btn-bottom" href="{% url 'picks' pool.pk %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700" style="display:none">
     Siguiente: goleador y confirmar →
   </a>
 </div>
 {% endif %}
 
 <script>
+let activeKoStage = '{{ stages.0.key }}';
+
+function switchKoStage(key) {
+  activeKoStage = key;
+  document.querySelectorAll('[data-ko-stage]').forEach(function (el) {
+    var isActive = el.dataset.koStage === key;
+    el.style.display = isActive ? '' : 'none';
+    if (isActive) {
+      var details = el.querySelector('details');
+      if (details) details.setAttribute('open', '');
+    }
+  });
+  document.querySelectorAll('.ko-tab').forEach(function (btn) {
+    var active = btn.dataset.stage === key;
+    btn.classList.toggle('bg-green-600', active);
+    btn.classList.toggle('text-white', active);
+    btn.classList.toggle('bg-gray-100', !active);
+    btn.classList.toggle('text-gray-700', !active);
+  });
+}
+
 (function () {
   var savedScrollY = 0;
   var openStageIndices = new Set();
@@ -76,7 +109,25 @@
     }
   });
 
-  // After swap: restore open stages, scroll position, winner dropdowns
+  function updateKoProgress() {
+    var finalStage = document.querySelector('[data-ko-stage="final"]');
+    var show = false;
+    if (finalStage) {
+      var forms = finalStage.querySelectorAll('.ko-form');
+      show = forms.length > 0;
+      forms.forEach(function (form) {
+        var home = form.querySelector('[name=predicted_home_score]');
+        var away = form.querySelector('[name=predicted_away_score]');
+        if (!home || !away || home.value === '' || away.value === '') show = false;
+      });
+    }
+    ['ko-next-btn', 'ko-next-btn-bottom'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = show ? '' : 'none';
+    });
+  }
+
+  // After swap: restore open stages, scroll position, winner dropdowns, active tab
   document.addEventListener('htmx:afterSettle', function () {
     document.querySelectorAll('#ko-bracket details').forEach(function (el, idx) {
       if (openStageIndices.has(idx)) {
@@ -87,10 +138,14 @@
     });
     window.scrollTo(0, savedScrollY);
     document.querySelectorAll('.ko-form').forEach(syncWinner);
+    switchKoStage(activeKoStage);
+    updateKoProgress();
   });
 
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.ko-form').forEach(syncWinner);
+    switchKoStage(activeKoStage);
+    updateKoProgress();
   });
 })();
 </script>

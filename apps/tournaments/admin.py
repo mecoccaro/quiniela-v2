@@ -12,11 +12,35 @@ class ScoreFinalPicksForm(forms.Form):
     official_top_scorer_name = forms.CharField(max_length=100, label="Official Top Scorer Name")
 
 
+_SCORING_HELP = (
+    "Leave empty to use the built-in defaults. "
+    "Paste a full JSON object to override, e.g.:<br><pre>"
+    '{\n  "group":       {"exact_score": 3, "correct_result": 5},\n'
+    '  "r32":         {"exact_score": 4, "correct_result": 6, "pens_winner": 1, "correct_slot": 2},\n'
+    '  "r16":         {"exact_score": 5, "correct_result": 7, "pens_winner": 1, "correct_slot": 3},\n'
+    '  "qf":          {"exact_score": 6, "correct_result": 8, "pens_winner": 1, "correct_slot": 4},\n'
+    '  "sf":          {"exact_score": 7, "correct_result": 9, "pens_winner": 1, "correct_slot": 5},\n'
+    '  "third_place": {"exact_score": 5, "correct_result": 7, "pens_winner": 1, "correct_slot": 3},\n'
+    '  "final":       {"exact_score": 10, "correct_result": 12, "pens_winner": 2, "correct_slot": 6},\n'
+    '  "champion":    10,\n'
+    '  "top_scorer":  5\n}'
+    "</pre>"
+)
+
+
 @admin.register(Tournament)
 class TournamentAdmin(admin.ModelAdmin):
     list_display = ["name", "slug", "status", "num_groups"]
     prepopulated_fields = {"slug": ("name",)}
     actions = ["score_final_picks_action"]
+    fieldsets = [
+        (None, {"fields": ["name", "slug", "status", "num_groups", "teams_per_group", "third_place_advancers"]}),
+        ("Scoring config", {
+            "fields": ["scoring_config"],
+            "description": _SCORING_HELP,
+            "classes": ["collapse"],
+        }),
+    ]
 
     def get_urls(self):
         urls = super().get_urls()

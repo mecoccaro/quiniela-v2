@@ -30,3 +30,20 @@ class RegistrationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class PasswordRecoveryForm(forms.Form):
+    email = forms.EmailField(label="Email")
+    nickname = forms.CharField(max_length=50, label="Apodo")
+
+
+class SetNewPasswordForm(forms.Form):
+    password1 = forms.CharField(label="Nueva contraseña", widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Confirmar contraseña", widget=forms.PasswordInput)
+
+    def clean_password2(self) -> str:
+        p1 = self.cleaned_data.get("password1")
+        p2 = self.cleaned_data.get("password2")
+        if p1 and p2 and p1 != p2:
+            raise forms.ValidationError("Las contraseñas no coinciden.")
+        return p2  # type: ignore[return-value]

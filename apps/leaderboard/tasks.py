@@ -23,18 +23,25 @@ def recalculate_pool_scores(match_id: int) -> None:
 
     for prediction in predictions:
         config = get_scoring_config(prediction.pool)
-        points = score_prediction(
-            predicted_home=prediction.predicted_home_score,
-            predicted_away=prediction.predicted_away_score,
-            official_home=match.home_score,
-            official_away=match.away_score,
-            stage=match.stage,
-            predicted_winner_id=prediction.predicted_winner_id,
-            official_knockout_winner_id=match.knockout_winner_id,
-            config=config,
-        )
+
+        if match.stage == Match.Stage.GROUP:
+            points = score_prediction(
+                predicted_home=prediction.predicted_home_score,
+                predicted_away=prediction.predicted_away_score,
+                official_home=match.home_score,
+                official_away=match.away_score,
+                stage=match.stage,
+                predicted_winner_id=prediction.predicted_winner_id,
+                official_knockout_winner_id=match.knockout_winner_id,
+                config=config,
+            )
+            slot_bonus = 0
+        else:
+            points, slot_bonus = _score_knockout_prediction(prediction, match, config)
+
         prediction.points_awarded = points
-        prediction.save(update_fields=["points_awarded"])
+        prediction.slot_bonus_awarded = slot_bonus
+        prediction.save(update_fields=["points_awarded", "slot_bonus_awarded"])
 
     affected_pool_ids = list(predictions.values_list("pool_id", flat=True).distinct())
     for pool_id in affected_pool_ids:
@@ -69,6 +76,57 @@ def score_final_picks(tournament_id: int, official_champion_id: int, official_to
         _recalculate_leaderboard(pool.pk)
 
 
+def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
+    """Score a knockout prediction, gating result points on team correctness.
+
+    Returns (points_awarded, slot_bonus_awarded).
+
+    Scoring tiers:
+    - 0 correct teams in slot → (0, 0)
+    - 1 correct team           → (0, correct_slot × 1)
+    - 2 correct teams          → (result/score pts, correct_slot × 2)
+    """
+    from apps.leaderboard.scoring import get_slot_bonus, score_prediction
+    from apps.tournaments.services import build_predicted_knockout_bracket
+
+    slot_pts = get_slot_bonus(match.stage, config)
+
+    # Can't check team placement without both actual teams assigned
+    if not match.home_team_id or not match.away_team_id or not match.bracket_slot:
+        return 0, 0
+
+    bracket = build_predicted_knockout_bracket(prediction.user, prediction.pool)
+    predicted_slot = next(
+        (s for s in bracket.get(match.stage, []) if s.slot_key == match.bracket_slot),
+        None,
+    )
+
+    num_correct = 0
+    if predicted_slot:
+        if predicted_slot.home_team and predicted_slot.home_team.pk == match.home_team_id:
+            num_correct += 1
+        if predicted_slot.away_team and predicted_slot.away_team.pk == match.away_team_id:
+            num_correct += 1
+
+    slot_bonus = slot_pts * num_correct
+
+    if num_correct < 2:
+        return 0, slot_bonus
+
+    # Both teams correct — apply normal result/score scoring
+    points = score_prediction(
+        predicted_home=prediction.predicted_home_score,
+        predicted_away=prediction.predicted_away_score,
+        official_home=match.home_score,
+        official_away=match.away_score,
+        stage=match.stage,
+        predicted_winner_id=prediction.predicted_winner_id,
+        official_knockout_winner_id=match.knockout_winner_id,
+        config=config,
+    )
+    return points, slot_bonus
+
+
 def _recalculate_leaderboard(pool_id: int) -> None:
     from apps.pools.models import (  # noqa: PLC0415
         LeaderboardEntry,
@@ -84,9 +142,11 @@ def _recalculate_leaderboard(pool_id: int) -> None:
         for membership in pool.memberships.select_related("user"):
             user = membership.user
 
-            pred_pts = (
-                Prediction.objects.filter(pool=pool, user=user).aggregate(t=Sum("points_awarded"))["t"] or 0
+            pred_agg = Prediction.objects.filter(pool=pool, user=user).aggregate(
+                pts=Sum("points_awarded"),
+                bonus=Sum("slot_bonus_awarded"),
             )
+            pred_pts = (pred_agg["pts"] or 0) + (pred_agg["bonus"] or 0)
             champ_pts = (
                 PoolChampionPick.objects.filter(pool=pool, user=user).aggregate(t=Sum("points_awarded"))["t"] or 0
             )
