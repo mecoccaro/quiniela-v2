@@ -195,9 +195,9 @@ def flag_emoji(fifa_code):
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Lint passes: `uv run ruff check .`
-- [ ] Tests pass: `uv run pytest`
-- [ ] Filter self-test: `uv run python -c "from apps.tournaments.templatetags.tournament_tags import flag_emoji; assert flag_emoji('ARG') == '🇦🇷'; assert flag_emoji('ENG') == '🇬🇧'; assert flag_emoji('KOR') == '🇰🇷'; print('OK')"` → `OK`
+- [x] Lint passes: `uv run ruff check .`
+- [x] Tests pass: `uv run pytest`
+- [x] Filter self-test: `uv run python -c "from apps.tournaments.templatetags.tournament_tags import flag_emoji; assert flag_emoji('ARG') == '🇦🇷'; assert flag_emoji('ENG') == '🇬🇧'; assert flag_emoji('KOR') == '🇰🇷'; print('OK')"` → `OK`
 
 #### Automated QA:
 - [ ] Start server, navigate to group stage predictions page — flags appear next to team names in match forms
