@@ -286,8 +286,8 @@ This re-shows only the active stage after the HTMX innerHTML swap replaces `#ko-
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Tests pass: `uv run pytest`
-- [ ] Lint passes: `uv run ruff check .`
+- [x] Tests pass: `uv run pytest`
+- [x] Lint passes: `uv run ruff check .`
 
 #### Automated QA:
 - [ ] Navigate to knockout predictions page — 5 tab buttons appear (R32, R16, QF, SF, Final)
