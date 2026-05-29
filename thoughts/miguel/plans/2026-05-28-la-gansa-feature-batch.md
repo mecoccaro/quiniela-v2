@@ -399,8 +399,8 @@ path("password-recovery/set/", views.SetNewPasswordView.as_view(), name="set_new
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Tests pass: `uv run pytest`
-- [ ] Lint passes: `uv run ruff check .`
+- [x] Tests pass: `uv run pytest`
+- [x] Lint passes: `uv run ruff check .`
 
 #### Automated QA:
 - [ ] Navigate to `/login/` — "¿Olvidaste tu contraseña?" link appears
