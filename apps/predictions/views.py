@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
@@ -21,6 +24,8 @@ from apps.tournaments.services import (
 from apps.users.models import User
 
 from .forms import ChampionPickForm, KnockoutPredictionForm, MatchPredictionForm, TopScorerPickForm
+
+DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 
 STAGE_LABELS = {
     "r32": "Ronda de 32",
@@ -236,11 +241,14 @@ class PicksView(LoginRequiredMixin, View):
                 elif pred.predicted_away_score > pred.predicted_home_score:
                     predicted_champion = final_slots[0].away_team
         top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=self.pool).first()
+        players_path = DATA_DIR / "players.json"
+        players = json.loads(players_path.read_text()) if players_path.exists() else []
         return render(request, "predictions/picks.html", {
             "pool": self.pool,
             "predicted_champion": predicted_champion,
             "top_scorer_pick": top_scorer_pick,
             "predictions_submitted": self.membership.predictions_submitted,
+            "players": players,
         })
 
 

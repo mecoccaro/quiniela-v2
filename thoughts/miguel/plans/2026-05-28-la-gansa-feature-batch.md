@@ -474,9 +474,9 @@ players = json.loads(players_path.read_text()) if players_path.exists() else []
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Tests pass: `uv run pytest`
-- [ ] Lint passes: `uv run ruff check .`
-- [ ] Players fixture parseable: `uv run python -c "import json; data=json.load(open('data/players.json')); print(len(data), 'players')"`  → ≥ 500 players
+- [x] Tests pass: `uv run pytest`
+- [x] Lint passes: `uv run ruff check .`
+- [x] Players fixture parseable: `uv run python -c "import json; data=json.load(open('data/players.json')); print(len(data), 'players')"`  → ≥ 500 players
 
 #### Automated QA:
 - [ ] Navigate to picks page (after completing group + knockout predictions) — text input now has a datalist dropdown

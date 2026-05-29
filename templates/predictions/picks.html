@@ -49,10 +49,19 @@
       hx-indicator="#scorer-spinner"
     >
       {% csrf_token %}
-      <input type="text" name="player_name" maxlength="100"
+      <input
+        type="text"
+        name="player_name"
+        list="players-datalist"
+        maxlength="100"
         value="{{ top_scorer_pick.player_name|default:'' }}"
-        placeholder="Nombre del jugador"
+        placeholder="Buscar jugador..."
         class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none">
+      <datalist id="players-datalist">
+        {% for player in players %}
+          <option value="{{ player.name }}">{{ player.name }} ({{ player.team }})</option>
+        {% endfor %}
+      </datalist>
       <span id="scorer-spinner" class="htmx-indicator text-green-500 text-xs mt-1 block">⏳ Guardando...</span>
     </form>
     {% endif %}
