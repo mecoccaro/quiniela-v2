@@ -9,7 +9,7 @@ from django.utils import timezone
 @shared_task
 def recalculate_pool_scores(match_id: int) -> None:
     """Recalculate points for all predictions of this match and update leaderboard entries."""
-    from apps.leaderboard.scoring import get_scoring_config, score_prediction
+    from apps.leaderboard.scoring import get_scoring_config, get_slot_bonus, score_prediction
     from apps.pools.models import Prediction
     from apps.tournaments.models import Match
 
@@ -34,7 +34,13 @@ def recalculate_pool_scores(match_id: int) -> None:
             config=config,
         )
         prediction.points_awarded = points
-        prediction.save(update_fields=["points_awarded"])
+        slot_bonus = 0
+        if match.stage != Match.Stage.GROUP:
+            predicted_w = _get_predicted_winner(prediction, match)
+            if predicted_w and match.knockout_winner_id and predicted_w == match.knockout_winner_id:
+                slot_bonus = get_slot_bonus(match.stage, config)
+        prediction.slot_bonus_awarded = slot_bonus
+        prediction.save(update_fields=["points_awarded", "slot_bonus_awarded"])
 
     affected_pool_ids = list(predictions.values_list("pool_id", flat=True).distinct())
     for pool_id in affected_pool_ids:
@@ -69,6 +75,23 @@ def score_final_picks(tournament_id: int, official_champion_id: int, official_to
         _recalculate_leaderboard(pool.pk)
 
 
+def _get_predicted_winner(prediction, match) -> int | None:
+    """Return the predicted winner team ID for a knockout match prediction.
+
+    Prefers explicit predicted_winner (draw+pens case); falls back to deriving
+    from the predicted scoreline.
+    """
+    if prediction.predicted_winner_id:
+        return prediction.predicted_winner_id
+    h, a = prediction.predicted_home_score, prediction.predicted_away_score
+    if h is not None and a is not None:
+        if h > a:
+            return match.home_team_id
+        if a > h:
+            return match.away_team_id
+    return None
+
+
 def _recalculate_leaderboard(pool_id: int) -> None:
     from apps.pools.models import (  # noqa: PLC0415
         LeaderboardEntry,
@@ -84,9 +107,11 @@ def _recalculate_leaderboard(pool_id: int) -> None:
         for membership in pool.memberships.select_related("user"):
             user = membership.user
 
-            pred_pts = (
-                Prediction.objects.filter(pool=pool, user=user).aggregate(t=Sum("points_awarded"))["t"] or 0
+            pred_agg = Prediction.objects.filter(pool=pool, user=user).aggregate(
+                pts=Sum("points_awarded"),
+                bonus=Sum("slot_bonus_awarded"),
             )
+            pred_pts = (pred_agg["pts"] or 0) + (pred_agg["bonus"] or 0)
             champ_pts = (
                 PoolChampionPick.objects.filter(pool=pool, user=user).aggregate(t=Sum("points_awarded"))["t"] or 0
             )

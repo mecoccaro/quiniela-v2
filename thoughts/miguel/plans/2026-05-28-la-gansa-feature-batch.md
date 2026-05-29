@@ -770,10 +770,10 @@ Or use two separate `aggregate` calls and sum — whichever is cleaner with Djan
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] Migration generates cleanly: `uv run manage.py makemigrations pools --check`
-- [ ] Apply migration: `uv run manage.py migrate`
-- [ ] Tests pass: `uv run pytest`
-- [ ] Lint passes: `uv run ruff check .`
+- [x] Migration generates cleanly: `uv run manage.py makemigrations pools --check`
+- [x] Apply migration: `uv run manage.py migrate`
+- [x] Tests pass: `uv run pytest`
+- [x] Lint passes: `uv run ruff check .`
 
 #### Automated QA:
 - [ ] Score a knockout match where user correctly predicted the winner → `Prediction.slot_bonus_awarded > 0`

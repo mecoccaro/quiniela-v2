@@ -47,6 +47,7 @@ class Prediction(models.Model):
         related_name="predicted_wins",
     )
     points_awarded = models.IntegerField(null=True, blank=True)
+    slot_bonus_awarded = models.IntegerField(null=True, blank=True)
 
     class Meta:
         unique_together = [("user", "pool", "match")]
