@@ -54,7 +54,12 @@ let activeKoStage = '{{ stages.0.key }}';
 function switchKoStage(key) {
   activeKoStage = key;
   document.querySelectorAll('[data-ko-stage]').forEach(function (el) {
-    el.style.display = el.dataset.koStage === key ? '' : 'none';
+    var isActive = el.dataset.koStage === key;
+    el.style.display = isActive ? '' : 'none';
+    if (isActive) {
+      var details = el.querySelector('details');
+      if (details) details.setAttribute('open', '');
+    }
   });
   document.querySelectorAll('.ko-tab').forEach(function (btn) {
     var active = btn.dataset.stage === key;
