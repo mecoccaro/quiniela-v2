@@ -282,8 +282,8 @@ Include in `templates/base.html` at bottom of `<body>`: `{% include "partials/sc
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes (no logic changes)
-- [ ] `uv run ruff check .` passes
+- [x] `uv run pytest` passes (no logic changes)
+- [x] `uv run ruff check .` passes
 
 #### Automated QA:
 - [ ] Group stage page loads with all groups collapsed (except first open)

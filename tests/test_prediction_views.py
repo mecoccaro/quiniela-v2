@@ -143,4 +143,4 @@ def test_submitted_form_renders_readonly(client_logged_in, pool, membership):
     membership.save()
     response = client_logged_in.get(f"/predictions/pool/{pool.pk}/group-stage/")
     assert response.status_code == 200
-    assert b"readonly" in response.content
+    assert b"predicciones ya fueron enviadas" in response.content

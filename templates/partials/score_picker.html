@@ -1,1 +1,105 @@
-{# ScorePicker singleton — implemented in Phase 4 #}
+<script>
+(function () {
+  'use strict';
+  var el = null, pk = null, H = 0, A = 0, onDone = null;
+  var PRESETS = [[0,0],[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],[2,2],[3,0],[0,3],[3,1],[1,3],[3,2],[2,3],[4,0],[0,4],[4,1],[1,4]];
+
+  var BTN = 'width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:18px;cursor:pointer;line-height:1;color:var(--text);';
+
+  function create() {
+    var d = document.createElement('div');
+    d.id = 'gansa-picker';
+    d.style.cssText = 'position:fixed;z-index:9999;background:var(--surface,#fff);border:1.5px solid var(--border,#E5E3DC);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.16);padding:16px;width:264px;display:none;';
+    d.innerHTML =
+      '<div id="gp-title" style="font-size:12px;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>' +
+      '<div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;">' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+          '<button onclick="GansaPicker._adj(-1,0)" style="'+BTN+'">−</button>' +
+          '<span id="gp-h" style="font-size:26px;font-weight:900;min-width:32px;text-align:center;color:var(--text);">0</span>' +
+          '<button onclick="GansaPicker._adj(1,0)" style="'+BTN+'">+</button>' +
+        '</div>' +
+        '<span style="font-size:22px;font-weight:900;color:var(--text-muted);padding:0 2px;">–</span>' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+          '<button onclick="GansaPicker._adj(0,-1)" style="'+BTN+'">−</button>' +
+          '<span id="gp-a" style="font-size:26px;font-weight:900;min-width:32px;text-align:center;color:var(--text);">0</span>' +
+          '<button onclick="GansaPicker._adj(0,1)" style="'+BTN+'">+</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="gp-presets" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:14px;"></div>' +
+      '<div style="display:flex;gap:8px;">' +
+        '<button onclick="GansaPicker._clear()" style="flex:1;padding:9px 0;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:var(--text-muted);">Borrar</button>' +
+        '<button onclick="GansaPicker._confirm()" style="flex:2;padding:9px 0;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Listo</button>' +
+      '</div>';
+
+    var grid = d.querySelector('#gp-presets');
+    PRESETS.forEach(function (p) {
+      var b = document.createElement('button');
+      b.dataset.h = p[0]; b.dataset.a = p[1];
+      b.className = 'gp-preset';
+      b.textContent = p[0] + ':' + p[1];
+      b.style.cssText = 'padding:5px 2px;border-radius:6px;border:1.5px solid var(--border);font-size:12px;font-weight:700;cursor:pointer;background:var(--bg);color:var(--text);';
+      b.onclick = function () { H = p[0]; A = p[1]; _render(); };
+      grid.appendChild(b);
+    });
+    document.body.appendChild(d);
+    return d;
+  }
+
+  function _render() {
+    el.querySelector('#gp-h').textContent = H;
+    el.querySelector('#gp-a').textContent = A;
+    el.querySelectorAll('.gp-preset').forEach(function (b) {
+      var active = parseInt(b.dataset.h) === H && parseInt(b.dataset.a) === A;
+      b.style.background = active ? 'var(--accent)' : 'var(--bg)';
+      b.style.color = active ? '#fff' : 'var(--text)';
+      b.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
+    });
+  }
+
+  document.addEventListener('mousedown', function (e) {
+    if (el && el.style.display !== 'none' && !el.contains(e.target)) {
+      GansaPicker.close();
+    }
+  });
+
+  window.GansaPicker = {
+    open: function (btn, hId, aId, home, away, cb) {
+      if (!el) el = create();
+      pk = { h: document.getElementById(hId), a: document.getElementById(aId) };
+      onDone = cb || null;
+      H = parseInt(pk.h.value) || 0;
+      A = parseInt(pk.a.value) || 0;
+      el.querySelector('#gp-title').textContent = home + ' vs ' + away;
+      _render();
+      el.style.display = 'block';
+      var r = btn.getBoundingClientRect(), W = 264, est = 340;
+      var top = r.bottom + 8, left = r.left + r.width / 2 - W / 2;
+      if (left < 8) left = 8;
+      if (left + W > window.innerWidth - 8) left = window.innerWidth - W - 8;
+      if (top + est > window.innerHeight - 8) top = r.top - est - 8;
+      el.style.top = top + 'px';
+      el.style.left = left + 'px';
+    },
+    close: function () { if (el) el.style.display = 'none'; },
+    _adj: function (dh, da) {
+      H = Math.max(0, Math.min(20, H + dh));
+      A = Math.max(0, Math.min(20, A + da));
+      _render();
+    },
+    _confirm: function () {
+      if (!pk) return;
+      pk.h.value = H; pk.a.value = A;
+      pk.h.dispatchEvent(new Event('change', { bubbles: true }));
+      if (onDone) onDone();
+      GansaPicker.close();
+    },
+    _clear: function () {
+      if (!pk) return;
+      pk.h.value = ''; pk.a.value = '';
+      pk.h.dispatchEvent(new Event('change', { bubbles: true }));
+      if (onDone) onDone();
+      GansaPicker.close();
+    }
+  };
+})();
+</script>
