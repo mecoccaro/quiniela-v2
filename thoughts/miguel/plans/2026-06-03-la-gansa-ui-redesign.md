@@ -1,6 +1,6 @@
 # La Gansa UI Redesign Implementation Plan
 
-status: in-progress
+status: completed
 
 ## Overview
 
@@ -653,8 +653,8 @@ Implements the read-only "Árbol" view in knockout: a full bracket visualization
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes
-- [ ] `uv run ruff check .` passes
+- [x] `uv run pytest` passes
+- [x] `uv run ruff check .` passes
 
 #### Automated QA:
 - [ ] Click "Árbol" toggle — bracket tree renders without JS errors

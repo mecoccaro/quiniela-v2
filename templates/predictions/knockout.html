@@ -70,9 +70,9 @@
   {% endif %}
 </div>
 
-<div id="ko-bracket-content" style="display:none;background:#fff;border-radius:16px;border:1px solid var(--border);padding:48px 32px;text-align:center;color:var(--text-muted);">
-  <p style="font-size:18px;font-weight:700;margin:0 0 8px;">Vista árbol — próximamente</p>
-  <p style="font-size:14px;margin:0;">Volvé a Lista para editar tus predicciones.</p>
+{{ bracket_json|json_script:"bracket-data" }}
+
+<div id="ko-bracket-content" style="display:none;background:#fff;border-radius:16px;border:1px solid var(--border);overflow:auto;max-height:640px;padding:16px;">
 </div>
 
 <script>
@@ -102,6 +102,118 @@ function setKoView(v) {
   btnList.style.color = v === 'list' ? '#fff' : 'var(--text-muted)';
   btnBracket.style.background = v === 'bracket' ? 'var(--accent)' : '#fff';
   btnBracket.style.color = v === 'bracket' ? '#fff' : 'var(--text-muted)';
+  if (v === 'bracket') _ensureBracketTree();
+}
+
+function _addSvgLine(svg, x1, y1, x2, y2) {
+  var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+  line.setAttribute('stroke', 'var(--border)'); line.setAttribute('stroke-width', '2');
+  svg.appendChild(line);
+}
+
+var _bracketRendered = false;
+function _ensureBracketTree() {
+  if (_bracketRendered) return;
+  _bracketRendered = true;
+
+  var rawEl = document.getElementById('bracket-data');
+  if (!rawEl) return;
+  var data;
+  try { data = JSON.parse(rawEl.textContent); } catch(e) { return; }
+
+  var CARD_W = 178, CARD_H = 62, RGAP = 44, SLOT = 72, TOP_PAD = 20;
+  var STAGE_ORDER = ['r32', 'r16', 'qf', 'sf', 'final'];
+  var stages = STAGE_ORDER.filter(function(k) { return data[k] && data[k].length > 0; });
+  if (stages.length === 0) return;
+
+  var nRounds = stages.length;
+  var nFirst = data[stages[0]].length;
+  var totalW = nRounds * CARD_W + (nRounds - 1) * SLOT + 20;
+  var totalH = nFirst * (CARD_H + RGAP) - RGAP + 2 * TOP_PAD;
+
+  // Compute centerY per round
+  var positions = [];
+  var first = [];
+  for (var i = 0; i < nFirst; i++) first.push(TOP_PAD + i * (CARD_H + RGAP) + CARD_H / 2);
+  positions.push(first);
+  for (var r = 1; r < nRounds; r++) {
+    var prev = positions[r - 1], curr = [];
+    for (var j = 0; j < Math.ceil(prev.length / 2); j++) {
+      var top = prev[2 * j], bot = prev[2 * j + 1] !== undefined ? prev[2 * j + 1] : top;
+      curr.push((top + bot) / 2);
+    }
+    positions.push(curr);
+  }
+
+  var container = document.getElementById('ko-bracket-content');
+  container.innerHTML = '';
+
+  var wrapper = document.createElement('div');
+  wrapper.style.cssText = 'position:relative;width:' + totalW + 'px;height:' + totalH + 'px;min-width:' + totalW + 'px;';
+
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;';
+  svg.setAttribute('width', totalW); svg.setAttribute('height', totalH);
+
+  for (var r = 0; r < nRounds; r++) {
+    var stageKey = stages[r];
+    var matches = data[stageKey] || [];
+    var xLeft = r * (CARD_W + SLOT);
+    var xRight = xLeft + CARD_W;
+    var midX = xRight + SLOT / 2;
+
+    for (var m = 0; m < matches.length; m++) {
+      var match = matches[m];
+      var centerY = positions[r][m];
+      var topY = Math.round(centerY - CARD_H / 2);
+      var isTBD = match.home === 'TBD' && match.away === 'TBD';
+      var hasScore = match.homeScore !== null && match.awayScore !== null;
+
+      var card = document.createElement('div');
+      card.style.cssText = [
+        'position:absolute', 'left:' + xLeft + 'px', 'top:' + topY + 'px',
+        'width:' + CARD_W + 'px', 'height:' + CARD_H + 'px',
+        'background:' + (isTBD ? 'var(--bg)' : '#fff'),
+        'border:1.5px solid var(--border)', 'border-radius:8px',
+        'overflow:hidden', 'box-sizing:border-box'
+      ].join(';');
+
+      var nameColor = isTBD ? 'var(--text-muted)' : 'var(--text)';
+      var scoreHtml = hasScore ? '<span style="font-size:11px;font-weight:900;color:var(--accent);flex-shrink:0;">' + match.homeScore + '</span>' : '';
+      var scoreHtml2 = hasScore ? '<span style="font-size:11px;font-weight:900;color:var(--accent);flex-shrink:0;">' + match.awayScore + '</span>' : '';
+
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-bottom:1px solid var(--border);height:50%;">' +
+          '<span style="font-size:11px;font-weight:600;color:' + nameColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.home + '</span>' +
+          scoreHtml +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;height:50%;">' +
+          '<span style="font-size:11px;font-weight:600;color:' + nameColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.away + '</span>' +
+          scoreHtml2 +
+        '</div>';
+
+      wrapper.appendChild(card);
+
+      // Connector lines to next round (pair every 2 matches)
+      if (r < nRounds - 1 && m % 2 === 0) {
+        var topCY = positions[r][m];
+        var botCY = positions[r][m + 1] !== undefined ? positions[r][m + 1] : topCY;
+        var nextCY = positions[r + 1][Math.floor(m / 2)];
+        var nextLeftX = (r + 1) * (CARD_W + SLOT);
+        _addSvgLine(svg, xRight, topCY, midX, topCY);
+        if (botCY !== topCY) {
+          _addSvgLine(svg, xRight, botCY, midX, botCY);
+          _addSvgLine(svg, midX, topCY, midX, botCY);
+        }
+        _addSvgLine(svg, midX, nextCY, nextLeftX, nextCY);
+      }
+    }
+  }
+
+  wrapper.appendChild(svg);
+  container.appendChild(wrapper);
 }
 
 (function () {

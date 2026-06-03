@@ -172,9 +172,27 @@ class KnockoutPredictionsView(LoginRequiredMixin, View):
             for k in ("r32", "r16", "qf", "sf", "final")
             if k in bracket
         ]
+
+        bracket_json = {}
+        for k in ("r32", "r16", "qf", "sf", "final"):
+            slots = bracket.get(k, [])
+            if not slots:
+                continue
+            bracket_json[k] = [
+                {
+                    "home": slot.home_team.name if slot.home_team else "TBD",
+                    "away": slot.away_team.name if slot.away_team else "TBD",
+                    "homeScore": slot.prediction.predicted_home_score if slot.prediction else None,
+                    "awayScore": slot.prediction.predicted_away_score if slot.prediction else None,
+                    "slotKey": slot.slot_key,
+                }
+                for slot in slots
+            ]
+
         return render(request, "predictions/knockout.html", {
             "pool": self.pool,
             "stages": stages,
+            "bracket_json": json.dumps(bracket_json),
             "predictions_submitted": self.membership.predictions_submitted,
         })
 
