@@ -3,50 +3,62 @@
 {% block title %}Panel — La Gansa{% endblock %}
 
 {% block content %}
-<h1 class="text-2xl font-bold text-gray-800 mb-6">Hola, {{ user.first_name }} 👋</h1>
+<div style="margin-bottom:24px;">
+  <h1 style="font-size:32px; font-weight:900; letter-spacing:-1px; color:var(--text); margin:0 0 4px;">Hola, {{ user.first_name }} 👋</h1>
+  <p style="font-size:15px; color:var(--text-muted); margin:0;">Tus quinielas</p>
+</div>
 
 {% if membership_data %}
-  <div class="space-y-4">
+  <div style="display:flex; flex-direction:column; gap:16px;">
     {% for membership, rank in membership_data %}
-      <div class="bg-white rounded-xl shadow p-5 flex items-center justify-between">
-        <div>
-          <p class="font-semibold text-gray-800">{{ membership.pool.name }}</p>
-          <p class="text-sm text-gray-500">{{ membership.pool.tournament.name }}</p>
-          <div class="flex items-center gap-2 mt-1">
-            {% if membership.predictions_submitted %}
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Enviado</span>
-            {% else %}
-              <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">Pendiente</span>
-            {% endif %}
-            {% if rank %}
-              <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Posición #{{ rank }}</span>
-            {% endif %}
+      <div style="background:#fff; border-radius:16px; padding:24px; border:1px solid var(--border); box-shadow:0 2px 12px rgba(0,0,0,0.04); display:flex; flex-direction:column; gap:16px;">
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <p style="font-size:20px; font-weight:800; color:var(--text); margin:0 0 2px;">{{ membership.pool.name }}</p>
+            <p style="font-size:13px; color:var(--text-muted); margin:0;">{{ membership.pool.tournament.name }}</p>
           </div>
+          {% if rank %}
+            <span style="font-size:28px; font-weight:900; color:var(--accent); line-height:1;">#{{ rank }}</span>
+          {% endif %}
         </div>
-        <div class="flex gap-2">
+
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          {% if membership.predictions_submitted %}
+            <span style="background:var(--success-light); color:var(--success); border-radius:100px; font-size:12px; font-weight:700; padding:3px 10px;">Enviado</span>
+          {% else %}
+            <span style="background:var(--pending-light); color:var(--pending); border-radius:100px; font-size:12px; font-weight:700; padding:3px 10px;">Pendiente</span>
+          {% endif %}
+          {% if rank %}
+            <span style="background:var(--accent-light); color:var(--accent); border-radius:100px; font-size:12px; font-weight:700; padding:3px 10px;">Posición #{{ rank }}</span>
+          {% endif %}
+        </div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
           {% if membership.predictions_submitted %}
             <a href="{% url 'my_predictions' membership.pool.pk %}"
-               class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">
-              Mis picks
-            </a>
+               style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Mis picks</a>
+            <a href="{% url 'leaderboard' membership.pool.pk %}"
+               style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Tabla</a>
+            <a href="{% url 'pool_day' membership.pool.pk %}"
+               style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Partidos</a>
           {% else %}
             <a href="{% url 'group_predictions' membership.pool.pk %}"
-               class="text-sm bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">
-              Predecir
-            </a>
+               style="background:var(--accent); color:#fff; border-radius:8px; padding:9px 20px; font-size:14px; font-weight:700; text-decoration:none; border:none;">Predecir →</a>
+            <a href="{% url 'leaderboard' membership.pool.pk %}"
+               style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Tabla</a>
+            <a href="{% url 'pool_day' membership.pool.pk %}"
+               style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Partidos</a>
           {% endif %}
-          <a href="{% url 'leaderboard' membership.pool.pk %}"
-             class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Tabla</a>
-          <a href="{% url 'pool_day' membership.pool.pk %}"
-             class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">Partidos</a>
         </div>
+
       </div>
     {% endfor %}
   </div>
 {% else %}
-  <div class="bg-white rounded-xl shadow p-8 text-center text-gray-500">
-    <p class="text-lg mb-2">Todavía no estás en ninguna quiniela.</p>
-    <p class="text-sm">Pídele al administrador que te agregue a un grupo.</p>
+  <div style="background:#fff; border-radius:16px; border:1px solid var(--border); padding:48px 32px; text-align:center; color:var(--text-muted);">
+    <p style="font-size:18px; margin:0 0 8px;">Todavía no estás en ninguna quiniela.</p>
+    <p style="font-size:14px; margin:0;">Pídele al administrador que te agregue a un grupo.</p>
   </div>
 {% endif %}
 {% endblock %}

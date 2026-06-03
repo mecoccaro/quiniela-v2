@@ -174,7 +174,7 @@ uv run ruff format .                # format
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes
+- [x] `uv run pytest` passes
 
 #### Automated QA:
 - [ ] Dashboard loads without errors; pool cards visible
