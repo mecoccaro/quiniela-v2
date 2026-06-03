@@ -26,6 +26,12 @@
   </p>
 </div>
 
+{% if error %}
+<div style="background:var(--danger-light);border:1px solid var(--danger);color:var(--danger);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:14px;font-weight:600;">
+  ⚠ {{ error }}
+</div>
+{% endif %}
+
 <form method="post">
   {% csrf_token %}
   <div class="bg-white rounded-xl shadow divide-y divide-gray-100 mb-6">
@@ -59,7 +65,7 @@
   <div class="flex gap-3">
     <button
       type="submit"
-      class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2.5 rounded-xl transition">
+      style="background:var(--accent);color:#fff;font-weight:700;padding:10px 24px;border-radius:10px;border:none;font-size:14px;cursor:pointer;">
       Confirmar orden y continuar →
     </button>
     <a

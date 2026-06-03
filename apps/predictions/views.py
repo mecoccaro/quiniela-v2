@@ -202,16 +202,37 @@ class ThirdPlaceTiebreakerView(LoginRequiredMixin, View):
 
     def post(self, request: HttpRequest, pool_id: int) -> HttpResponse:
         tied_teams = get_conduct_tied_thirds(request.user, self.pool)
+
+        submitted: dict[int, int] = {}
         for team in tied_teams:
-            rank_val = request.POST.get(f"rank_{team.pk}")
-            if rank_val:
-                ThirdPlaceTiebreakerPick.objects.update_or_create(
-                    user=request.user,
-                    pool=self.pool,
-                    team=team,
-                    defaults={"predicted_rank": int(rank_val)},
-                )
+            rank_val = request.POST.get(f"rank_{team.pk}", "").strip()
+            if not rank_val:
+                return self._render_error(request, tied_teams, "Asigna un orden a todos los equipos.")
+            submitted[team.pk] = int(rank_val)
+
+        if len(submitted.values()) != len(set(submitted.values())):
+            return self._render_error(request, tied_teams, "Cada equipo debe tener un orden diferente.")
+
+        for team in tied_teams:
+            ThirdPlaceTiebreakerPick.objects.update_or_create(
+                user=request.user,
+                pool=self.pool,
+                team=team,
+                defaults={"predicted_rank": submitted[team.pk]},
+            )
         return redirect("knockout_predictions", pool_id=self.pool.pk)
+
+    def _render_error(self, request: HttpRequest, tied_teams, error_msg: str) -> HttpResponse:
+        existing_picks = {
+            p.team_id: p.predicted_rank
+            for p in ThirdPlaceTiebreakerPick.objects.filter(user=request.user, pool=self.pool)
+        }
+        return render(request, "predictions/third_place_tiebreaker.html", {
+            "pool": self.pool,
+            "tied_teams": tied_teams,
+            "existing_picks": existing_picks,
+            "error": error_msg,
+        })
 
 
 class SaveKnockoutPredictionView(LoginRequiredMixin, View):

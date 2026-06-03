@@ -589,9 +589,9 @@ def _render_error(self, request, tied_teams, error_msg):
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes (existing tests must still pass)
-- [ ] `uv run ruff check .` passes
-- [ ] New test: `uv run pytest tests/ -k tiebreaker` — write a short unit test for `ThirdPlaceTiebreakerView.post()` covering: (a) missing rank → 200 with error, (b) duplicate ranks → 200 with error, (c) valid unique ranks → redirect 302
+- [x] `uv run pytest` passes (existing tests must still pass)
+- [x] `uv run ruff check .` passes
+- [x] New test: `uv run pytest tests/ -k tiebreaker` — write a short unit test for `ThirdPlaceTiebreakerView.post()` covering: (a) missing rank → 200 with error, (b) duplicate ranks → 200 with error, (c) valid unique ranks → redirect 302
 
 #### Automated QA:
 - [ ] Submit form with two teams at same position → error banner appears, no redirect
