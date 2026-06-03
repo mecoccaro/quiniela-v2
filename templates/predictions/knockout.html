@@ -77,6 +77,7 @@
 
 <script>
 let activeKoStage = '{{ stages.0.key }}';
+var _koSubmitted = {% if predictions_submitted %}true{% else %}false{% endif %};
 
 function switchKoStage(key) {
   activeKoStage = key;
@@ -207,6 +208,21 @@ function _ensureBracketTree() {
           aScoreHtml +
         '</div>';
 
+      // Make card clickable in Árbol view (opens ScorePicker on the hidden inputs)
+      if (!_koSubmitted && match.matchPk) {
+        (function (pk, home, away) {
+          card.style.cursor = 'pointer';
+          card.addEventListener('mouseenter', function () { card.style.borderColor = 'var(--accent)'; });
+          card.addEventListener('mouseleave', function () { card.style.borderColor = 'var(--border)'; });
+          card.onclick = function () {
+            GansaPicker.open(card, 'hs-' + pk, 'as-' + pk, home, away, function () {
+              updateKoPill(String(pk));
+              _ensureBracketTree();
+            });
+          };
+        })(match.matchPk, match.home, match.away);
+      }
+
       wrapper.appendChild(card);
 
       if (r < nRounds - 1 && m % 2 === 0) {
@@ -314,6 +330,10 @@ function _ensureBracketTree() {
     document.querySelectorAll('.ko-form').forEach(syncWinner);
     switchKoStage(activeKoStage);
     updateKoProgress();
+    var bracketEl = document.getElementById('ko-bracket-content');
+    if (bracketEl && bracketEl.style.display !== 'none') {
+      _ensureBracketTree();
+    }
   });
 
   document.addEventListener('DOMContentLoaded', function () {
