@@ -116,7 +116,6 @@ function _addSvgLine(svg, x1, y1, x2, y2) {
 var _bracketRendered = false;
 function _ensureBracketTree() {
   if (_bracketRendered) return;
-  _bracketRendered = true;
 
   var rawEl = document.getElementById('bracket-data');
   if (!rawEl) return;
@@ -214,6 +213,7 @@ function _ensureBracketTree() {
 
   wrapper.appendChild(svg);
   container.appendChild(wrapper);
+  _bracketRendered = true;
 }
 
 (function () {

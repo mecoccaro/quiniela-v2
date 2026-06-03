@@ -192,7 +192,7 @@ class KnockoutPredictionsView(LoginRequiredMixin, View):
         return render(request, "predictions/knockout.html", {
             "pool": self.pool,
             "stages": stages,
-            "bracket_json": json.dumps(bracket_json),
+            "bracket_json": bracket_json,
             "predictions_submitted": self.membership.predictions_submitted,
         })
 
