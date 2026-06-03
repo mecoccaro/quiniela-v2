@@ -440,7 +440,7 @@ Include in `templates/base.html` at bottom of `<body>`: `{% include "partials/sc
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes
+- [x] `uv run pytest` passes
 
 #### Automated QA:
 - [ ] My predictions page loads; stage sections visible as white cards
