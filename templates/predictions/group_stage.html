@@ -4,104 +4,215 @@
 {% block title %}Predicciones — {{ pool.name }}{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-between mb-6">
+
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
   <div>
-    <h1 class="text-2xl font-bold text-gray-800">{{ pool.name }}</h1>
-    <p class="text-sm text-gray-500">Fase de grupos — {{ pool.tournament.name }}</p>
+    <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.5px;color:var(--text);margin:0 0 4px;">{{ pool.name }}</h1>
+    <p style="font-size:13px;color:var(--text-muted);margin:0;">{{ pool.tournament.name }}</p>
   </div>
-  <div class="text-right flex flex-col items-end gap-2">
-    <p id="progress-count" class="text-2xl font-bold {% if total_predicted == total_matches %}text-green-600{% else %}text-gray-700{% endif %}">
-      {{ total_predicted }} <span class="text-base font-normal text-gray-400">/ {{ total_matches }}</span>
+  <div style="text-align:right;">
+    <p id="progress-count" style="font-size:22px;font-weight:900;margin:0;color:{% if total_predicted == total_matches %}var(--success){% else %}var(--accent){% endif %};">
+      {{ total_predicted }}<span style="font-size:13px;font-weight:400;color:var(--text-muted);"> / {{ total_matches }} partidos predichos</span>
     </p>
-    <p class="text-xs text-gray-400">partidos predichos</p>
-    <a id="ko-link" href="{% url 'knockout_predictions' pool.pk %}"
-       class="text-sm bg-green-600 text-white px-3 py-1 rounded-lg hover:bg-green-700 font-semibold"
-       {% if total_predicted < total_matches %}style="display:none"{% endif %}>
-      Eliminatorias →
-    </a>
   </div>
 </div>
 
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="background:var(--accent);color:#fff;border-radius:100px;padding:7px 18px;font-size:13px;font-weight:700;">Fase de Grupos</span>
+    <a id="ko-link" href="{% url 'knockout_predictions' pool.pk %}"
+       style="background:#fff;border:1.5px solid var(--border);border-radius:100px;padding:7px 18px;font-size:13px;font-weight:700;color:var(--text-muted);text-decoration:none;{% if total_predicted < total_matches %}display:none;{% endif %}">Eliminatorias →</a>
+  </div>
+  {% if not predictions_submitted %}
+  <button onclick="randomizeAll(this)" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
+  {% endif %}
+</div>
+
 {% if predictions_submitted %}
-<div class="bg-green-100 text-green-800 rounded-lg p-4 mb-6 text-sm font-medium">
+<div style="background:var(--success-light);color:var(--success);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:14px;font-weight:600;">
   ✅ Tus predicciones ya fueron enviadas. Solo puedes ver los resultados.
 </div>
 {% endif %}
 
-<div class="space-y-4">
+<div style="display:flex;flex-direction:column;gap:12px;">
 {% for group in group_data %}
-<details class="bg-white rounded-xl shadow overflow-hidden" {% if forloop.first %}open{% endif %}>
-  <summary class="flex items-center justify-between px-5 py-4 cursor-pointer select-none hover:bg-gray-50">
-    <span class="font-bold text-gray-800 text-lg">Grupo {{ group.letter }}</span>
-    <span class="text-sm text-gray-400">
-      {{ group.matches|length }} partidos
-    </span>
-  </summary>
+<div id="group-{{ group.letter }}" data-open="{% if forloop.first %}1{% else %}0{% endif %}"
+     style="background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;">
 
-  <div class="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div onclick="toggleGroup('{{ group.letter }}')"
+       style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;user-select:none;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:18px;font-weight:800;color:var(--text);">Grupo {{ group.letter }}</span>
+      <div style="position:relative;width:80px;height:5px;background:var(--border);border-radius:100px;overflow:hidden;">
+        <div id="bar-{{ group.letter }}" style="position:absolute;left:0;top:0;height:100%;background:var(--accent);border-radius:100px;width:0%;transition:width 0.3s;"></div>
+      </div>
+      <span id="grp-count-{{ group.letter }}" style="font-size:12px;color:var(--text-muted);">0/{{ group.matches|length }}</span>
+    </div>
+    <span id="chevron-{{ group.letter }}"
+          style="color:var(--text-muted);font-size:20px;display:inline-block;transform:{% if forloop.first %}rotate(90deg){% else %}rotate(0deg){% endif %};transition:transform 0.2s;">›</span>
+  </div>
 
-    <!-- Match inputs -->
-    <div class="space-y-3">
+  <div id="group-content-{{ group.letter }}"
+       class="grid grid-cols-1 md:grid-cols-2 gap-5 px-5 pb-5"
+       {% if not forloop.first %}style="display:none"{% endif %}>
+
+    <div>
       {% for item in group.matches %}
       {% with match=item.match pred=item.prediction %}
-      <form
-        hx-post="{% url 'save_match_prediction' pool.pk match.pk %}"
-        hx-target="#standings-{{ group.letter }}"
-        hx-swap="outerHTML"
-        hx-trigger="change delay:400ms"
-        hx-indicator="#spinner-{{ match.pk }}"
-        class="flex items-center gap-2"
-      >
+
+      <form id="score-form-{{ match.pk }}"
+            hx-post="{% url 'save_match_prediction' pool.pk match.pk %}"
+            hx-target="#standings-{{ group.letter }}"
+            hx-swap="outerHTML"
+            hx-trigger="change delay:400ms"
+            hx-indicator="#spinner-{{ match.pk }}">
         {% csrf_token %}
-        <span class="text-xs text-gray-600 flex-1 text-right truncate" title="{{ match.home_team.name }}">{{ match.home_team.fifa_code|flag_emoji }} {{ match.home_team.name }}</span>
-        <input
-          type="number" name="predicted_home_score" min="0" max="20"
-          value="{{ pred.predicted_home_score|default_if_none:'' }}"
-          {% if predictions_submitted %}readonly{% endif %}
-          class="w-12 text-center border border-gray-300 rounded-lg py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none {% if predictions_submitted %}bg-gray-100 text-gray-500{% endif %}"
-        >
-        <span class="text-gray-400 font-bold">–</span>
-        <input
-          type="number" name="predicted_away_score" min="0" max="20"
-          value="{{ pred.predicted_away_score|default_if_none:'' }}"
-          {% if predictions_submitted %}readonly{% endif %}
-          class="w-12 text-center border border-gray-300 rounded-lg py-1 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none {% if predictions_submitted %}bg-gray-100 text-gray-500{% endif %}"
-        >
-        <span class="text-xs text-gray-600 flex-1 truncate" title="{{ match.away_team.name }}">{{ match.away_team.fifa_code|flag_emoji }} {{ match.away_team.name }}</span>
-        <span id="spinner-{{ match.pk }}" class="htmx-indicator text-green-500 text-xs">⏳</span>
+        <input type="hidden" id="hs-{{ match.pk }}" name="predicted_home_score"
+               value="{{ pred.predicted_home_score|default_if_none:'' }}">
+        <input type="hidden" id="as-{{ match.pk }}" name="predicted_away_score"
+               value="{{ pred.predicted_away_score|default_if_none:'' }}">
       </form>
+
+      <div style="position:relative;">
+        <div style="display:grid;grid-template-columns:1fr 100px 1fr;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:13px;color:var(--text);text-align:right;padding-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                title="{{ match.home_team.name }}">{{ match.home_team.fifa_code|flag_emoji }} {{ match.home_team.name }}</span>
+
+          {% if predictions_submitted %}
+          <div style="background:var(--bg);border-radius:8px;padding:7px 0;font-size:15px;font-weight:900;color:var(--text-muted);text-align:center;font-variant-numeric:tabular-nums;">
+            {% if pred.predicted_home_score is not None %}{{ pred.predicted_home_score }} : {{ pred.predicted_away_score }}{% else %}– : –{% endif %}
+          </div>
+          {% else %}
+          <button id="pill-{{ match.pk }}"
+                  onclick="GansaPicker.open(this,'hs-{{ match.pk }}','as-{{ match.pk }}','{{ match.home_team.name|escapejs }}','{{ match.away_team.name|escapejs }}',function(){updatePill('{{ match.pk }}')})"
+                  style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 0;font-size:15px;font-weight:900;color:{% if pred.predicted_home_score is not None %}var(--text){% else %}var(--text-muted){% endif %};cursor:pointer;text-align:center;font-variant-numeric:tabular-nums;width:100%;">
+            {% if pred.predicted_home_score is not None %}{{ pred.predicted_home_score }} : {{ pred.predicted_away_score }}{% else %}– : –{% endif %}
+          </button>
+          {% endif %}
+
+          <span style="font-size:13px;color:var(--text);text-align:left;padding-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                title="{{ match.away_team.name }}">{{ match.away_team.fifa_code|flag_emoji }} {{ match.away_team.name }}</span>
+        </div>
+        <span id="spinner-{{ match.pk }}" class="htmx-indicator"
+              style="position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:10px;pointer-events:none;">⏳</span>
+      </div>
+
       {% endwith %}
       {% endfor %}
     </div>
 
-    <!-- Live standings -->
     <div>
       {% include "predictions/partials/group_standings.html" with standings=group.standings group_letter=group.letter %}
     </div>
 
   </div>
-</details>
+</div>
 {% endfor %}
 </div>
+
 <script>
 (function () {
-  var total = {{ total_matches }};
-  function updateProgress() {
+  var _groups = {
+    {% for group in group_data %}{% for item in group.matches %}'{{ item.match.pk }}':'{{ group.letter }}',
+    {% endfor %}{% endfor %}
+  };
+
+  window.updatePill = function (matchId) {
+    var hEl = document.getElementById('hs-' + matchId);
+    var aEl = document.getElementById('as-' + matchId);
+    var pill = document.getElementById('pill-' + matchId);
+    if (!hEl || !aEl) return;
+    if (pill) {
+      if (hEl.value !== '' && aEl.value !== '') {
+        pill.textContent = hEl.value + ' : ' + aEl.value;
+        pill.style.color = 'var(--text)';
+      } else {
+        pill.textContent = '– : –';
+        pill.style.color = 'var(--text-muted)';
+      }
+    }
+    var letter = _groups[String(matchId)];
+    if (letter) _updateGroupBar(letter);
+    _updateProgress();
+  };
+
+  function _updateGroupBar(letter) {
+    var groupEl = document.getElementById('group-' + letter);
+    if (!groupEl) return;
+    var inputs = groupEl.querySelectorAll('[id^="hs-"]');
     var filled = 0;
-    document.querySelectorAll('form[hx-post]').forEach(function (form) {
-      var home = form.querySelector('[name=predicted_home_score]');
-      var away = form.querySelector('[name=predicted_away_score]');
-      if (home && away && home.value !== '' && away.value !== '') filled++;
+    inputs.forEach(function (inp) {
+      var aEl = document.getElementById('as-' + inp.id.replace('hs-', ''));
+      if (inp.value !== '' && aEl && aEl.value !== '') filled++;
+    });
+    var bar = document.getElementById('bar-' + letter);
+    var cnt = document.getElementById('grp-count-' + letter);
+    if (bar) bar.style.width = (inputs.length > 0 ? Math.round(filled / inputs.length * 100) : 0) + '%';
+    if (cnt) cnt.textContent = filled + '/' + inputs.length;
+  }
+
+  var _total = {{ total_matches }};
+  function _updateProgress() {
+    var filled = 0;
+    document.querySelectorAll('[id^="hs-"]').forEach(function (inp) {
+      var aEl = document.getElementById('as-' + inp.id.replace('hs-', ''));
+      if (inp.value !== '' && aEl && aEl.value !== '') filled++;
     });
     var countEl = document.getElementById('progress-count');
-    var btnEl = document.getElementById('ko-link');
+    var koLink = document.getElementById('ko-link');
     if (countEl) {
-      countEl.innerHTML = filled + ' <span class="text-base font-normal text-gray-400">/ ' + total + '</span>';
-      countEl.className = 'text-2xl font-bold ' + (filled === total ? 'text-green-600' : 'text-gray-700');
+      countEl.innerHTML = filled + '<span style="font-size:13px;font-weight:400;color:var(--text-muted);"> / ' + _total + ' partidos predichos</span>';
+      countEl.style.color = filled === _total ? 'var(--success)' : 'var(--accent)';
     }
-    if (btnEl) btnEl.style.display = filled === total ? '' : 'none';
+    if (koLink) koLink.style.display = filled === _total ? '' : 'none';
   }
-  document.addEventListener('htmx:afterSettle', updateProgress);
+
+  window.toggleGroup = function (letter) {
+    var card = document.getElementById('group-' + letter);
+    var content = document.getElementById('group-content-' + letter);
+    var chevron = document.getElementById('chevron-' + letter);
+    var open = card.dataset.open === '1';
+    if (open) {
+      content.style.display = 'none';
+      chevron.style.transform = 'rotate(0deg)';
+      card.dataset.open = '0';
+    } else {
+      content.style.display = '';
+      chevron.style.transform = 'rotate(90deg)';
+      card.dataset.open = '1';
+    }
+  };
+
+  {% if not predictions_submitted %}
+  window.randomizeAll = function (btn) {
+    var inputs = document.querySelectorAll('[id^="hs-"]');
+    if (inputs.length === 0) return;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="gansa-spinner"></span>Guardando...'; }
+    inputs.forEach(function (hInp) {
+      var matchId = hInp.id.replace('hs-', '');
+      var aInp = document.getElementById('as-' + matchId);
+      if (!aInp) return;
+      hInp.value = Math.floor(Math.random() * 6);
+      aInp.value = Math.floor(Math.random() * 6);
+      updatePill(matchId);
+      hInp.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    var ms = Math.max(2500, inputs.length * 60 + 1000);
+    setTimeout(function () {
+      if (btn) { btn.disabled = false; btn.textContent = '🎲 Randomizar'; }
+    }, ms);
+  };
+  {% endif %}
+
+  document.addEventListener('htmx:afterSettle', _updateProgress);
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var letters = {};
+    Object.values(_groups).forEach(function (l) { letters[l] = true; });
+    Object.keys(letters).forEach(function (l) { _updateGroupBar(l); });
+    _updateProgress();
+  });
 })();
 </script>
+
 {% endblock %}

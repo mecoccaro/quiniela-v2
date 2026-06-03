@@ -3,76 +3,249 @@
 {% block title %}Eliminatorias — {{ pool.name }}{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-between mb-6">
+
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
   <div>
-    <a href="{% url 'group_predictions' pool.pk %}" class="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1 mb-1">
-      ← Fase de grupos
-    </a>
-    <h1 class="text-2xl font-bold text-gray-800">{{ pool.name }}</h1>
-    <p class="text-sm text-gray-500">Eliminatorias — {{ pool.tournament.name }}</p>
+    <div style="margin-bottom:6px;">
+      <a href="{% url 'group_predictions' pool.pk %}"
+         style="font-size:13px;color:var(--text-muted);text-decoration:none;font-weight:600;">← Fase de Grupos</a>
+      <span style="font-size:13px;color:var(--border);margin:0 6px;">|</span>
+      <span style="font-size:13px;font-weight:700;background:var(--accent);color:#fff;border-radius:100px;padding:3px 12px;">Eliminatorias</span>
+    </div>
+    <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.5px;color:var(--text);margin:0 0 2px;">{{ pool.name }}</h1>
+    <p style="font-size:13px;color:var(--text-muted);margin:0;">{{ pool.tournament.name }}</p>
   </div>
   {% if not predictions_submitted %}
-  <a id="ko-next-btn" href="{% url 'picks' pool.pk %}" class="text-sm bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-semibold" style="display:none">
+  <a id="ko-next-btn" href="{% url 'picks' pool.pk %}"
+     style="display:none;background:var(--accent);color:#fff;border-radius:8px;padding:9px 20px;font-size:14px;font-weight:700;text-decoration:none;">
     Goleador y confirmar →
   </a>
   {% endif %}
 </div>
 
 {% if predictions_submitted %}
-<div class="bg-green-100 text-green-800 rounded-lg p-4 mb-6 text-sm font-medium">
+<div style="background:var(--success-light);color:var(--success);border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:14px;font-weight:600;">
   ✅ Tus predicciones ya fueron enviadas. Solo puedes ver los resultados.
 </div>
 {% endif %}
 
-<div id="ko-tabs" class="flex gap-2 mb-4 overflow-x-auto">
-  {% for stage in stages %}
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+  <div id="ko-tabs" style="display:flex;gap:6px;overflow-x:auto;flex:1;">
+    {% for stage in stages %}
     <button
+      class="ko-tab"
       onclick="switchKoStage('{{ stage.key }}')"
       id="ko-tab-{{ stage.key }}"
-      class="ko-tab px-3 py-1.5 rounded text-sm font-medium whitespace-nowrap bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-800"
-      data-stage="{{ stage.key }}">
+      data-stage="{{ stage.key }}"
+      style="padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--surface,#fff);color:var(--text-muted);">
       {{ stage.label }}
     </button>
-  {% endfor %}
+    {% endfor %}
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <div style="display:flex;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);">
+      <button id="ko-view-list" onclick="setKoView('list')"
+              style="padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#fff;">Lista</button>
+      <button id="ko-view-bracket" onclick="setKoView('bracket')"
+              style="padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:#fff;color:var(--text-muted);">Árbol</button>
+    </div>
+    {% if not predictions_submitted %}
+    <button onclick="randomizeAllKo(this)"
+            style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
+    {% endif %}
+  </div>
 </div>
 
-<div id="ko-bracket" class="space-y-4">
-  {% include "predictions/partials/knockout_stages.html" %}
+<div id="ko-lista-content">
+  <div id="ko-bracket">
+    {% include "predictions/partials/knockout_stages.html" %}
+  </div>
+  {% if not predictions_submitted %}
+  <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+    <a id="ko-next-btn-bottom" href="{% url 'picks' pool.pk %}"
+       style="display:none;background:var(--accent);color:#fff;border-radius:8px;padding:11px 24px;font-size:15px;font-weight:700;text-decoration:none;">
+      Siguiente: goleador y confirmar →
+    </a>
+  </div>
+  {% endif %}
 </div>
 
-{% if not predictions_submitted %}
-<div class="mt-6 flex justify-end">
-  <a id="ko-next-btn-bottom" href="{% url 'picks' pool.pk %}" class="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700" style="display:none">
-    Siguiente: goleador y confirmar →
-  </a>
+{{ bracket_json|json_script:"bracket-data" }}
+
+<div id="ko-bracket-content" style="display:none;background:#fff;border-radius:16px;border:1px solid var(--border);overflow:auto;max-height:640px;padding:16px;">
 </div>
-{% endif %}
 
 <script>
 let activeKoStage = '{{ stages.0.key }}';
+var _koSubmitted = {% if predictions_submitted %}true{% else %}false{% endif %};
 
 function switchKoStage(key) {
   activeKoStage = key;
   document.querySelectorAll('[data-ko-stage]').forEach(function (el) {
-    var isActive = el.dataset.koStage === key;
-    el.style.display = isActive ? '' : 'none';
-    if (isActive) {
-      var details = el.querySelector('details');
-      if (details) details.setAttribute('open', '');
-    }
+    el.style.display = el.dataset.koStage === key ? '' : 'none';
   });
   document.querySelectorAll('.ko-tab').forEach(function (btn) {
     var active = btn.dataset.stage === key;
-    btn.classList.toggle('bg-green-600', active);
-    btn.classList.toggle('text-white', active);
-    btn.classList.toggle('bg-gray-100', !active);
-    btn.classList.toggle('text-gray-700', !active);
+    btn.style.background = active ? 'var(--accent)' : 'var(--surface,#fff)';
+    btn.style.color = active ? '#fff' : 'var(--text-muted)';
+    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
   });
+}
+
+function setKoView(v) {
+  var lista = document.getElementById('ko-lista-content');
+  var bracket = document.getElementById('ko-bracket-content');
+  var btnList = document.getElementById('ko-view-list');
+  var btnBracket = document.getElementById('ko-view-bracket');
+  lista.style.display = v === 'list' ? '' : 'none';
+  bracket.style.display = v === 'bracket' ? '' : 'none';
+  btnList.style.background = v === 'list' ? 'var(--accent)' : '#fff';
+  btnList.style.color = v === 'list' ? '#fff' : 'var(--text-muted)';
+  btnBracket.style.background = v === 'bracket' ? 'var(--accent)' : '#fff';
+  btnBracket.style.color = v === 'bracket' ? '#fff' : 'var(--text-muted)';
+  if (v === 'bracket') _ensureBracketTree();
+}
+
+function _addSvgLine(svg, x1, y1, x2, y2) {
+  var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+  line.setAttribute('stroke', 'var(--border)'); line.setAttribute('stroke-width', '2');
+  svg.appendChild(line);
+}
+
+function _ensureBracketTree() {
+  var rawEl = document.getElementById('bracket-data');
+  if (!rawEl) return;
+  var data;
+  try { data = JSON.parse(rawEl.textContent); } catch(e) { return; }
+
+  var CARD_W = 178, CARD_H = 62, RGAP = 44, SLOT = 72, TOP_PAD = 20;
+  var STAGE_ORDER = ['r32', 'r16', 'qf', 'sf', 'final'];
+  var stages = STAGE_ORDER.filter(function(k) { return data[k] && data[k].length > 0; });
+  if (stages.length === 0) return;
+
+  var nRounds = stages.length;
+  var nFirst = data[stages[0]].length;
+  var totalW = nRounds * CARD_W + (nRounds - 1) * SLOT + 20;
+  var totalH = nFirst * (CARD_H + RGAP) - RGAP + 2 * TOP_PAD;
+
+  var positions = [];
+  var first = [];
+  for (var i = 0; i < nFirst; i++) first.push(TOP_PAD + i * (CARD_H + RGAP) + CARD_H / 2);
+  positions.push(first);
+  for (var r = 1; r < nRounds; r++) {
+    var prev = positions[r - 1], curr = [];
+    for (var j = 0; j < Math.ceil(prev.length / 2); j++) {
+      var top = prev[2 * j], bot = prev[2 * j + 1] !== undefined ? prev[2 * j + 1] : top;
+      curr.push((top + bot) / 2);
+    }
+    positions.push(curr);
+  }
+
+  var container = document.getElementById('ko-bracket-content');
+  container.innerHTML = '';
+
+  var wrapper = document.createElement('div');
+  wrapper.style.cssText = 'position:relative;width:' + totalW + 'px;height:' + totalH + 'px;min-width:' + totalW + 'px;';
+
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;';
+  svg.setAttribute('width', totalW); svg.setAttribute('height', totalH);
+
+  for (var r = 0; r < nRounds; r++) {
+    var stageKey = stages[r];
+    var matches = data[stageKey] || [];
+    var xLeft = r * (CARD_W + SLOT);
+    var xRight = xLeft + CARD_W;
+    var midX = xRight + SLOT / 2;
+
+    for (var m = 0; m < matches.length; m++) {
+      var match = matches[m];
+      var centerY = positions[r][m];
+      var topY = Math.round(centerY - CARD_H / 2);
+
+      // Read live scores from hidden inputs if matchPk available
+      var hScore = match.homeScore, aScore = match.awayScore;
+      if (match.matchPk) {
+        var hInp = document.getElementById('hs-' + match.matchPk);
+        var aInp = document.getElementById('as-' + match.matchPk);
+        if (hInp && hInp.value !== '') hScore = parseInt(hInp.value);
+        if (aInp && aInp.value !== '') aScore = parseInt(aInp.value);
+      }
+      var hasScore = hScore !== null && hScore !== undefined && aScore !== null && aScore !== undefined;
+      var isTBD = match.home === 'TBD' && match.away === 'TBD';
+
+      // Determine winner for highlighting
+      var homeWins = hasScore && hScore > aScore;
+      var awayWins = hasScore && aScore > hScore;
+
+      var card = document.createElement('div');
+      card.style.cssText = [
+        'position:absolute', 'left:' + xLeft + 'px', 'top:' + topY + 'px',
+        'width:' + CARD_W + 'px', 'height:' + CARD_H + 'px',
+        'background:' + (isTBD ? 'var(--bg)' : '#fff'),
+        'border:1.5px solid var(--border)', 'border-radius:8px',
+        'overflow:hidden', 'box-sizing:border-box'
+      ].join(';');
+
+      var hColor = homeWins ? 'var(--accent)' : (isTBD ? 'var(--text-muted)' : 'var(--text)');
+      var aColor = awayWins ? 'var(--accent)' : (isTBD ? 'var(--text-muted)' : 'var(--text)');
+      var hWeight = homeWins ? '800' : '600';
+      var aWeight = awayWins ? '800' : '600';
+      var hBg = homeWins ? 'background:var(--accent-light);' : '';
+      var aBg = awayWins ? 'background:var(--accent-light);' : '';
+      var hScoreHtml = hasScore ? '<span style="font-size:11px;font-weight:900;color:' + (homeWins ? 'var(--accent)' : 'var(--text-muted)') + ';flex-shrink:0;">' + hScore + '</span>' : '';
+      var aScoreHtml = hasScore ? '<span style="font-size:11px;font-weight:900;color:' + (awayWins ? 'var(--accent)' : 'var(--text-muted)') + ';flex-shrink:0;">' + aScore + '</span>' : '';
+
+      card.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-bottom:1px solid var(--border);height:50%;' + hBg + '">' +
+          '<span style="font-size:11px;font-weight:' + hWeight + ';color:' + hColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.home + '</span>' +
+          hScoreHtml +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;height:50%;' + aBg + '">' +
+          '<span style="font-size:11px;font-weight:' + aWeight + ';color:' + aColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.away + '</span>' +
+          aScoreHtml +
+        '</div>';
+
+      // Make card clickable in Árbol view (opens ScorePicker on the hidden inputs)
+      if (!_koSubmitted && match.matchPk) {
+        (function (pk, home, away) {
+          card.style.cursor = 'pointer';
+          card.addEventListener('mouseenter', function () { card.style.borderColor = 'var(--accent)'; });
+          card.addEventListener('mouseleave', function () { card.style.borderColor = 'var(--border)'; });
+          card.onclick = function () {
+            GansaPicker.open(card, 'hs-' + pk, 'as-' + pk, home, away, function () {
+              updateKoPill(String(pk));
+              _ensureBracketTree();
+            });
+          };
+        })(match.matchPk, match.home, match.away);
+      }
+
+      wrapper.appendChild(card);
+
+      if (r < nRounds - 1 && m % 2 === 0) {
+        var topCY = positions[r][m];
+        var botCY = positions[r][m + 1] !== undefined ? positions[r][m + 1] : topCY;
+        var nextCY = positions[r + 1][Math.floor(m / 2)];
+        var nextLeftX = (r + 1) * (CARD_W + SLOT);
+        _addSvgLine(svg, xRight, topCY, midX, topCY);
+        if (botCY !== topCY) {
+          _addSvgLine(svg, xRight, botCY, midX, botCY);
+          _addSvgLine(svg, midX, topCY, midX, botCY);
+        }
+        _addSvgLine(svg, midX, nextCY, nextLeftX, nextCY);
+      }
+    }
+  }
+
+  wrapper.appendChild(svg);
+  container.appendChild(wrapper);
 }
 
 (function () {
   var savedScrollY = 0;
-  var openStageIndices = new Set();
 
   function syncWinner(form) {
     var home = form.querySelector('[name=predicted_home_score]');
@@ -81,33 +254,52 @@ function switchKoStage(key) {
     if (!home || !away || !wrap) return;
     var equal = home.value !== '' && away.value !== '' &&
                 parseInt(home.value, 10) === parseInt(away.value, 10);
-    wrap.classList.toggle('hidden', !equal);
-    wrap.classList.toggle('flex', equal);
+    wrap.style.display = equal ? 'flex' : 'none';
     if (!equal) {
       var sel = wrap.querySelector('select');
       if (sel) sel.value = '';
     }
   }
 
-  // Event delegation — survives HTMX innerHTML swaps
-  document.addEventListener('input', function (e) {
-    var name = e.target.name;
-    if (name === 'predicted_home_score' || name === 'predicted_away_score') {
-      var form = e.target.closest('.ko-form');
-      if (form) syncWinner(form);
+  window.updateKoPill = function (matchPk) {
+    var hEl = document.getElementById('hs-' + matchPk);
+    var aEl = document.getElementById('as-' + matchPk);
+    var pill = document.getElementById('ko-pill-' + matchPk);
+    if (!hEl || !aEl) return;
+    if (pill) {
+      if (hEl.value !== '' && aEl.value !== '') {
+        pill.textContent = hEl.value + ' : ' + aEl.value;
+        pill.style.color = 'var(--text)';
+      } else {
+        pill.textContent = '– : –';
+        pill.style.color = 'var(--text-muted)';
+      }
     }
-  });
+    var form = hEl.closest('.ko-form');
+    if (form) syncWinner(form);
+    updateKoProgress();
+  };
 
-  // Before each bracket save: snapshot scroll + open stages
-  document.addEventListener('htmx:beforeRequest', function (e) {
-    if (e.target.closest && e.target.closest('.ko-form')) {
-      savedScrollY = window.scrollY;
-      openStageIndices.clear();
-      document.querySelectorAll('#ko-bracket details').forEach(function (el, idx) {
-        if (el.hasAttribute('open')) openStageIndices.add(idx);
-      });
-    }
-  });
+  {% if not predictions_submitted %}
+  window.randomizeAllKo = function (btn) {
+    var inputs = document.querySelectorAll('#ko-lista-content [id^="hs-"]');
+    if (inputs.length === 0) return;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="gansa-spinner"></span>Guardando...'; }
+    inputs.forEach(function (hInp) {
+      var matchId = hInp.id.replace('hs-', '');
+      var aInp = document.getElementById('as-' + matchId);
+      if (!aInp) return;
+      hInp.value = Math.floor(Math.random() * 6);
+      aInp.value = Math.floor(Math.random() * 6);
+      updateKoPill(matchId);
+      hInp.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    var ms = Math.max(2500, inputs.length * 60 + 1000);
+    setTimeout(function () {
+      if (btn) { btn.disabled = false; btn.textContent = '🎲 Randomizar'; }
+    }, ms);
+  };
+  {% endif %}
 
   function updateKoProgress() {
     var finalStage = document.querySelector('[data-ko-stage="final"]');
@@ -127,19 +319,21 @@ function switchKoStage(key) {
     });
   }
 
-  // After swap: restore open stages, scroll position, winner dropdowns, active tab
+  document.addEventListener('htmx:beforeRequest', function (e) {
+    if (e.target.closest && e.target.closest('.ko-form')) {
+      savedScrollY = window.scrollY;
+    }
+  });
+
   document.addEventListener('htmx:afterSettle', function () {
-    document.querySelectorAll('#ko-bracket details').forEach(function (el, idx) {
-      if (openStageIndices.has(idx)) {
-        el.setAttribute('open', '');
-      } else {
-        el.removeAttribute('open');
-      }
-    });
     window.scrollTo(0, savedScrollY);
     document.querySelectorAll('.ko-form').forEach(syncWinner);
     switchKoStage(activeKoStage);
     updateKoProgress();
+    var bracketEl = document.getElementById('ko-bracket-content');
+    if (bracketEl && bracketEl.style.display !== 'none') {
+      _ensureBracketTree();
+    }
   });
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -149,4 +343,5 @@ function switchKoStage(key) {
   });
 })();
 </script>
+
 {% endblock %}

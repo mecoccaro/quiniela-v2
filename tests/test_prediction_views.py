@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from django.test import Client
 
@@ -143,4 +145,42 @@ def test_submitted_form_renders_readonly(client_logged_in, pool, membership):
     membership.save()
     response = client_logged_in.get(f"/predictions/pool/{pool.pk}/group-stage/")
     assert response.status_code == 200
-    assert b"readonly" in response.content
+    assert b"predicciones ya fueron enviadas" in response.content
+
+
+# --- ThirdPlaceTiebreakerView validation ---
+
+@pytest.fixture
+def tiebreaker_teams(db):
+    return [
+        Team.objects.create(name="Alpha", fifa_code="ALP"),
+        Team.objects.create(name="Beta", fifa_code="BET"),
+    ]
+
+
+@pytest.mark.django_db
+def test_tiebreaker_missing_rank_returns_error(client_logged_in, pool, membership, tiebreaker_teams):
+    url = f"/predictions/pool/{pool.pk}/third-place-tiebreaker/"
+    with patch("apps.predictions.views.get_conduct_tied_thirds", return_value=tiebreaker_teams):
+        response = client_logged_in.post(url, {f"rank_{tiebreaker_teams[0].pk}": "1"})
+    assert response.status_code == 200
+    assert b"Asigna un orden" in response.content
+
+
+@pytest.mark.django_db
+def test_tiebreaker_duplicate_ranks_returns_error(client_logged_in, pool, membership, tiebreaker_teams):
+    url = f"/predictions/pool/{pool.pk}/third-place-tiebreaker/"
+    data = {f"rank_{t.pk}": "1" for t in tiebreaker_teams}
+    with patch("apps.predictions.views.get_conduct_tied_thirds", return_value=tiebreaker_teams):
+        response = client_logged_in.post(url, data)
+    assert response.status_code == 200
+    assert b"orden diferente" in response.content
+
+
+@pytest.mark.django_db
+def test_tiebreaker_valid_ranks_redirects(client_logged_in, pool, membership, tiebreaker_teams):
+    url = f"/predictions/pool/{pool.pk}/third-place-tiebreaker/"
+    data = {f"rank_{tiebreaker_teams[0].pk}": "1", f"rank_{tiebreaker_teams[1].pk}": "2"}
+    with patch("apps.predictions.views.get_conduct_tied_thirds", return_value=tiebreaker_teams):
+        response = client_logged_in.post(url, data)
+    assert response.status_code == 302

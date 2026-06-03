@@ -4,126 +4,121 @@
 {% block title %}Partidos del día — {{ pool.name }}{% endblock %}
 
 {% block content %}
-<div class="flex items-center justify-between mb-4">
-  <h1 class="text-2xl font-bold text-gray-800">Partidos del día</h1>
-  <span class="text-sm text-gray-500">{{ pool.name }}</span>
+
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
+  <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.5px;color:var(--text);margin:0;">Partidos</h1>
+  <span style="font-size:14px;color:var(--text-muted);">{{ pool.name }}</span>
 </div>
 
 {# Date switcher #}
-<div class="flex items-center gap-3 mb-6 flex-wrap">
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
   {% if prev_date %}
   <a href="?date={{ prev_date|date:'Y-m-d' }}"
-     class="text-gray-600 hover:text-green-700 font-medium px-3 py-1.5 rounded-lg border border-gray-200 hover:border-green-400 text-sm">
-    &#8592; {{ prev_date|date:"j/n" }}
-  </a>
+     style="font-size:13px;font-weight:700;color:var(--text-muted);padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:#fff;text-decoration:none;">← {{ prev_date|date:"j/n" }}</a>
   {% else %}
-  <span class="text-gray-300 px-3 py-1.5 rounded-lg border border-gray-100 text-sm">&#8592;</span>
+  <span style="font-size:13px;color:var(--border);padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);">←</span>
   {% endif %}
 
-  <span class="font-semibold text-gray-800 text-lg">{{ selected_date|date:"l j \d\e F" }}</span>
+  <span style="font-size:20px;font-weight:800;color:var(--text);">{{ selected_date|date:"l j \d\e F" }}</span>
 
   {% if next_date %}
   <a href="?date={{ next_date|date:'Y-m-d' }}"
-     class="text-gray-600 hover:text-green-700 font-medium px-3 py-1.5 rounded-lg border border-gray-200 hover:border-green-400 text-sm">
-    {{ next_date|date:"j/n" }} &#8594;
-  </a>
+     style="font-size:13px;font-weight:700;color:var(--text-muted);padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);background:#fff;text-decoration:none;">{{ next_date|date:"j/n" }} →</a>
   {% else %}
-  <span class="text-gray-300 px-3 py-1.5 rounded-lg border border-gray-100 text-sm">&#8594;</span>
+  <span style="font-size:13px;color:var(--border);padding:7px 14px;border-radius:8px;border:1.5px solid var(--border);">→</span>
   {% endif %}
 </div>
 
 {# Matches #}
 {% if match_data %}
-  <div class="space-y-6">
+  <div style="display:flex;flex-direction:column;gap:16px;">
     {% for item in match_data %}
       {% with match=item.match participants=item.participants %}
-      <div class="bg-white rounded-xl shadow p-5">
-        <div class="flex items-center gap-2 mb-4 flex-wrap">
-          <span class="font-semibold text-gray-800 text-base">
-            {{ match.home_team.fifa_code|flag_emoji }} {{ match.home_team.name }}
-          </span>
-          <span class="text-gray-400 font-medium">vs</span>
-          <span class="font-semibold text-gray-800 text-base">
-            {{ match.away_team.name }} {{ match.away_team.fifa_code|flag_emoji }}
-          </span>
-          {% if match.scheduled_at %}
-          <span class="ml-auto text-sm text-gray-500 tabular-nums">
-            {{ match.scheduled_at|time:"H:i" }} UTC
-          </span>
-          {% endif %}
+      <div style="background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;">
+
+        {# Card header #}
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:15px;font-weight:700;color:var(--text);">{{ match.home_team.fifa_code|flag_emoji }} {{ match.home_team.name }}</span>
+            <span style="font-size:13px;color:var(--text-muted);font-weight:500;">vs</span>
+            <span style="font-size:15px;font-weight:700;color:var(--text);">{{ match.away_team.name }} {{ match.away_team.fifa_code|flag_emoji }}</span>
+            {% if match.scheduled_at %}
+            <span style="font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;">{{ match.scheduled_at|time:"H:i" }} UTC</span>
+            {% endif %}
+          </div>
           {% if match.home_score is not None and match.away_score is not None %}
-          <span class="bg-gray-800 text-white text-sm font-mono font-semibold px-3 py-1 rounded-lg">
-            {{ match.home_score }} – {{ match.away_score }}
-          </span>
+          <span style="background:var(--text);color:#fff;border-radius:8px;padding:6px 16px;font-weight:900;font-size:17px;font-variant-numeric:tabular-nums;">{{ match.home_score }} – {{ match.away_score }}</span>
+          {% else %}
+          <span style="background:var(--pending-light);color:var(--pending);border-radius:100px;font-size:12px;font-weight:700;padding:4px 12px;">Próximamente</span>
           {% endif %}
         </div>
 
+        {# Predictions table #}
         {% if participants %}
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="text-left text-xs text-gray-500 border-b border-gray-100">
-                <th class="pb-2 pr-4 font-medium">Usuario</th>
-                <th class="pb-2 px-2 font-medium text-center">Predicción</th>
-                <th class="pb-2 pl-2 font-medium text-center">Puntos</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-50">
-              {% for p in participants %}
-              <tr>
-                <td class="py-2 pr-4 font-medium text-gray-700">{{ p.user.nickname }}</td>
-                <td class="py-2 px-2 text-center">
-                  {% if p.prediction %}
-                    <span class="font-mono font-semibold text-gray-800">
-                      {{ p.prediction.predicted_home_score }} – {{ p.prediction.predicted_away_score }}
-                    </span>
-                    {% if p.prediction.predicted_winner %}
-                      <span class="ml-1 text-xs text-gray-500">
-                        ({{ p.prediction.predicted_winner.fifa_code|flag_emoji }})
-                      </span>
-                    {% endif %}
-                  {% else %}
-                    <span class="text-gray-400">—</span>
-                  {% endif %}
-                </td>
-                <td class="py-2 pl-2 text-center">
-                  {% if p.prediction and p.prediction.points_awarded is not None %}
-                    <span class="inline-block bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full text-xs">
-                      {{ p.prediction.points_awarded }}
-                    </span>
-                  {% else %}
-                    <span class="text-gray-400">—</span>
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <div style="border-top:1px solid var(--border);">
+          <div style="display:grid;grid-template-columns:1fr 120px 72px;background:var(--bg);padding:0 20px;">
+            <div style="padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;">USUARIO</div>
+            <div style="padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;text-align:center;">PREDICCIÓN</div>
+            <div style="padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;text-align:center;">PUNTOS</div>
+          </div>
+          {% for p in participants %}
+          <div style="display:grid;grid-template-columns:1fr 120px 72px;padding:0 20px;align-items:center;border-top:1px solid var(--border);{% if p.user.nickname == request.user.nickname %}background:var(--accent-light);{% endif %}">
+            <div style="padding:10px 0;font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ p.user.nickname }}{% if p.user.nickname == request.user.nickname %} <span style="font-size:11px;color:var(--accent);">(vos)</span>{% endif %}</div>
+            <div style="padding:10px 0;text-align:center;">
+              {% if p.prediction %}
+                <span style="font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;color:var(--text);">{{ p.prediction.predicted_home_score }} – {{ p.prediction.predicted_away_score }}</span>
+                {% if p.prediction.predicted_winner %}
+                  <span style="font-size:11px;color:var(--text-muted);margin-left:4px;">({{ p.prediction.predicted_winner.fifa_code|flag_emoji }})</span>
+                {% endif %}
+              {% else %}
+                <span style="color:var(--text-muted);">—</span>
+              {% endif %}
+            </div>
+            <div style="padding:10px 0;text-align:center;">
+              {% if p.prediction and p.prediction.points_awarded is not None %}
+                {% with pts=p.prediction.points_awarded %}
+                {% if pts >= 3 %}
+                  <span style="background:var(--success-light);color:var(--success);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;">{{ pts }}pts</span>
+                {% elif pts >= 1 %}
+                  <span style="background:var(--accent-light);color:var(--accent);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;">{{ pts }}pt</span>
+                {% else %}
+                  <span style="background:var(--bg);color:var(--text-muted);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;border:1px solid var(--border);">{{ pts }}pts</span>
+                {% endif %}
+                {% endwith %}
+              {% else %}
+                <span style="color:var(--text-muted);">—</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
         </div>
         {% else %}
-        <p class="text-sm text-gray-400">Ningún participante ha enviado predicciones aún.</p>
+        <div style="padding:16px 20px;border-top:1px solid var(--border);">
+          <p style="font-size:14px;color:var(--text-muted);margin:0;">Ningún participante ha enviado predicciones aún.</p>
+        </div>
         {% endif %}
+
       </div>
       {% endwith %}
     {% endfor %}
   </div>
 {% else %}
-  <div class="bg-white rounded-xl shadow p-8 text-center text-gray-500">
-    <p class="text-lg mb-2">No hay partidos programados para este día.</p>
+  <div style="background:#fff;border-radius:16px;border:1px solid var(--border);padding:48px 32px;text-align:center;color:var(--text-muted);">
+    <p style="font-size:18px;margin:0 0 8px;">No hay partidos programados para este día.</p>
     {% if available_dates %}
-    <p class="text-sm text-gray-400">Selecciona una fecha con partidos abajo.</p>
+    <p style="font-size:14px;margin:0;">Selecciona una fecha con partidos abajo.</p>
     {% endif %}
   </div>
 {% endif %}
 
-{# All available dates as compact jump buttons #}
+{# Date strip #}
 {% if available_dates %}
-<div class="mt-6">
-  <p class="text-xs text-gray-400 mb-2 font-medium uppercase tracking-wide">Fechas con partidos</p>
-  <div class="flex flex-wrap gap-1.5">
+<div style="margin-top:24px;">
+  <p style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 8px;">Fechas con partidos</p>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;">
     {% for d in available_dates %}
     <a href="?date={{ d|date:'Y-m-d' }}"
-       class="text-xs px-2.5 py-1 rounded-lg font-medium {% if d == selected_date %}bg-green-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-800{% endif %}">
+       style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:100px;text-decoration:none;{% if d == selected_date %}background:var(--accent);color:#fff;{% else %}background:#fff;border:1.5px solid var(--border);color:var(--text-muted);{% endif %}">
       {{ d|date:"j/n" }}
     </a>
     {% endfor %}
@@ -131,10 +126,10 @@
 </div>
 {% endif %}
 
-<div class="mt-6 flex gap-2 text-sm flex-wrap">
-  <a href="{% url 'dashboard' %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Panel</a>
-  <a href="{% url 'leaderboard' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Tabla</a>
-  <a href="{% url 'participants' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Participantes</a>
+<div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;">
+  <a href="{% url 'dashboard' %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Panel</a>
+  <a href="{% url 'leaderboard' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Tabla</a>
+  <a href="{% url 'participants' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Participantes</a>
 </div>
 
 {% endblock %}

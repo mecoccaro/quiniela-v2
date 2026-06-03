@@ -103,6 +103,8 @@ class MyPredictionsView(LoginRequiredMixin, View):
 
         champion_pick = PoolChampionPick.objects.filter(user=user, pool=pool).first()
         top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=pool).first()
+        entry = LeaderboardEntry.objects.filter(user=user, pool=pool).first()
+        total_points = entry.total_points if entry else 0
 
         return render(request, "leaderboard/my_predictions.html", {
             "pool": pool,
@@ -110,6 +112,7 @@ class MyPredictionsView(LoginRequiredMixin, View):
             "stages": stages,
             "champion_pick": champion_pick,
             "top_scorer_pick": top_scorer_pick,
+            "total_points": total_points,
         })
 
 

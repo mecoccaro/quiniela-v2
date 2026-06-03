@@ -6,8 +6,34 @@
   <title>{% block title %}La Gansa{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent:       oklch(62% 0.22 28);
+      --accent-light: oklch(97% 0.06 28);
+      --nav:          #111111;
+      --nav-text:     #ffffff;
+      --bg:           #F5F4EE;
+      --surface:      #ffffff;
+      --border:       #E5E3DC;
+      --text:         #111111;
+      --text-muted:   #8A8877;
+      --success:      #16A34A;
+      --success-light:#F0FFF4;
+      --danger:       #DC2626;
+      --danger-light: #FFF5F5;
+      --pending:      #B45309;
+      --pending-light:#FFFBEB;
+    }
+    body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    @keyframes gansa-spin { to { transform: rotate(360deg); } }
+    .gansa-spinner { display:inline-block;width:13px;height:13px;border:2px solid rgba(0,0,0,0.15);border-top-color:var(--text-muted);border-radius:50%;animation:gansa-spin 0.7s linear infinite;vertical-align:middle;margin-right:4px; }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body class="min-h-screen" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   {% include "partials/nav.html" %}
   {% include "partials/faq_modal.html" %}
   {% include "partials/howto_modal.html" %}
@@ -44,5 +70,6 @@
       }
     });
   </script>
+  {% include "partials/score_picker.html" %}
 </body>
 </html>
