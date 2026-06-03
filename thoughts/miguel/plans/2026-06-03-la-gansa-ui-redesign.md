@@ -509,8 +509,8 @@ Include in `templates/base.html` at bottom of `<body>`: `{% include "partials/sc
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes
-- [ ] `uv run ruff check .` passes
+- [x] `uv run pytest` passes
+- [x] `uv run ruff check .` passes
 
 #### Automated QA:
 - [ ] Knockout page loads; round tabs switch between stages
