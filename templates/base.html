@@ -29,6 +29,8 @@
     }
     body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); }
     .tabular-nums { font-variant-numeric: tabular-nums; }
+    @keyframes gansa-spin { to { transform: rotate(360deg); } }
+    .gansa-spinner { display:inline-block;width:13px;height:13px;border:2px solid rgba(0,0,0,0.15);border-top-color:var(--text-muted);border-radius:50%;animation:gansa-spin 0.7s linear infinite;vertical-align:middle;margin-right:4px; }
   </style>
 </head>
 <body class="min-h-screen" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>

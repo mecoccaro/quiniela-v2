@@ -185,6 +185,7 @@ class KnockoutPredictionsView(LoginRequiredMixin, View):
                     "homeScore": slot.prediction.predicted_home_score if slot.prediction else None,
                     "awayScore": slot.prediction.predicted_away_score if slot.prediction else None,
                     "slotKey": slot.slot_key,
+                    "matchPk": slot.match.pk if slot.match else None,
                 }
                 for slot in slots
             ]

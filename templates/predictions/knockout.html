@@ -50,7 +50,7 @@
               style="padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:#fff;color:var(--text-muted);">Árbol</button>
     </div>
     {% if not predictions_submitted %}
-    <button onclick="randomizeAllKo()"
+    <button onclick="randomizeAllKo(this)"
             style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
     {% endif %}
   </div>
@@ -113,10 +113,7 @@ function _addSvgLine(svg, x1, y1, x2, y2) {
   svg.appendChild(line);
 }
 
-var _bracketRendered = false;
 function _ensureBracketTree() {
-  if (_bracketRendered) return;
-
   var rawEl = document.getElementById('bracket-data');
   if (!rawEl) return;
   var data;
@@ -132,7 +129,6 @@ function _ensureBracketTree() {
   var totalW = nRounds * CARD_W + (nRounds - 1) * SLOT + 20;
   var totalH = nFirst * (CARD_H + RGAP) - RGAP + 2 * TOP_PAD;
 
-  // Compute centerY per round
   var positions = [];
   var first = [];
   for (var i = 0; i < nFirst; i++) first.push(TOP_PAD + i * (CARD_H + RGAP) + CARD_H / 2);
@@ -167,8 +163,21 @@ function _ensureBracketTree() {
       var match = matches[m];
       var centerY = positions[r][m];
       var topY = Math.round(centerY - CARD_H / 2);
+
+      // Read live scores from hidden inputs if matchPk available
+      var hScore = match.homeScore, aScore = match.awayScore;
+      if (match.matchPk) {
+        var hInp = document.getElementById('hs-' + match.matchPk);
+        var aInp = document.getElementById('as-' + match.matchPk);
+        if (hInp && hInp.value !== '') hScore = parseInt(hInp.value);
+        if (aInp && aInp.value !== '') aScore = parseInt(aInp.value);
+      }
+      var hasScore = hScore !== null && hScore !== undefined && aScore !== null && aScore !== undefined;
       var isTBD = match.home === 'TBD' && match.away === 'TBD';
-      var hasScore = match.homeScore !== null && match.awayScore !== null;
+
+      // Determine winner for highlighting
+      var homeWins = hasScore && hScore > aScore;
+      var awayWins = hasScore && aScore > hScore;
 
       var card = document.createElement('div');
       card.style.cssText = [
@@ -179,23 +188,27 @@ function _ensureBracketTree() {
         'overflow:hidden', 'box-sizing:border-box'
       ].join(';');
 
-      var nameColor = isTBD ? 'var(--text-muted)' : 'var(--text)';
-      var scoreHtml = hasScore ? '<span style="font-size:11px;font-weight:900;color:var(--accent);flex-shrink:0;">' + match.homeScore + '</span>' : '';
-      var scoreHtml2 = hasScore ? '<span style="font-size:11px;font-weight:900;color:var(--accent);flex-shrink:0;">' + match.awayScore + '</span>' : '';
+      var hColor = homeWins ? 'var(--accent)' : (isTBD ? 'var(--text-muted)' : 'var(--text)');
+      var aColor = awayWins ? 'var(--accent)' : (isTBD ? 'var(--text-muted)' : 'var(--text)');
+      var hWeight = homeWins ? '800' : '600';
+      var aWeight = awayWins ? '800' : '600';
+      var hBg = homeWins ? 'background:var(--accent-light);' : '';
+      var aBg = awayWins ? 'background:var(--accent-light);' : '';
+      var hScoreHtml = hasScore ? '<span style="font-size:11px;font-weight:900;color:' + (homeWins ? 'var(--accent)' : 'var(--text-muted)') + ';flex-shrink:0;">' + hScore + '</span>' : '';
+      var aScoreHtml = hasScore ? '<span style="font-size:11px;font-weight:900;color:' + (awayWins ? 'var(--accent)' : 'var(--text-muted)') + ';flex-shrink:0;">' + aScore + '</span>' : '';
 
       card.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-bottom:1px solid var(--border);height:50%;">' +
-          '<span style="font-size:11px;font-weight:600;color:' + nameColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.home + '</span>' +
-          scoreHtml +
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-bottom:1px solid var(--border);height:50%;' + hBg + '">' +
+          '<span style="font-size:11px;font-weight:' + hWeight + ';color:' + hColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.home + '</span>' +
+          hScoreHtml +
         '</div>' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;height:50%;">' +
-          '<span style="font-size:11px;font-weight:600;color:' + nameColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.away + '</span>' +
-          scoreHtml2 +
+        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;height:50%;' + aBg + '">' +
+          '<span style="font-size:11px;font-weight:' + aWeight + ';color:' + aColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.away + '</span>' +
+          aScoreHtml +
         '</div>';
 
       wrapper.appendChild(card);
 
-      // Connector lines to next round (pair every 2 matches)
       if (r < nRounds - 1 && m % 2 === 0) {
         var topCY = positions[r][m];
         var botCY = positions[r][m + 1] !== undefined ? positions[r][m + 1] : topCY;
@@ -213,7 +226,6 @@ function _ensureBracketTree() {
 
   wrapper.appendChild(svg);
   container.appendChild(wrapper);
-  _bracketRendered = true;
 }
 
 (function () {
@@ -253,8 +265,11 @@ function _ensureBracketTree() {
   };
 
   {% if not predictions_submitted %}
-  window.randomizeAllKo = function () {
-    document.querySelectorAll('#ko-lista-content [id^="hs-"]').forEach(function (hInp) {
+  window.randomizeAllKo = function (btn) {
+    var inputs = document.querySelectorAll('#ko-lista-content [id^="hs-"]');
+    if (inputs.length === 0) return;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="gansa-spinner"></span>Guardando...'; }
+    inputs.forEach(function (hInp) {
       var matchId = hInp.id.replace('hs-', '');
       var aInp = document.getElementById('as-' + matchId);
       if (!aInp) return;
@@ -263,6 +278,10 @@ function _ensureBracketTree() {
       updateKoPill(matchId);
       hInp.dispatchEvent(new Event('change', { bubbles: true }));
     });
+    var ms = Math.max(2500, inputs.length * 60 + 1000);
+    setTimeout(function () {
+      if (btn) { btn.disabled = false; btn.textContent = '🎲 Randomizar'; }
+    }, ms);
   };
   {% endif %}
 

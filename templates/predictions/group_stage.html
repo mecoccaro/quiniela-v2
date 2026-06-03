@@ -24,7 +24,7 @@
        style="background:#fff;border:1.5px solid var(--border);border-radius:100px;padding:7px 18px;font-size:13px;font-weight:700;color:var(--text-muted);text-decoration:none;{% if total_predicted < total_matches %}display:none;{% endif %}">Eliminatorias →</a>
   </div>
   {% if not predictions_submitted %}
-  <button onclick="randomizeAll()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
+  <button onclick="randomizeAll(this)" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
   {% endif %}
 </div>
 
@@ -184,8 +184,11 @@
   };
 
   {% if not predictions_submitted %}
-  window.randomizeAll = function () {
-    document.querySelectorAll('[id^="hs-"]').forEach(function (hInp) {
+  window.randomizeAll = function (btn) {
+    var inputs = document.querySelectorAll('[id^="hs-"]');
+    if (inputs.length === 0) return;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="gansa-spinner"></span>Guardando...'; }
+    inputs.forEach(function (hInp) {
       var matchId = hInp.id.replace('hs-', '');
       var aInp = document.getElementById('as-' + matchId);
       if (!aInp) return;
@@ -194,6 +197,10 @@
       updatePill(matchId);
       hInp.dispatchEvent(new Event('change', { bubbles: true }));
     });
+    var ms = Math.max(2500, inputs.length * 60 + 1000);
+    setTimeout(function () {
+      if (btn) { btn.disabled = false; btn.textContent = '🎲 Randomizar'; }
+    }, ms);
   };
   {% endif %}
 
