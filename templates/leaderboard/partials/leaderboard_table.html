@@ -1,45 +1,54 @@
-<div class="bg-white rounded-xl shadow overflow-hidden"
+<div style="background:#fff;border-radius:16px;border:1px solid var(--border);overflow:hidden;"
      hx-get="{% url 'leaderboard' pool.pk %}"
      hx-trigger="every 60s"
      hx-target="this"
      hx-swap="outerHTML">
-  <table class="w-full text-sm">
-    <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
-      <tr>
-        <th class="px-4 py-3 text-left w-8">#</th>
-        <th class="px-4 py-3 text-left w-8"></th>
-        <th class="px-4 py-3 text-left">Jugador</th>
-        <th class="px-4 py-3 text-right">Pts</th>
-        <th class="px-4 py-3 text-center hidden sm:table-cell">Estado</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-gray-100">
-      {% for entry in entries %}
-      <tr class="{% if entry.user == request.user %}bg-green-50{% endif %} hover:bg-gray-50">
-        <td class="px-4 py-3 font-bold text-gray-500">{{ entry.rank }}</td>
-        <td class="px-2 py-3 text-center w-8">
-          {% if entry.rank_change is not None %}
-            {% if entry.rank_change > 0 %}
-              <span class="text-green-500 font-bold text-sm" title="Subió {{ entry.rank_change }} puesto{{ entry.rank_change|pluralize }}">↑</span>
-            {% elif entry.rank_change < 0 %}
-              <span class="text-red-500 font-bold text-sm" title="Bajó {{ entry.rank_change|stringformat:'d'|slice:'1:' }} puesto{{ entry.rank_change|stringformat:'d'|slice:'1:'|length|pluralize }}">↓</span>
-            {% else %}
-              <span class="text-gray-400 text-sm" title="Sin cambios">=</span>
-            {% endif %}
-          {% endif %}
-        </td>
-        <td class="px-4 py-3 font-medium text-gray-800">
-          {{ entry.user.nickname }}
-          {% if entry.user == request.user %}<span class="text-xs text-green-600 ml-1">(vos)</span>{% endif %}
-        </td>
-        <td class="px-4 py-3 text-right font-bold text-gray-900">{{ entry.total_points }}</td>
-        <td class="px-4 py-3 text-center hidden sm:table-cell">
-          {% if entry.user.pk in submitted_ids %}
-            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Enviado</span>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+
+  <!-- Header -->
+  <div style="display:grid;grid-template-columns:48px 1fr 48px 64px 88px;background:var(--bg);padding:0 16px;border-bottom:1px solid var(--border);">
+    <div style="padding:10px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;">#</div>
+    <div style="padding:10px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;">JUGADOR</div>
+    <div style="padding:10px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;text-align:center;">↕</div>
+    <div style="padding:10px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;text-align:right;">PTS</div>
+    <div style="padding:10px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;text-align:center;">ESTADO</div>
+  </div>
+
+  {% for entry in entries %}
+  <div style="display:grid;grid-template-columns:48px 1fr 48px 64px 88px;padding:0 16px;align-items:center;border-top:1px solid var(--border);{% if entry.user == request.user %}background:var(--accent-light);{% endif %}">
+
+    <!-- Rank -->
+    <div style="padding:12px 0;font-size:{% if entry.rank <= 3 %}18{% else %}14{% endif %}px;font-weight:900;{% if entry.rank <= 3 %}color:var(--accent);{% else %}color:var(--text-muted);{% endif %}">{{ entry.rank }}</div>
+
+    <!-- Player -->
+    <div style="padding:12px 8px 12px 0;display:flex;align-items:center;gap:8px;min-width:0;">
+      <div style="width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;{% if entry.user == request.user %}background:var(--accent);color:#fff;{% else %}background:var(--border);color:var(--text);{% endif %}">{{ entry.user.nickname|slice:":2"|upper }}</div>
+      <span style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ entry.user.nickname }}{% if entry.user == request.user %} <span style="font-size:11px;color:var(--accent);">(vos)</span>{% endif %}</span>
+    </div>
+
+    <!-- Trend -->
+    <div style="padding:12px 0;text-align:center;font-size:12px;font-weight:700;">
+      {% if entry.rank_change is not None %}
+        {% if entry.rank_change > 0 %}
+          <span style="color:var(--success);">▲{{ entry.rank_change }}</span>
+        {% elif entry.rank_change < 0 %}
+          <span style="color:var(--danger);">▼{{ entry.rank_change|stringformat:'d'|slice:'1:' }}</span>
+        {% else %}
+          <span style="color:var(--text-muted);">—</span>
+        {% endif %}
+      {% endif %}
+    </div>
+
+    <!-- Points -->
+    <div style="padding:12px 0;text-align:right;font-size:20px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;">{{ entry.total_points }}</div>
+
+    <!-- Status -->
+    <div style="padding:12px 0;text-align:center;">
+      {% if entry.user.pk in submitted_ids %}
+        <span style="background:var(--success-light);color:var(--success);border-radius:100px;font-size:11px;font-weight:700;padding:3px 8px;">Enviado</span>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endfor %}
+
 </div>

@@ -343,7 +343,7 @@ Include in `templates/base.html` at bottom of `<body>`: `{% include "partials/sc
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes
+- [x] `uv run pytest` passes
 
 #### Automated QA:
 - [ ] Leaderboard page loads; podium visible when ≥ 3 entries
