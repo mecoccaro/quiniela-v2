@@ -1,21 +1,22 @@
 {% load static %}
-<nav class="bg-green-700 text-white shadow">
-  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="{% url 'dashboard' %}" class="font-bold text-lg tracking-wide flex items-center gap-2">
-      <img src="{% static 'images/logo.png' %}" alt="La Gansa" class="h-8 w-auto inline"> La Gansa
+<nav style="background:var(--nav); color:var(--nav-text); height:56px; position:sticky; top:0; z-index:200; display:flex; align-items:center;">
+  <div class="max-w-4xl mx-auto px-4 w-full flex items-center justify-between">
+    <a href="{% url 'dashboard' %}" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
+      <div style="width:32px; height:32px; border-radius:50%; background:conic-gradient(#E53E3E 0deg 90deg, #2B6CB0 90deg 180deg, #C6F135 180deg 270deg, #ED8936 270deg 360deg); display:flex; align-items:center; justify-content:center; font-size:8px;">🦢</div>
+      <span style="font-size:18px; font-weight:800; letter-spacing:-0.5px; color:var(--nav-text);">La Gansa</span>
     </a>
-    <div class="flex items-center gap-3 text-sm">
-      <button onclick="openModal('howto-modal')" class="text-green-200 hover:text-white hidden sm:inline">¿Cómo jugar?</button>
-      <button onclick="openModal('faq-modal')" class="text-green-200 hover:text-white hidden sm:inline">FAQ</button>
+    <div style="display:flex; align-items:center; gap:12px; font-size:13px;">
+      <button onclick="openModal('howto-modal')" style="opacity:0.65; font-size:13px; background:none; border:none; color:var(--nav-text); cursor:pointer;" class="hidden sm:inline">¿Cómo jugar?</button>
+      <button onclick="openModal('faq-modal')" style="opacity:0.65; font-size:13px; background:none; border:none; color:var(--nav-text); cursor:pointer;" class="hidden sm:inline">FAQ</button>
       {% if user.is_authenticated %}
-        <span class="text-green-200">{{ user.nickname }}</span>
+        <span style="opacity:0.8; font-size:13px;">{{ user.nickname }}</span>
         <form method="post" action="{% url 'logout' %}">
           {% csrf_token %}
-          <button type="submit" class="bg-green-600 hover:bg-green-500 px-3 py-1 rounded">Salir</button>
+          <button type="submit" style="background:var(--accent); color:#fff; border:none; border-radius:6px; padding:7px 16px; font-size:13px; font-weight:700; cursor:pointer;">Salir</button>
         </form>
       {% else %}
-        <a href="{% url 'login' %}" class="hover:text-green-200">Ingresar</a>
-        <a href="{% url 'register' %}" class="bg-white text-green-700 hover:bg-green-100 px-3 py-1 rounded font-medium">Registrarse</a>
+        <a href="{% url 'login' %}" style="opacity:0.65; color:var(--nav-text); text-decoration:none; font-size:13px;">Ingresar</a>
+        <a href="{% url 'register' %}" style="background:var(--accent); color:#fff; border-radius:6px; padding:7px 16px; font-size:13px; font-weight:700; text-decoration:none;">Registrarse</a>
       {% endif %}
     </div>
   </div>

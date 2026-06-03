@@ -131,8 +131,8 @@ uv run ruff format .                # format
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes
-- [ ] `uv run ruff check .` passes
+- [x] `uv run pytest` passes
+- [x] `uv run ruff check .` passes
 
 #### Automated QA:
 - [ ] Dev server: navbar background is dark (`#111111`), not green
