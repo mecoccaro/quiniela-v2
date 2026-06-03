@@ -390,7 +390,7 @@ Include in `templates/base.html` at bottom of `<body>`: `{% include "partials/sc
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `uv run pytest` passes
+- [x] `uv run pytest` passes
 
 #### Automated QA:
 - [ ] Pool day page loads; match cards visible with correct layout
