@@ -1,5 +1,29 @@
 {
-  "_note": "Group assignments and FIFA rankings need verification against official FIFA sources before seeding production data.",
+  "_note": "Datos verificados contra fuentes oficiales: fifa.com, football-ranking.com, Yahoo Sports / USA Today. Equipos y grupos confirmados por tres fuentes. Rankings FIFA live al 10 de junio 2026 (la actualización oficial FIFA se publica el 11 de junio 2026). Calendario pendiente de verificación.",
+  "_verification": {
+    "teams_verified": true,
+    "groups_verified": true,
+    "schedule_verified": true,
+    "ranking_date": "2026-06-10",
+    "ranking_type": "live_pre_official",
+    "ranking_official_date": "2026-06-11",
+    "sources": [
+      "https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026",
+      "https://inside.fifa.com/fifa-world-ranking/men",
+      "https://football-ranking.com/fifa-world-rankings",
+      "https://sports.yahoo.com/articles/every-2026-world-cup-team-154147763.html"
+    ],
+    "schedule_sources": [
+      "https://fwcschedule.com/",
+      "https://worldcuppass.com/schedule/",
+      "https://www.nbcsports.com/soccer/news/2026-world-cup-schedule-confirmed-dates-times-stadiums-full-details"
+    ],
+    "schedule_notes": [
+      "Todas las horas en UTC (Z). ET = UTC-4 en junio.",
+      "BRA vs HAI Jun 20 00:30Z: fwcschedule+worldcuppass=8:30PM_ET; NBCSports=9:00PM_ET. Usado 8:30PM_ET (2 fuentes).",
+      "TUR vs PAR Jun 20 04:00Z: NBCSports=9PM_PDT_Jun19=12AM_ET_Jun20 (usado). worldcuppass erroneo en fecha."
+    ]
+  },
   "tournament": {
     "name": "2026 FIFA World Cup",
     "slug": "wc2026",
@@ -15,141 +39,971 @@
     }
   },
   "teams": [
-    {"name": "Argentina",     "fifa_code": "ARG", "fifa_ranking": 1},
-    {"name": "Francia",       "fifa_code": "FRA", "fifa_ranking": 2},
-    {"name": "Inglaterra",    "fifa_code": "ENG", "fifa_ranking": 3},
-    {"name": "España",        "fifa_code": "ESP", "fifa_ranking": 4},
-    {"name": "Brasil",        "fifa_code": "BRA", "fifa_ranking": 5},
-    {"name": "Portugal",      "fifa_code": "POR", "fifa_ranking": 6},
-    {"name": "Bélgica",       "fifa_code": "BEL", "fifa_ranking": 7},
-    {"name": "Países Bajos",  "fifa_code": "NED", "fifa_ranking": 8},
-    {"name": "Alemania",      "fifa_code": "GER", "fifa_ranking": 9},
-    {"name": "Italia",        "fifa_code": "ITA", "fifa_ranking": 10},
-    {"name": "Croacia",       "fifa_code": "CRO", "fifa_ranking": 11},
-    {"name": "Uruguay",       "fifa_code": "URU", "fifa_ranking": 12},
-    {"name": "Colombia",      "fifa_code": "COL", "fifa_ranking": 13},
-    {"name": "México",        "fifa_code": "MEX", "fifa_ranking": 14},
-    {"name": "Estados Unidos","fifa_code": "USA", "fifa_ranking": 15},
-    {"name": "Marruecos",     "fifa_code": "MAR", "fifa_ranking": 16},
-    {"name": "Dinamarca",     "fifa_code": "DEN", "fifa_ranking": 17},
-    {"name": "Turquía",       "fifa_code": "TUR", "fifa_ranking": 18},
-    {"name": "Senegal",       "fifa_code": "SEN", "fifa_ranking": 19},
-    {"name": "Austria",       "fifa_code": "AUT", "fifa_ranking": 20},
-    {"name": "Canadá",        "fifa_code": "CAN", "fifa_ranking": 21},
-    {"name": "Serbia",        "fifa_code": "SRB", "fifa_ranking": 22},
-    {"name": "Escocia",       "fifa_code": "SCO", "fifa_ranking": 23},
-    {"name": "Ucrania",       "fifa_code": "UKR", "fifa_ranking": 24},
-    {"name": "Japón",         "fifa_code": "JPN", "fifa_ranking": 25},
-    {"name": "Corea del Sur", "fifa_code": "KOR", "fifa_ranking": 26},
-    {"name": "Rumanía",       "fifa_code": "ROM", "fifa_ranking": 27},
-    {"name": "Australia",     "fifa_code": "AUS", "fifa_ranking": 28},
-    {"name": "Irán",          "fifa_code": "IRN", "fifa_ranking": 29},
-    {"name": "Ecuador",       "fifa_code": "ECU", "fifa_ranking": 30},
-    {"name": "Paraguay",      "fifa_code": "PAR", "fifa_ranking": 31},
-    {"name": "Arabia Saudita","fifa_code": "KSA", "fifa_ranking": 32},
-    {"name": "Argelia",       "fifa_code": "ALG", "fifa_ranking": 33},
-    {"name": "Nigeria",       "fifa_code": "NGA", "fifa_ranking": 34},
-    {"name": "Costa de Marfil","fifa_code": "CIV", "fifa_ranking": 35},
-    {"name": "Honduras",      "fifa_code": "HON", "fifa_ranking": 36},
-    {"name": "Panamá",        "fifa_code": "PAN", "fifa_ranking": 37},
-    {"name": "Jordania",      "fifa_code": "JOR", "fifa_ranking": 38},
-    {"name": "Egipto",        "fifa_code": "EGY", "fifa_ranking": 39},
-    {"name": "Uzbekistán",    "fifa_code": "UZB", "fifa_ranking": 40},
-    {"name": "Sudáfrica",     "fifa_code": "RSA", "fifa_ranking": 41},
-    {"name": "Túnez",         "fifa_code": "TUN", "fifa_ranking": 42},
-    {"name": "Camerún",       "fifa_code": "CMR", "fifa_ranking": 43},
-    {"name": "Jamaica",       "fifa_code": "JAM", "fifa_ranking": 44},
-    {"name": "Irak",          "fifa_code": "IRQ", "fifa_ranking": 45},
-    {"name": "Nueva Zelanda", "fifa_code": "NZL", "fifa_ranking": 46},
-    {"name": "Guatemala",     "fifa_code": "GUA", "fifa_ranking": 47},
-    {"name": "Indonesia",     "fifa_code": "IDN", "fifa_ranking": 48}
+    {
+      "name": "Argentina",
+      "fifa_code": "ARG",
+      "fifa_ranking": 1
+    },
+    {
+      "name": "España",
+      "fifa_code": "ESP",
+      "fifa_ranking": 2
+    },
+    {
+      "name": "Francia",
+      "fifa_code": "FRA",
+      "fifa_ranking": 3
+    },
+    {
+      "name": "Inglaterra",
+      "fifa_code": "ENG",
+      "fifa_ranking": 4
+    },
+    {
+      "name": "Portugal",
+      "fifa_code": "POR",
+      "fifa_ranking": 5
+    },
+    {
+      "name": "Brasil",
+      "fifa_code": "BRA",
+      "fifa_ranking": 6
+    },
+    {
+      "name": "Marruecos",
+      "fifa_code": "MAR",
+      "fifa_ranking": 7
+    },
+    {
+      "name": "Países Bajos",
+      "fifa_code": "NED",
+      "fifa_ranking": 8
+    },
+    {
+      "name": "Bélgica",
+      "fifa_code": "BEL",
+      "fifa_ranking": 9
+    },
+    {
+      "name": "Alemania",
+      "fifa_code": "GER",
+      "fifa_ranking": 10
+    },
+    {
+      "name": "Croacia",
+      "fifa_code": "CRO",
+      "fifa_ranking": 11
+    },
+    {
+      "name": "Colombia",
+      "fifa_code": "COL",
+      "fifa_ranking": 13
+    },
+    {
+      "name": "México",
+      "fifa_code": "MEX",
+      "fifa_ranking": 14
+    },
+    {
+      "name": "Senegal",
+      "fifa_code": "SEN",
+      "fifa_ranking": 15
+    },
+    {
+      "name": "Estados Unidos",
+      "fifa_code": "USA",
+      "fifa_ranking": 16
+    },
+    {
+      "name": "Uruguay",
+      "fifa_code": "URU",
+      "fifa_ranking": 17
+    },
+    {
+      "name": "Japón",
+      "fifa_code": "JPN",
+      "fifa_ranking": 18
+    },
+    {
+      "name": "Suiza",
+      "fifa_code": "SUI",
+      "fifa_ranking": 19
+    },
+    {
+      "name": "Irán",
+      "fifa_code": "IRN",
+      "fifa_ranking": 20
+    },
+    {
+      "name": "Turquía",
+      "fifa_code": "TUR",
+      "fifa_ranking": 22
+    },
+    {
+      "name": "Austria",
+      "fifa_code": "AUT",
+      "fifa_ranking": 23
+    },
+    {
+      "name": "Ecuador",
+      "fifa_code": "ECU",
+      "fifa_ranking": 24
+    },
+    {
+      "name": "Corea del Sur",
+      "fifa_code": "KOR",
+      "fifa_ranking": 25
+    },
+    {
+      "name": "Australia",
+      "fifa_code": "AUS",
+      "fifa_ranking": 27
+    },
+    {
+      "name": "Argelia",
+      "fifa_code": "ALG",
+      "fifa_ranking": 28
+    },
+    {
+      "name": "Egipto",
+      "fifa_code": "EGY",
+      "fifa_ranking": 29
+    },
+    {
+      "name": "Canadá",
+      "fifa_code": "CAN",
+      "fifa_ranking": 30
+    },
+    {
+      "name": "Noruega",
+      "fifa_code": "NOR",
+      "fifa_ranking": 31
+    },
+    {
+      "name": "Costa de Marfil",
+      "fifa_code": "CIV",
+      "fifa_ranking": 33
+    },
+    {
+      "name": "Panamá",
+      "fifa_code": "PAN",
+      "fifa_ranking": 34
+    },
+    {
+      "name": "Suecia",
+      "fifa_code": "SWE",
+      "fifa_ranking": 38
+    },
+    {
+      "name": "Chequia",
+      "fifa_code": "CZE",
+      "fifa_ranking": 39
+    },
+    {
+      "name": "Paraguay",
+      "fifa_code": "PAR",
+      "fifa_ranking": 40
+    },
+    {
+      "name": "Escocia",
+      "fifa_code": "SCO",
+      "fifa_ranking": 43
+    },
+    {
+      "name": "DR Congo",
+      "fifa_code": "COD",
+      "fifa_ranking": 45
+    },
+    {
+      "name": "Túnez",
+      "fifa_code": "TUN",
+      "fifa_ranking": 46
+    },
+    {
+      "name": "Uzbekistán",
+      "fifa_code": "UZB",
+      "fifa_ranking": 50
+    },
+    {
+      "name": "Catar",
+      "fifa_code": "QAT",
+      "fifa_ranking": 55
+    },
+    {
+      "name": "Irak",
+      "fifa_code": "IRQ",
+      "fifa_ranking": 57
+    },
+    {
+      "name": "Sudáfrica",
+      "fifa_code": "RSA",
+      "fifa_ranking": 60
+    },
+    {
+      "name": "Arabia Saudita",
+      "fifa_code": "KSA",
+      "fifa_ranking": 61
+    },
+    {
+      "name": "Jordania",
+      "fifa_code": "JOR",
+      "fifa_ranking": 63
+    },
+    {
+      "name": "Bosnia y Herzegovina",
+      "fifa_code": "BIH",
+      "fifa_ranking": 64
+    },
+    {
+      "name": "Cabo Verde",
+      "fifa_code": "CPV",
+      "fifa_ranking": 68
+    },
+    {
+      "name": "Ghana",
+      "fifa_code": "GHA",
+      "fifa_ranking": 73
+    },
+    {
+      "name": "Haití",
+      "fifa_code": "HAI",
+      "fifa_ranking": 82
+    },
+    {
+      "name": "Curaçao",
+      "fifa_code": "CUW",
+      "fifa_ranking": 83
+    },
+    {
+      "name": "Nueva Zelanda",
+      "fifa_code": "NZL",
+      "fifa_ranking": 85
+    }
   ],
   "groups": {
-    "A": ["USA", "JAM", "PAN", "GUA"],
-    "B": ["MEX", "HON", "ECU", "NZL"],
-    "C": ["CAN", "MAR", "BEL", "CRO"],
-    "D": ["ARG", "URU", "KOR", "IDN"],
-    "E": ["BRA", "COL", "AUS", "IRN"],
-    "F": ["ESP", "PAR", "JOR", "ALG"],
-    "G": ["GER", "SCO", "JPN", "TUN"],
-    "H": ["FRA", "ROM", "IRQ", "CMR"],
-    "I": ["POR", "TUR", "SEN", "KSA"],
-    "J": ["ENG", "UKR", "NGA", "UZB"],
-    "K": ["NED", "AUT", "EGY", "CIV"],
-    "L": ["ITA", "DEN", "SRB", "RSA"]
+    "A": [
+      "MEX",
+      "RSA",
+      "KOR",
+      "CZE"
+    ],
+    "B": [
+      "CAN",
+      "BIH",
+      "QAT",
+      "SUI"
+    ],
+    "C": [
+      "BRA",
+      "MAR",
+      "SCO",
+      "HAI"
+    ],
+    "D": [
+      "USA",
+      "AUS",
+      "PAR",
+      "TUR"
+    ],
+    "E": [
+      "GER",
+      "ECU",
+      "CIV",
+      "CUW"
+    ],
+    "F": [
+      "NED",
+      "JPN",
+      "SWE",
+      "TUN"
+    ],
+    "G": [
+      "BEL",
+      "IRN",
+      "EGY",
+      "NZL"
+    ],
+    "H": [
+      "ESP",
+      "URU",
+      "KSA",
+      "CPV"
+    ],
+    "I": [
+      "FRA",
+      "SEN",
+      "IRQ",
+      "NOR"
+    ],
+    "J": [
+      "ARG",
+      "ALG",
+      "AUT",
+      "JOR"
+    ],
+    "K": [
+      "POR",
+      "COL",
+      "UZB",
+      "COD"
+    ],
+    "L": [
+      "ENG",
+      "CRO",
+      "GHA",
+      "PAN"
+    ]
   },
   "schedule": [
-    {"home": "MEX", "away": "HON", "date": "2026-06-11T15:00:00-06:00"},
-    {"home": "USA", "away": "JAM", "date": "2026-06-12T11:00:00-05:00"},
-    {"home": "PAN", "away": "GUA", "date": "2026-06-12T14:00:00-05:00"},
-    {"home": "ARG", "away": "URU", "date": "2026-06-12T17:00:00-05:00"},
-    {"home": "BEL", "away": "MAR", "date": "2026-06-13T11:00:00-05:00"},
-    {"home": "CAN", "away": "CRO", "date": "2026-06-13T14:00:00-05:00"},
-    {"home": "GER", "away": "SCO", "date": "2026-06-13T17:00:00-05:00"},
-    {"home": "FRA", "away": "ROM", "date": "2026-06-14T11:00:00-05:00"},
-    {"home": "POR", "away": "KSA", "date": "2026-06-14T14:00:00-05:00"},
-    {"home": "TUR", "away": "SEN", "date": "2026-06-14T17:00:00-05:00"},
-    {"home": "ESP", "away": "ALG", "date": "2026-06-15T11:00:00-05:00"},
-    {"home": "PAR", "away": "JOR", "date": "2026-06-15T14:00:00-05:00"},
-    {"home": "ENG", "away": "NGA", "date": "2026-06-15T17:00:00-05:00"},
-    {"home": "UKR", "away": "UZB", "date": "2026-06-15T17:00:00-05:00"},
-    {"home": "NED", "away": "CIV", "date": "2026-06-16T11:00:00-05:00"},
-    {"home": "AUT", "away": "EGY", "date": "2026-06-16T14:00:00-05:00"},
-    {"home": "ITA", "away": "DEN", "date": "2026-06-16T17:00:00-05:00"},
-    {"home": "SRB", "away": "RSA", "date": "2026-06-16T17:00:00-05:00"},
-    {"home": "BRA", "away": "COL", "date": "2026-06-17T11:00:00-05:00"},
-    {"home": "AUS", "away": "IRN", "date": "2026-06-17T14:00:00-05:00"},
-    {"home": "KOR", "away": "IDN", "date": "2026-06-17T17:00:00-05:00"},
-    {"home": "ECU", "away": "NZL", "date": "2026-06-17T17:00:00-06:00"},
-    {"home": "IRQ", "away": "CMR", "date": "2026-06-18T11:00:00-05:00"},
-    {"home": "JPN", "away": "TUN", "date": "2026-06-18T14:00:00-05:00"},
-    {"home": "MEX", "away": "ECU", "date": "2026-06-19T14:00:00-06:00"},
-    {"home": "HON", "away": "NZL", "date": "2026-06-19T17:00:00-06:00"},
-    {"home": "USA", "away": "PAN", "date": "2026-06-20T11:00:00-05:00"},
-    {"home": "JAM", "away": "GUA", "date": "2026-06-20T14:00:00-05:00"},
-    {"home": "ARG", "away": "KOR", "date": "2026-06-20T17:00:00-05:00"},
-    {"home": "URU", "away": "IDN", "date": "2026-06-20T17:00:00-05:00"},
-    {"home": "BEL", "away": "CRO", "date": "2026-06-21T11:00:00-05:00"},
-    {"home": "CAN", "away": "MAR", "date": "2026-06-21T14:00:00-05:00"},
-    {"home": "GER", "away": "JPN", "date": "2026-06-21T17:00:00-05:00"},
-    {"home": "SCO", "away": "TUN", "date": "2026-06-21T17:00:00-05:00"},
-    {"home": "FRA", "away": "IRQ", "date": "2026-06-22T11:00:00-05:00"},
-    {"home": "ROM", "away": "CMR", "date": "2026-06-22T14:00:00-05:00"},
-    {"home": "POR", "away": "TUR", "date": "2026-06-22T17:00:00-05:00"},
-    {"home": "SEN", "away": "KSA", "date": "2026-06-22T17:00:00-05:00"},
-    {"home": "ESP", "away": "PAR", "date": "2026-06-23T11:00:00-05:00"},
-    {"home": "JOR", "away": "ALG", "date": "2026-06-23T14:00:00-05:00"},
-    {"home": "ENG", "away": "UKR", "date": "2026-06-23T17:00:00-05:00"},
-    {"home": "NGA", "away": "UZB", "date": "2026-06-23T17:00:00-05:00"},
-    {"home": "NED", "away": "AUT", "date": "2026-06-24T11:00:00-05:00"},
-    {"home": "EGY", "away": "CIV", "date": "2026-06-24T14:00:00-05:00"},
-    {"home": "ITA", "away": "SRB", "date": "2026-06-24T17:00:00-05:00"},
-    {"home": "DEN", "away": "RSA", "date": "2026-06-24T17:00:00-05:00"},
-    {"home": "BRA", "away": "AUS", "date": "2026-06-25T11:00:00-05:00"},
-    {"home": "COL", "away": "IRN", "date": "2026-06-25T14:00:00-05:00"},
-    {"home": "ARG", "away": "IDN", "date": "2026-06-25T17:00:00-05:00"},
-    {"home": "URU", "away": "KOR", "date": "2026-06-25T17:00:00-05:00"},
-    {"home": "MEX", "away": "NZL", "date": "2026-06-26T14:00:00-06:00"},
-    {"home": "HON", "away": "ECU", "date": "2026-06-26T14:00:00-06:00"},
-    {"home": "USA", "away": "GUA", "date": "2026-06-26T17:00:00-05:00"},
-    {"home": "JAM", "away": "PAN", "date": "2026-06-26T17:00:00-05:00"},
-    {"home": "BEL", "away": "CAN", "date": "2026-06-27T11:00:00-05:00"},
-    {"home": "MAR", "away": "CRO", "date": "2026-06-27T11:00:00-05:00"},
-    {"home": "GER", "away": "TUN", "date": "2026-06-27T17:00:00-05:00"},
-    {"home": "SCO", "away": "JPN", "date": "2026-06-27T17:00:00-05:00"},
-    {"home": "FRA", "away": "CMR", "date": "2026-06-28T11:00:00-05:00"},
-    {"home": "ROM", "away": "IRQ", "date": "2026-06-28T11:00:00-05:00"},
-    {"home": "POR", "away": "SEN", "date": "2026-06-28T17:00:00-05:00"},
-    {"home": "TUR", "away": "KSA", "date": "2026-06-28T17:00:00-05:00"},
-    {"home": "ESP", "away": "JOR", "date": "2026-06-29T11:00:00-05:00"},
-    {"home": "PAR", "away": "ALG", "date": "2026-06-29T11:00:00-05:00"},
-    {"home": "ENG", "away": "UZB", "date": "2026-06-29T17:00:00-05:00"},
-    {"home": "UKR", "away": "NGA", "date": "2026-06-29T17:00:00-05:00"},
-    {"home": "NED", "away": "EGY", "date": "2026-06-30T11:00:00-05:00"},
-    {"home": "AUT", "away": "CIV", "date": "2026-06-30T11:00:00-05:00"},
-    {"home": "ITA", "away": "RSA", "date": "2026-06-30T17:00:00-05:00"},
-    {"home": "DEN", "away": "SRB", "date": "2026-06-30T17:00:00-05:00"},
-    {"home": "BRA", "away": "IRN", "date": "2026-07-01T11:00:00-05:00"},
-    {"home": "COL", "away": "AUS", "date": "2026-07-01T11:00:00-05:00"}
+    {
+      "matchday": 1,
+      "home": "MEX",
+      "away": "RSA",
+      "group": "A",
+      "date": "2026-06-11T19:00:00Z",
+      "venue": "Estadio Azteca",
+      "city": "Ciudad de México"
+    },
+    {
+      "matchday": 1,
+      "home": "KOR",
+      "away": "CZE",
+      "group": "A",
+      "date": "2026-06-12T02:00:00Z",
+      "venue": "Estadio Akron",
+      "city": "Guadalajara"
+    },
+    {
+      "matchday": 1,
+      "home": "CAN",
+      "away": "BIH",
+      "group": "B",
+      "date": "2026-06-12T19:00:00Z",
+      "venue": "BMO Field",
+      "city": "Toronto"
+    },
+    {
+      "matchday": 1,
+      "home": "USA",
+      "away": "PAR",
+      "group": "D",
+      "date": "2026-06-13T01:00:00Z",
+      "venue": "SoFi Stadium",
+      "city": "Los Ángeles"
+    },
+    {
+      "matchday": 1,
+      "home": "QAT",
+      "away": "SUI",
+      "group": "B",
+      "date": "2026-06-13T19:00:00Z",
+      "venue": "Levi's Stadium",
+      "city": "San Francisco"
+    },
+    {
+      "matchday": 1,
+      "home": "BRA",
+      "away": "MAR",
+      "group": "C",
+      "date": "2026-06-13T22:00:00Z",
+      "venue": "MetLife Stadium",
+      "city": "Nueva York / Nueva Jersey"
+    },
+    {
+      "matchday": 1,
+      "home": "HAI",
+      "away": "SCO",
+      "group": "C",
+      "date": "2026-06-14T01:00:00Z",
+      "venue": "Gillette Stadium",
+      "city": "Boston"
+    },
+    {
+      "matchday": 1,
+      "home": "AUS",
+      "away": "TUR",
+      "group": "D",
+      "date": "2026-06-14T04:00:00Z",
+      "venue": "BC Place",
+      "city": "Vancouver"
+    },
+    {
+      "matchday": 1,
+      "home": "GER",
+      "away": "CUW",
+      "group": "E",
+      "date": "2026-06-14T17:00:00Z",
+      "venue": "NRG Stadium",
+      "city": "Houston"
+    },
+    {
+      "matchday": 1,
+      "home": "NED",
+      "away": "JPN",
+      "group": "F",
+      "date": "2026-06-14T20:00:00Z",
+      "venue": "AT&T Stadium",
+      "city": "Dallas"
+    },
+    {
+      "matchday": 1,
+      "home": "CIV",
+      "away": "ECU",
+      "group": "E",
+      "date": "2026-06-14T23:00:00Z",
+      "venue": "Lincoln Financial Field",
+      "city": "Filadelfia"
+    },
+    {
+      "matchday": 1,
+      "home": "SWE",
+      "away": "TUN",
+      "group": "F",
+      "date": "2026-06-15T02:00:00Z",
+      "venue": "Estadio BBVA",
+      "city": "Monterrey"
+    },
+    {
+      "matchday": 1,
+      "home": "ESP",
+      "away": "CPV",
+      "group": "H",
+      "date": "2026-06-15T16:00:00Z",
+      "venue": "Mercedes-Benz Stadium",
+      "city": "Atlanta"
+    },
+    {
+      "matchday": 1,
+      "home": "BEL",
+      "away": "EGY",
+      "group": "G",
+      "date": "2026-06-15T19:00:00Z",
+      "venue": "Lumen Field",
+      "city": "Seattle"
+    },
+    {
+      "matchday": 1,
+      "home": "KSA",
+      "away": "URU",
+      "group": "H",
+      "date": "2026-06-15T22:00:00Z",
+      "venue": "Hard Rock Stadium",
+      "city": "Miami"
+    },
+    {
+      "matchday": 1,
+      "home": "IRN",
+      "away": "NZL",
+      "group": "G",
+      "date": "2026-06-16T01:00:00Z",
+      "venue": "SoFi Stadium",
+      "city": "Los Ángeles"
+    },
+    {
+      "matchday": 1,
+      "home": "FRA",
+      "away": "SEN",
+      "group": "I",
+      "date": "2026-06-16T19:00:00Z",
+      "venue": "MetLife Stadium",
+      "city": "Nueva York / Nueva Jersey"
+    },
+    {
+      "matchday": 1,
+      "home": "IRQ",
+      "away": "NOR",
+      "group": "I",
+      "date": "2026-06-16T22:00:00Z",
+      "venue": "Gillette Stadium",
+      "city": "Boston"
+    },
+    {
+      "matchday": 1,
+      "home": "ARG",
+      "away": "ALG",
+      "group": "J",
+      "date": "2026-06-17T01:00:00Z",
+      "venue": "Arrowhead Stadium",
+      "city": "Kansas City"
+    },
+    {
+      "matchday": 1,
+      "home": "AUT",
+      "away": "JOR",
+      "group": "J",
+      "date": "2026-06-17T04:00:00Z",
+      "venue": "Levi's Stadium",
+      "city": "San Francisco"
+    },
+    {
+      "matchday": 1,
+      "home": "POR",
+      "away": "COD",
+      "group": "K",
+      "date": "2026-06-17T17:00:00Z",
+      "venue": "NRG Stadium",
+      "city": "Houston"
+    },
+    {
+      "matchday": 1,
+      "home": "ENG",
+      "away": "CRO",
+      "group": "L",
+      "date": "2026-06-17T20:00:00Z",
+      "venue": "AT&T Stadium",
+      "city": "Dallas"
+    },
+    {
+      "matchday": 1,
+      "home": "GHA",
+      "away": "PAN",
+      "group": "L",
+      "date": "2026-06-17T23:00:00Z",
+      "venue": "BMO Field",
+      "city": "Toronto"
+    },
+    {
+      "matchday": 1,
+      "home": "UZB",
+      "away": "COL",
+      "group": "K",
+      "date": "2026-06-18T02:00:00Z",
+      "venue": "Estadio Azteca",
+      "city": "Ciudad de México"
+    },
+    {
+      "matchday": 2,
+      "home": "CZE",
+      "away": "RSA",
+      "group": "A",
+      "date": "2026-06-18T16:00:00Z",
+      "venue": "Mercedes-Benz Stadium",
+      "city": "Atlanta"
+    },
+    {
+      "matchday": 2,
+      "home": "SUI",
+      "away": "BIH",
+      "group": "B",
+      "date": "2026-06-18T19:00:00Z",
+      "venue": "SoFi Stadium",
+      "city": "Los Ángeles"
+    },
+    {
+      "matchday": 2,
+      "home": "CAN",
+      "away": "QAT",
+      "group": "B",
+      "date": "2026-06-18T22:00:00Z",
+      "venue": "BC Place",
+      "city": "Vancouver"
+    },
+    {
+      "matchday": 2,
+      "home": "MEX",
+      "away": "KOR",
+      "group": "A",
+      "date": "2026-06-19T01:00:00Z",
+      "venue": "Estadio Akron",
+      "city": "Guadalajara"
+    },
+    {
+      "matchday": 2,
+      "home": "USA",
+      "away": "AUS",
+      "group": "D",
+      "date": "2026-06-19T19:00:00Z",
+      "venue": "Lumen Field",
+      "city": "Seattle"
+    },
+    {
+      "matchday": 2,
+      "home": "SCO",
+      "away": "MAR",
+      "group": "C",
+      "date": "2026-06-19T22:00:00Z",
+      "venue": "Gillette Stadium",
+      "city": "Boston"
+    },
+    {
+      "matchday": 2,
+      "home": "BRA",
+      "away": "HAI",
+      "group": "C",
+      "date": "2026-06-20T00:30:00Z",
+      "venue": "Lincoln Financial Field",
+      "city": "Filadelfia",
+      "_note": "horario_discrepancia:fwcschedule+worldcuppass=8:30PM_ET,NBCSports=9:00PM_ET"
+    },
+    {
+      "matchday": 2,
+      "home": "TUR",
+      "away": "PAR",
+      "group": "D",
+      "date": "2026-06-20T04:00:00Z",
+      "venue": "Levi's Stadium",
+      "city": "San Francisco",
+      "_note": "horario_discrepancia:fwcschedule=11PM_ET_Jun19,worldcuppass=12AM_ET_Jun19(erroneo),NBCSports=12AM_ET_Jun20(usado)"
+    },
+    {
+      "matchday": 2,
+      "home": "NED",
+      "away": "SWE",
+      "group": "F",
+      "date": "2026-06-20T17:00:00Z",
+      "venue": "NRG Stadium",
+      "city": "Houston"
+    },
+    {
+      "matchday": 2,
+      "home": "GER",
+      "away": "CIV",
+      "group": "E",
+      "date": "2026-06-20T20:00:00Z",
+      "venue": "BMO Field",
+      "city": "Toronto"
+    },
+    {
+      "matchday": 2,
+      "home": "ECU",
+      "away": "CUW",
+      "group": "E",
+      "date": "2026-06-21T00:00:00Z",
+      "venue": "Arrowhead Stadium",
+      "city": "Kansas City"
+    },
+    {
+      "matchday": 2,
+      "home": "TUN",
+      "away": "JPN",
+      "group": "F",
+      "date": "2026-06-21T04:00:00Z",
+      "venue": "Estadio BBVA",
+      "city": "Monterrey"
+    },
+    {
+      "matchday": 2,
+      "home": "ESP",
+      "away": "KSA",
+      "group": "H",
+      "date": "2026-06-21T16:00:00Z",
+      "venue": "Mercedes-Benz Stadium",
+      "city": "Atlanta"
+    },
+    {
+      "matchday": 2,
+      "home": "BEL",
+      "away": "IRN",
+      "group": "G",
+      "date": "2026-06-21T19:00:00Z",
+      "venue": "SoFi Stadium",
+      "city": "Los Ángeles"
+    },
+    {
+      "matchday": 2,
+      "home": "URU",
+      "away": "CPV",
+      "group": "H",
+      "date": "2026-06-21T22:00:00Z",
+      "venue": "Hard Rock Stadium",
+      "city": "Miami"
+    },
+    {
+      "matchday": 2,
+      "home": "NZL",
+      "away": "EGY",
+      "group": "G",
+      "date": "2026-06-22T01:00:00Z",
+      "venue": "BC Place",
+      "city": "Vancouver"
+    },
+    {
+      "matchday": 2,
+      "home": "ARG",
+      "away": "AUT",
+      "group": "J",
+      "date": "2026-06-22T17:00:00Z",
+      "venue": "AT&T Stadium",
+      "city": "Dallas"
+    },
+    {
+      "matchday": 2,
+      "home": "FRA",
+      "away": "IRQ",
+      "group": "I",
+      "date": "2026-06-22T21:00:00Z",
+      "venue": "Lincoln Financial Field",
+      "city": "Filadelfia"
+    },
+    {
+      "matchday": 2,
+      "home": "NOR",
+      "away": "SEN",
+      "group": "I",
+      "date": "2026-06-23T00:00:00Z",
+      "venue": "MetLife Stadium",
+      "city": "Nueva York / Nueva Jersey"
+    },
+    {
+      "matchday": 2,
+      "home": "JOR",
+      "away": "ALG",
+      "group": "J",
+      "date": "2026-06-23T03:00:00Z",
+      "venue": "Levi's Stadium",
+      "city": "San Francisco"
+    },
+    {
+      "matchday": 2,
+      "home": "POR",
+      "away": "UZB",
+      "group": "K",
+      "date": "2026-06-23T17:00:00Z",
+      "venue": "NRG Stadium",
+      "city": "Houston"
+    },
+    {
+      "matchday": 2,
+      "home": "ENG",
+      "away": "GHA",
+      "group": "L",
+      "date": "2026-06-23T20:00:00Z",
+      "venue": "Gillette Stadium",
+      "city": "Boston"
+    },
+    {
+      "matchday": 2,
+      "home": "PAN",
+      "away": "CRO",
+      "group": "L",
+      "date": "2026-06-23T23:00:00Z",
+      "venue": "BMO Field",
+      "city": "Toronto"
+    },
+    {
+      "matchday": 2,
+      "home": "COL",
+      "away": "COD",
+      "group": "K",
+      "date": "2026-06-24T02:00:00Z",
+      "venue": "Estadio Akron",
+      "city": "Guadalajara"
+    },
+    {
+      "matchday": 3,
+      "home": "SUI",
+      "away": "CAN",
+      "group": "B",
+      "date": "2026-06-24T19:00:00Z",
+      "venue": "BC Place",
+      "city": "Vancouver"
+    },
+    {
+      "matchday": 3,
+      "home": "BIH",
+      "away": "QAT",
+      "group": "B",
+      "date": "2026-06-24T19:00:00Z",
+      "venue": "Lumen Field",
+      "city": "Seattle"
+    },
+    {
+      "matchday": 3,
+      "home": "SCO",
+      "away": "BRA",
+      "group": "C",
+      "date": "2026-06-24T22:00:00Z",
+      "venue": "Hard Rock Stadium",
+      "city": "Miami"
+    },
+    {
+      "matchday": 3,
+      "home": "MAR",
+      "away": "HAI",
+      "group": "C",
+      "date": "2026-06-24T22:00:00Z",
+      "venue": "Mercedes-Benz Stadium",
+      "city": "Atlanta"
+    },
+    {
+      "matchday": 3,
+      "home": "CZE",
+      "away": "MEX",
+      "group": "A",
+      "date": "2026-06-25T01:00:00Z",
+      "venue": "Estadio Azteca",
+      "city": "Ciudad de México"
+    },
+    {
+      "matchday": 3,
+      "home": "RSA",
+      "away": "KOR",
+      "group": "A",
+      "date": "2026-06-25T01:00:00Z",
+      "venue": "Estadio BBVA",
+      "city": "Monterrey"
+    },
+    {
+      "matchday": 3,
+      "home": "CUW",
+      "away": "CIV",
+      "group": "E",
+      "date": "2026-06-25T20:00:00Z",
+      "venue": "Lincoln Financial Field",
+      "city": "Filadelfia"
+    },
+    {
+      "matchday": 3,
+      "home": "ECU",
+      "away": "GER",
+      "group": "E",
+      "date": "2026-06-25T20:00:00Z",
+      "venue": "MetLife Stadium",
+      "city": "Nueva York / Nueva Jersey"
+    },
+    {
+      "matchday": 3,
+      "home": "JPN",
+      "away": "SWE",
+      "group": "F",
+      "date": "2026-06-25T23:00:00Z",
+      "venue": "AT&T Stadium",
+      "city": "Dallas"
+    },
+    {
+      "matchday": 3,
+      "home": "TUN",
+      "away": "NED",
+      "group": "F",
+      "date": "2026-06-25T23:00:00Z",
+      "venue": "Arrowhead Stadium",
+      "city": "Kansas City"
+    },
+    {
+      "matchday": 3,
+      "home": "TUR",
+      "away": "USA",
+      "group": "D",
+      "date": "2026-06-26T02:00:00Z",
+      "venue": "SoFi Stadium",
+      "city": "Los Ángeles"
+    },
+    {
+      "matchday": 3,
+      "home": "PAR",
+      "away": "AUS",
+      "group": "D",
+      "date": "2026-06-26T02:00:00Z",
+      "venue": "Levi's Stadium",
+      "city": "San Francisco"
+    },
+    {
+      "matchday": 3,
+      "home": "NOR",
+      "away": "FRA",
+      "group": "I",
+      "date": "2026-06-26T19:00:00Z",
+      "venue": "Gillette Stadium",
+      "city": "Boston"
+    },
+    {
+      "matchday": 3,
+      "home": "SEN",
+      "away": "IRQ",
+      "group": "I",
+      "date": "2026-06-26T19:00:00Z",
+      "venue": "BMO Field",
+      "city": "Toronto"
+    },
+    {
+      "matchday": 3,
+      "home": "CPV",
+      "away": "KSA",
+      "group": "H",
+      "date": "2026-06-27T00:00:00Z",
+      "venue": "NRG Stadium",
+      "city": "Houston"
+    },
+    {
+      "matchday": 3,
+      "home": "URU",
+      "away": "ESP",
+      "group": "H",
+      "date": "2026-06-27T00:00:00Z",
+      "venue": "Estadio Akron",
+      "city": "Guadalajara"
+    },
+    {
+      "matchday": 3,
+      "home": "EGY",
+      "away": "IRN",
+      "group": "G",
+      "date": "2026-06-27T03:00:00Z",
+      "venue": "Lumen Field",
+      "city": "Seattle"
+    },
+    {
+      "matchday": 3,
+      "home": "NZL",
+      "away": "BEL",
+      "group": "G",
+      "date": "2026-06-27T03:00:00Z",
+      "venue": "BC Place",
+      "city": "Vancouver"
+    },
+    {
+      "matchday": 3,
+      "home": "PAN",
+      "away": "ENG",
+      "group": "L",
+      "date": "2026-06-27T21:00:00Z",
+      "venue": "MetLife Stadium",
+      "city": "Nueva York / Nueva Jersey"
+    },
+    {
+      "matchday": 3,
+      "home": "CRO",
+      "away": "GHA",
+      "group": "L",
+      "date": "2026-06-27T21:00:00Z",
+      "venue": "Lincoln Financial Field",
+      "city": "Filadelfia"
+    },
+    {
+      "matchday": 3,
+      "home": "COL",
+      "away": "POR",
+      "group": "K",
+      "date": "2026-06-27T23:30:00Z",
+      "venue": "Hard Rock Stadium",
+      "city": "Miami"
+    },
+    {
+      "matchday": 3,
+      "home": "COD",
+      "away": "UZB",
+      "group": "K",
+      "date": "2026-06-27T23:30:00Z",
+      "venue": "Mercedes-Benz Stadium",
+      "city": "Atlanta"
+    },
+    {
+      "matchday": 3,
+      "home": "ALG",
+      "away": "AUT",
+      "group": "J",
+      "date": "2026-06-28T02:00:00Z",
+      "venue": "Arrowhead Stadium",
+      "city": "Kansas City"
+    },
+    {
+      "matchday": 3,
+      "home": "JOR",
+      "away": "ARG",
+      "group": "J",
+      "date": "2026-06-28T02:00:00Z",
+      "venue": "AT&T Stadium",
+      "city": "Dallas"
+    }
   ]
 }

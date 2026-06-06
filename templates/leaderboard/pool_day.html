@@ -45,6 +45,9 @@
             {% if match.scheduled_at %}
             <span style="font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;">{{ match.scheduled_at|time:"H:i" }} UTC</span>
             {% endif %}
+            {% if match.venue %}
+            <span style="font-size:12px;color:var(--text-muted);">📍 {{ match.venue }}{% if match.city %}, {{ match.city }}{% endif %}</span>
+            {% endif %}
           </div>
           {% if match.home_score is not None and match.away_score is not None %}
           <span style="background:var(--text);color:#fff;border-radius:8px;padding:6px 16px;font-weight:900;font-size:17px;font-variant-numeric:tabular-nums;">{{ match.home_score }} – {{ match.away_score }}</span>
