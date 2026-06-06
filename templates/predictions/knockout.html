@@ -156,19 +156,20 @@ function _propagate(orig, homeTeam, awayTeam) {
   };
 }
 
-// WC2026-specific bracket topology (indexes into bracket_json arrays)
-// Left half feeds SF_1 (home); right half feeds SF_2 (away)
+// WC2026 bracket topology — v2 (knockout_bracket_v2.json)
+// QF_2 now pairs R16_5+R16_6 (not R16_3+4); QF_3 pairs R16_3+R16_4 (not R16_5+6)
+// R32 indices map into data.r32[] (R32_1=idx0, R32_2=idx1 … R32_16=idx15)
 var _TOPO = {
-  L: { // r32 pair-groups: [[home_idx, away_idx], ...] top→bottom, matched to r16[0..3]
-    r32g: [[1,4],[0,2],[3,5],[6,7]],  // M74,M77 | M73,M75 | M76,M78 | M79,M80
-    r16:  [0,1,2,3],
-    qf:   [0,1],
+  L: { // feeds SF_1 → QF_1(R16_1,R16_2) + QF_2(R16_5,R16_6)
+    r32g: [[1,4],[0,2],[10,11],[8,9]], // R32_2,5 | R32_1,3 | R32_11,12 | R32_9,10
+    r16:  [0,1,4,5],                   // R16_1,2,5,6
+    qf:   [0,1],                        // QF_1,2
     sf:   0
   },
-  R: {
-    r32g: [[10,11],[8,9],[13,15],[12,14]], // M83,M84 | M81,M82 | M86,M88 | M85,M87
-    r16:  [4,5,6,7],
-    qf:   [2,3],
+  R: { // feeds SF_2 → QF_3(R16_3,R16_4) + QF_4(R16_7,R16_8)
+    r32g: [[3,5],[6,7],[13,15],[12,14]], // R32_4,6 | R32_7,8 | R32_14,16 | R32_13,15
+    r16:  [2,3,6,7],                     // R16_3,4,7,8
+    qf:   [2,3],                          // QF_3,4
     sf:   1
   }
 };

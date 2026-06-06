@@ -14,6 +14,7 @@ BRACKET_STAGE_MAP = {
     "r16": Match.Stage.R16,
     "qf": Match.Stage.QF,
     "sf": Match.Stage.SF,
+    "third_place": Match.Stage.THIRD_PLACE,
     "final": Match.Stage.FINAL,
 }
 
@@ -137,18 +138,16 @@ class Command(BaseCommand):
         with bracket_path.open() as f:
             bracket_data = json.load(f)
 
-        # R32 venue/city/date from the confirmed bracket file
+        # Date/city details keyed by FIFA match number (from confirmed bracket file)
         r32_confirmed_path = DATA_DIR / "r32_bracket_confirmado.json"
-        r32_extra: dict[str, dict] = {}
+        confirmed_by_match: dict[int, dict] = {}
         if r32_confirmed_path.exists():
             with r32_confirmed_path.open() as f:
-                r32_confirmed = json.load(f)
-            for slot_key, slot_data in r32_confirmed.get("slots", {}).items():
-                r32_extra[slot_key] = {
-                    "venue": slot_data.get("venue", ""),
-                    "city": slot_data.get("city", ""),
-                    "scheduled_at": parse_datetime(slot_data["date"] + "T00:00:00Z") if slot_data.get("date") else None,
-                }
+                r32_conf = json.load(f)
+            for _key, slot_data in r32_conf.get("slots", {}).items():
+                mn = slot_data.get("match_number")
+                if mn:
+                    confirmed_by_match[mn] = slot_data
 
         ko_count = 0
         for stage_key, slots in bracket_data.items():
@@ -158,7 +157,14 @@ class Command(BaseCommand):
             if stage is None:
                 continue
             for slot_def in slots:
-                extra = r32_extra.get(slot_def["slot"], {})
+                # venue comes from v2 directly; city/date from confirmed file by match number
+                venue = slot_def.get("venue", "")
+                match_num = slot_def.get("match")
+                conf = confirmed_by_match.get(match_num, {}) if match_num else {}
+                city = conf.get("city", "")
+                date_str = conf.get("date")
+                scheduled_at = parse_datetime(date_str + "T00:00:00Z") if date_str else None
+
                 _, created = Match.objects.update_or_create(
                     tournament=tournament,
                     stage=stage,
@@ -166,9 +172,9 @@ class Command(BaseCommand):
                     defaults={
                         "home_team": None,
                         "away_team": None,
-                        "venue": extra.get("venue", ""),
-                        "city": extra.get("city", ""),
-                        "scheduled_at": extra.get("scheduled_at"),
+                        "venue": venue,
+                        "city": city,
+                        "scheduled_at": scheduled_at,
                     },
                 )
                 if created:
