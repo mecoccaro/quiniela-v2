@@ -65,6 +65,9 @@ class Match(models.Model):
     away_team = models.ForeignKey(Team, on_delete=models.PROTECT, null=True, blank=True, related_name="away_matches")
     bracket_slot = models.CharField(max_length=20, blank=True)
     scheduled_at = models.DateTimeField(null=True, blank=True)
+    venue = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    matchday = models.PositiveIntegerField(null=True, blank=True)
     home_score = models.PositiveIntegerField(null=True, blank=True)
     away_score = models.PositiveIntegerField(null=True, blank=True)
     knockout_winner = models.ForeignKey(

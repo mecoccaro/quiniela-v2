@@ -14,6 +14,7 @@ BRACKET_STAGE_MAP = {
     "r16": Match.Stage.R16,
     "qf": Match.Stage.QF,
     "sf": Match.Stage.SF,
+    "third_place": Match.Stage.THIRD_PLACE,
     "final": Match.Stage.FINAL,
 }
 
@@ -27,15 +28,23 @@ class Command(BaseCommand):
             default="wc2026",
             help="Slug of the tournament to load (default: wc2026)",
         )
+        parser.add_argument(
+            "--reset",
+            action="store_true",
+            help=(
+                "Delete all existing matches and group assignments for this tournament "
+                "before loading. WARNING: cascades to all predictions for this tournament."
+            ),
+        )
 
     def handle(self, *args, **options):
         fixture_path = DATA_DIR / "wc2026.json"
         with fixture_path.open() as f:
             data = json.load(f)
 
-        # Tournament
+        # Tournament — update or create
         t_data = data["tournament"]
-        tournament, created = Tournament.objects.get_or_create(
+        tournament, created = Tournament.objects.update_or_create(
             slug=options["tournament_slug"],
             defaults={
                 "name": t_data["name"],
@@ -45,18 +54,29 @@ class Command(BaseCommand):
                 "scoring_config": t_data["scoring_config"],
             },
         )
-        action = "Created" if created else "Found"
+        action = "Created" if created else "Updated"
         self.stdout.write(f"{action} tournament: {tournament}")
 
-        # Teams
+        # --reset: wipe matches and group assignments (preserves Tournament + Pools)
+        if options["reset"]:
+            deleted_matches, _ = Match.objects.filter(tournament=tournament).delete()
+            deleted_tt, _ = TournamentTeam.objects.filter(tournament=tournament).delete()
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Reset: deleted {deleted_matches} matches and {deleted_tt} group assignments "
+                    f"(predictions cascade-deleted with matches)."
+                )
+            )
+
+        # Teams — update or create
         teams_by_code: dict[str, Team] = {}
         for t in data["teams"]:
-            team, created = Team.objects.get_or_create(
+            team, created = Team.objects.update_or_create(
                 fifa_code=t["fifa_code"],
                 defaults={"name": t["name"], "flag_url": t.get("flag_url", "")},
             )
             teams_by_code[t["fifa_code"]] = team
-            action = "Created" if created else "Found"
+            action = "Created" if created else "Updated"
             self.stdout.write(f"  {action} team: {team}")
 
         # Groups → TournamentTeams
@@ -64,7 +84,7 @@ class Command(BaseCommand):
         for group_letter, codes in data["groups"].items():
             for code in codes:
                 team = teams_by_code[code]
-                tt, created = TournamentTeam.objects.get_or_create(
+                tt, created = TournamentTeam.objects.update_or_create(
                     tournament=tournament,
                     team=team,
                     defaults={
@@ -72,25 +92,40 @@ class Command(BaseCommand):
                         "fifa_ranking": ranking_map[code],
                     },
                 )
-                if not created and tt.group_letter != group_letter:
-                    tt.group_letter = group_letter
-                    tt.save()
 
         self.stdout.write(
             f"Loaded {TournamentTeam.objects.filter(tournament=tournament).count()} TournamentTeams"
         )
 
-        # Group matches — generate round-robin for each group
+        # Build schedule lookup: (home_code, away_code) → {date, venue, city, matchday}
+        schedule_map: dict[tuple[str, str], dict] = {}
+        for item in data.get("schedule", []):
+            key = (item["home"], item["away"])
+            schedule_map[key] = {
+                "scheduled_at": parse_datetime(item["date"]),
+                "venue": item.get("venue", ""),
+                "city": item.get("city", ""),
+                "matchday": item.get("matchday"),
+            }
+
+        # Group matches — generate round-robin, set schedule data immediately
         match_count = 0
         for group_letter, codes in data["groups"].items():
             group_teams = [teams_by_code[c] for c in codes]
             for home_team, away_team in itertools.combinations(group_teams, 2):
-                _, created = Match.objects.get_or_create(
+                sched = schedule_map.get((home_team.fifa_code, away_team.fifa_code), {})
+                _, created = Match.objects.update_or_create(
                     tournament=tournament,
                     stage=Match.Stage.GROUP,
                     group_letter=group_letter,
                     home_team=home_team,
                     away_team=away_team,
+                    defaults={
+                        "scheduled_at": sched.get("scheduled_at"),
+                        "venue": sched.get("venue", ""),
+                        "city": sched.get("city", ""),
+                        "matchday": sched.get("matchday"),
+                    },
                 )
                 if created:
                     match_count += 1
@@ -98,24 +133,21 @@ class Command(BaseCommand):
         total_group = Match.objects.filter(tournament=tournament, stage=Match.Stage.GROUP).count()
         self.stdout.write(f"{match_count} new group matches created. Total: {total_group}")
 
-        # Schedule dates — populate Match.scheduled_at for group matches
-        schedule_count = 0
-        for item in data.get("schedule", []):
-            dt = parse_datetime(item["date"])
-            updated = Match.objects.filter(
-                tournament=tournament,
-                stage=Match.Stage.GROUP,
-                home_team__fifa_code=item["home"],
-                away_team__fifa_code=item["away"],
-            ).update(scheduled_at=dt)
-            schedule_count += updated
-
-        self.stdout.write(f"{schedule_count} group matches updated with scheduled_at dates")
-
         # Knockout placeholder matches — one per bracket slot
         bracket_path = DATA_DIR / "knockout_bracket.json"
         with bracket_path.open() as f:
             bracket_data = json.load(f)
+
+        # Date/city details keyed by FIFA match number (from confirmed bracket file)
+        r32_confirmed_path = DATA_DIR / "r32_bracket_confirmado.json"
+        confirmed_by_match: dict[int, dict] = {}
+        if r32_confirmed_path.exists():
+            with r32_confirmed_path.open() as f:
+                r32_conf = json.load(f)
+            for _key, slot_data in r32_conf.get("slots", {}).items():
+                mn = slot_data.get("match_number")
+                if mn:
+                    confirmed_by_match[mn] = slot_data
 
         ko_count = 0
         for stage_key, slots in bracket_data.items():
@@ -125,11 +157,25 @@ class Command(BaseCommand):
             if stage is None:
                 continue
             for slot_def in slots:
-                _, created = Match.objects.get_or_create(
+                # venue comes from v2 directly; city/date from confirmed file by match number
+                venue = slot_def.get("venue", "")
+                match_num = slot_def.get("match")
+                conf = confirmed_by_match.get(match_num, {}) if match_num else {}
+                city = conf.get("city", "")
+                date_str = conf.get("date")
+                scheduled_at = parse_datetime(date_str + "T00:00:00Z") if date_str else None
+
+                _, created = Match.objects.update_or_create(
                     tournament=tournament,
                     stage=stage,
                     bracket_slot=slot_def["slot"],
-                    defaults={"home_team": None, "away_team": None},
+                    defaults={
+                        "home_team": None,
+                        "away_team": None,
+                        "venue": venue,
+                        "city": city,
+                        "scheduled_at": scheduled_at,
+                    },
                 )
                 if created:
                     ko_count += 1

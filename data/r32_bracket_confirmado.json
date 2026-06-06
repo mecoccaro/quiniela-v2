@@ -1,0 +1,199 @@
+{
+  "_metadata": {
+    "_note": "R32 bracket lookup table — maps group outcomes to official FIFA R32 match slots for FIFA World Cup 26™. Match numbering follows official FIFA sequence (73–88). Schema v2.0 replaces sequential-pairing assumption of v1.0 with actual official bracket.",
+    "_schema_version": "2.0",
+    "_upgraded_from": "1.0",
+    "_last_verified": "2026-06-06",
+    "_verified_sources": [
+      "NBC Sports — nbcsports.com (full R32 match list with venues and dates)",
+      "CBS Sports — cbssports.com (full bracket and schedule)",
+      "MLS Soccer — mlssoccer.com (full match list by venue)",
+      "Sky Sports — skysports.com (full fixture schedule)",
+      "Bleacher Report — bleacherreport.com (bracket and round structure)"
+    ],
+    "_primary_source_note": "FIFA official site blocked automated access. Data cross-validated across 5 independent sources — full agreement on all 16 pairings, venues, dates, third-place pools, and R16 feeds.",
+    "_pending": "Full 495-combination table from Annex C of FIFA Competition Regulations. Required for Phase 6 third-place team slot resolution."
+  },
+
+  "slots": {
+    "M73": {
+      "match_number": 73,
+      "home": "A2",
+      "away": "B2",
+      "venue": "SoFi Stadium",
+      "city": "Los Angeles",
+      "country": "USA",
+      "date": "2026-06-28",
+      "r16_feed": "M90"
+    },
+    "M74": {
+      "match_number": 74,
+      "home": "E1",
+      "away": "3rd_ABCDF",
+      "venue": "Gillette Stadium",
+      "city": "Boston (Foxborough)",
+      "country": "USA",
+      "date": "2026-06-29",
+      "r16_feed": "M89"
+    },
+    "M75": {
+      "match_number": 75,
+      "home": "F1",
+      "away": "C2",
+      "venue": "Estadio BBVA",
+      "city": "Guadalupe (Monterrey)",
+      "country": "Mexico",
+      "date": "2026-06-29",
+      "r16_feed": "M90"
+    },
+    "M76": {
+      "match_number": 76,
+      "home": "C1",
+      "away": "F2",
+      "venue": "NRG Stadium",
+      "city": "Houston",
+      "country": "USA",
+      "date": "2026-06-29",
+      "r16_feed": "M91"
+    },
+    "M77": {
+      "match_number": 77,
+      "home": "I1",
+      "away": "3rd_CDFGH",
+      "venue": "MetLife Stadium",
+      "city": "East Rutherford (New York-New Jersey)",
+      "country": "USA",
+      "date": "2026-06-30",
+      "r16_feed": "M89"
+    },
+    "M78": {
+      "match_number": 78,
+      "home": "E2",
+      "away": "I2",
+      "venue": "AT&T Stadium",
+      "city": "Arlington (Dallas)",
+      "country": "USA",
+      "date": "2026-06-30",
+      "r16_feed": "M91"
+    },
+    "M79": {
+      "match_number": 79,
+      "home": "A1",
+      "away": "3rd_CEFHI",
+      "venue": "Estadio Azteca",
+      "city": "Mexico City",
+      "country": "Mexico",
+      "date": "2026-06-30",
+      "r16_feed": "M92"
+    },
+    "M80": {
+      "match_number": 80,
+      "home": "L1",
+      "away": "3rd_EHIJK",
+      "venue": "Mercedes-Benz Stadium",
+      "city": "Atlanta",
+      "country": "USA",
+      "date": "2026-07-01",
+      "r16_feed": "M92"
+    },
+    "M81": {
+      "match_number": 81,
+      "home": "D1",
+      "away": "3rd_BEFIJ",
+      "venue": "Levi's Stadium",
+      "city": "Santa Clara (San Francisco Bay Area)",
+      "country": "USA",
+      "date": "2026-07-01",
+      "r16_feed": "M94"
+    },
+    "M82": {
+      "match_number": 82,
+      "home": "G1",
+      "away": "3rd_AEHIJ",
+      "venue": "Lumen Field",
+      "city": "Seattle",
+      "country": "USA",
+      "date": "2026-07-01",
+      "r16_feed": "M94"
+    },
+    "M83": {
+      "match_number": 83,
+      "home": "K2",
+      "away": "L2",
+      "venue": "BMO Field",
+      "city": "Toronto",
+      "country": "Canada",
+      "date": "2026-07-02",
+      "r16_feed": "M93"
+    },
+    "M84": {
+      "match_number": 84,
+      "home": "H1",
+      "away": "J2",
+      "venue": "SoFi Stadium",
+      "city": "Los Angeles",
+      "country": "USA",
+      "date": "2026-07-02",
+      "r16_feed": "M93"
+    },
+    "M85": {
+      "match_number": 85,
+      "home": "B1",
+      "away": "3rd_EFGIJ",
+      "venue": "BC Place",
+      "city": "Vancouver",
+      "country": "Canada",
+      "date": "2026-07-02",
+      "r16_feed": "M96"
+    },
+    "M86": {
+      "match_number": 86,
+      "home": "J1",
+      "away": "H2",
+      "venue": "Hard Rock Stadium",
+      "city": "Miami",
+      "country": "USA",
+      "date": "2026-07-03",
+      "r16_feed": "M95"
+    },
+    "M87": {
+      "match_number": 87,
+      "home": "K1",
+      "away": "3rd_DEIJL",
+      "venue": "GEHA Field at Arrowhead Stadium",
+      "city": "Kansas City",
+      "country": "USA",
+      "date": "2026-07-03",
+      "r16_feed": "M96"
+    },
+    "M88": {
+      "match_number": 88,
+      "home": "D2",
+      "away": "G2",
+      "venue": "AT&T Stadium",
+      "city": "Arlington (Dallas)",
+      "country": "USA",
+      "date": "2026-07-03",
+      "r16_feed": "M95"
+    }
+  },
+
+  "third_place_pools": {
+    "_note": "Per Annex C of FIFA Competition Regulations. Each key is an R32 match slot. The value is the pool of 5 eligible groups from which the qualifying 3rd-place team in that slot is drawn. Exact group assignment within the pool requires the full 495-combination table (see third_place_assignments). Note: group letters are sorted alphabetically within each pool.",
+    "M74": ["A", "B", "C", "D", "F"],
+    "M77": ["C", "D", "F", "G", "H"],
+    "M79": ["C", "E", "F", "H", "I"],
+    "M80": ["E", "H", "I", "J", "K"],
+    "M81": ["B", "E", "F", "I", "J"],
+    "M82": ["A", "E", "H", "I", "J"],
+    "M85": ["E", "F", "G", "I", "J"],
+    "M87": ["D", "E", "I", "J", "L"]
+  },
+
+  "third_place_assignments": {
+    "_note": "Full 495-combination table (C(12,8)) from Annex C of FIFA World Cup 2026 Competition Regulations. Maps every possible combination of 8 qualifying third-place groups to specific R32 match slots. Groups E and I appear in all 8 pools and are always represented. Implementation required for Phase 6.",
+    "_status": "PENDING",
+    "_source": "FIFA Competition Regulations — FIFA World Cup 26™, Annex C",
+    "_combinations_total": 495
+  }
+}

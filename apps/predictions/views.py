@@ -181,7 +181,9 @@ class KnockoutPredictionsView(LoginRequiredMixin, View):
             bracket_json[k] = [
                 {
                     "home": slot.home_team.name if slot.home_team else "TBD",
+                    "homeCode": slot.home_team.fifa_code if slot.home_team else None,
                     "away": slot.away_team.name if slot.away_team else "TBD",
+                    "awayCode": slot.away_team.fifa_code if slot.away_team else None,
                     "homeScore": slot.prediction.predicted_home_score if slot.prediction else None,
                     "awayScore": slot.prediction.predicted_away_score if slot.prediction else None,
                     "slotKey": slot.slot_key,
