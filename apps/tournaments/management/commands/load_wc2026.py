@@ -137,6 +137,19 @@ class Command(BaseCommand):
         with bracket_path.open() as f:
             bracket_data = json.load(f)
 
+        # R32 venue/city/date from the confirmed bracket file
+        r32_confirmed_path = DATA_DIR / "r32_bracket_confirmado.json"
+        r32_extra: dict[str, dict] = {}
+        if r32_confirmed_path.exists():
+            with r32_confirmed_path.open() as f:
+                r32_confirmed = json.load(f)
+            for slot_key, slot_data in r32_confirmed.get("slots", {}).items():
+                r32_extra[slot_key] = {
+                    "venue": slot_data.get("venue", ""),
+                    "city": slot_data.get("city", ""),
+                    "scheduled_at": parse_datetime(slot_data["date"] + "T00:00:00Z") if slot_data.get("date") else None,
+                }
+
         ko_count = 0
         for stage_key, slots in bracket_data.items():
             if stage_key.startswith("_"):
@@ -145,11 +158,18 @@ class Command(BaseCommand):
             if stage is None:
                 continue
             for slot_def in slots:
-                _, created = Match.objects.get_or_create(
+                extra = r32_extra.get(slot_def["slot"], {})
+                _, created = Match.objects.update_or_create(
                     tournament=tournament,
                     stage=stage,
                     bracket_slot=slot_def["slot"],
-                    defaults={"home_team": None, "away_team": None},
+                    defaults={
+                        "home_team": None,
+                        "away_team": None,
+                        "venue": extra.get("venue", ""),
+                        "city": extra.get("city", ""),
+                        "scheduled_at": extra.get("scheduled_at"),
+                    },
                 )
                 if created:
                     ko_count += 1

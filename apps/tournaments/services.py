@@ -139,16 +139,43 @@ class BracketSlot:
 def _resolve_team(
     descriptor: str,
     position_map: dict[str, "int | None"],
-    third_ids: "list[int | None]",
+    third_pool_map: "dict[str, int | None]",
     winner_map: "dict[str, int | None]",
 ) -> "int | None":
-    """Resolve a bracket descriptor like 'A1', '3RD_2', 'win:R32_5' to a team_id."""
+    """Resolve a bracket descriptor like 'A1', '3rd_ABCDF', 'win:M73' to a team_id."""
     if descriptor.startswith("win:"):
         return winner_map.get(descriptor[4:])
-    if descriptor.startswith("3RD_"):
-        idx = int(descriptor[4:]) - 1
-        return third_ids[idx] if idx < len(third_ids) else None
+    if descriptor.startswith("3rd_"):
+        return third_pool_map.get(descriptor)
     return position_map.get(descriptor)
+
+
+def _build_third_pool_map(
+    r32_slots: "list[dict]",
+    ranked_third: "list[TeamStanding]",
+    third_group_letter: "dict[int, str]",
+) -> "dict[str, int | None]":
+    """
+    Greedily assign ranked 3rd-place teams to pool-based descriptors (e.g. '3rd_ABCDF').
+    Iterates R32 slots in order; for each pool descriptor picks the highest-ranked
+    unassigned 3rd-place team whose group letter is in the pool.
+    """
+    result: dict[str, int | None] = {}
+    assigned: set[int] = set()
+    for slot_def in r32_slots:
+        for field in ("home", "away"):
+            desc = slot_def[field]
+            if not desc.startswith("3rd_") or desc in result:
+                continue
+            pool_letters = set(desc[4:])
+            chosen = None
+            for s in ranked_third:
+                if s.team_id not in assigned and third_group_letter.get(s.team_id) in pool_letters:
+                    chosen = s.team_id
+                    assigned.add(s.team_id)
+                    break
+            result[desc] = chosen
+    return result
 
 
 def build_predicted_knockout_bracket(
@@ -206,9 +233,16 @@ def build_predicted_knockout_bracket(
     if tiebreaker_picks:
         ranked_third.sort(key=lambda s: tiebreaker_picks.get(s.team_id, 999))
 
-    third_ids: list[int | None] = [s.team_id for s in ranked_third[:8]]
-    while len(third_ids) < 8:
-        third_ids.append(None)
+    # Map team_id → group_letter for 3rd-place teams (needed for pool assignment)
+    third_group_letter: dict[int, str] = {
+        team_id: key[0]
+        for key, team_id in position_map.items()
+        if key.endswith("3") and team_id is not None
+    }
+
+    # Build pool-based third-place assignment for descriptors like '3rd_ABCDF'
+    r32_slots = bracket_data.get("r32", [])
+    third_pool_map = _build_third_pool_map(r32_slots, ranked_third[:8], third_group_letter)
 
     # All knockout placeholder matches, keyed by bracket_slot
     knockout_matches: dict[str, Match] = {
@@ -235,8 +269,8 @@ def build_predicted_knockout_bracket(
         slots = []
         for slot_def in bracket_data[stage_key]:
             slot_key = slot_def["slot"]
-            home_id = _resolve_team(slot_def["home"], position_map, third_ids, winner_map)
-            away_id = _resolve_team(slot_def["away"], position_map, third_ids, winner_map)
+            home_id = _resolve_team(slot_def["home"], position_map, third_pool_map, winner_map)
+            away_id = _resolve_team(slot_def["away"], position_map, third_pool_map, winner_map)
             match = knockout_matches.get(slot_key)
             pred = ko_predictions.get(match.pk) if match else None
 
