@@ -72,7 +72,7 @@
 
 {{ bracket_json|json_script:"bracket-data" }}
 
-<div id="ko-bracket-content" style="display:none;background:#fff;border-radius:16px;border:1px solid var(--border);overflow:auto;max-height:640px;padding:16px;">
+<div id="ko-bracket-content" style="display:none;border-radius:12px;overflow:auto;max-height:680px;">
 </div>
 
 <script>
@@ -106,142 +106,307 @@ function setKoView(v) {
   if (v === 'bracket') _ensureBracketTree();
 }
 
-function _addSvgLine(svg, x1, y1, x2, y2) {
-  var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-  line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-  line.setAttribute('stroke', 'var(--border)'); line.setAttribute('stroke-width', '2');
-  svg.appendChild(line);
+// ── Bracket tree renderer ─────────────────────────────────────────────────────
+var _FIFA_ISO = {
+  'ENG':'GB','SCO':'GB','WAL':'GB','NIR':'GB','KOR':'KR','IRN':'IR','IRQ':'IQ',
+  'KSA':'SA','UAE':'AE','JOR':'JO','GER':'DE','NED':'NL','POR':'PT','DEN':'DK',
+  'CRO':'HR','TUR':'TR','UKR':'UA','SRB':'RS','AUT':'AT','SUI':'CH','SWE':'SE',
+  'BIH':'BA','MEX':'MX','URU':'UY','PAR':'PY','HON':'HN','GUA':'GT','CRC':'CR',
+  'TRI':'TT','JAM':'JM','HAI':'HT','CUB':'CU','PAN':'PA','CUW':'CW','CIV':'CI',
+  'CMR':'CM','NGA':'NG','SEN':'SN','GHA':'GH','MAR':'MA','TUN':'TN','EGY':'EG',
+  'ALG':'DZ','RSA':'ZA','COD':'CD','CPV':'CV'
+};
+function _flag(code) {
+  if (!code) return '🏳';
+  var iso = (_FIFA_ISO[code] || code.slice(0,2)).toUpperCase();
+  return String.fromCodePoint(0x1F1E6+iso.charCodeAt(0)-65)+String.fromCodePoint(0x1F1E6+iso.charCodeAt(1)-65);
 }
+function _svgLine(svg, x1, y1, x2, y2, color) {
+  var l = document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+  l.setAttribute('stroke', color||'#2a4a60');l.setAttribute('stroke-width','1.5');
+  svg.appendChild(l);
+}
+
+// WC2026-specific bracket topology (indexes into bracket_json arrays)
+// Left half feeds SF_1 (home); right half feeds SF_2 (away)
+var _TOPO = {
+  L: { // r32 pair-groups: [[home_idx, away_idx], ...] top→bottom, matched to r16[0..3]
+    r32g: [[1,4],[0,2],[3,5],[6,7]],  // M74,M77 | M73,M75 | M76,M78 | M79,M80
+    r16:  [0,1,2,3],
+    qf:   [0,1],
+    sf:   0
+  },
+  R: {
+    r32g: [[10,11],[8,9],[13,15],[12,14]], // M83,M84 | M81,M82 | M86,M88 | M85,M87
+    r16:  [4,5,6,7],
+    qf:   [2,3],
+    sf:   1
+  }
+};
+
+var _COL = { // dark theme colors
+  bg:      '#0d1f2d',
+  card:    '#152d3f',
+  border:  '#1e3f55',
+  hover:   '#1d3a50',
+  text:    '#b0d4e8',
+  muted:   '#4a7a90',
+  hdr:     '#3aabcf',
+  score:   '#3acc90',
+  winBg:   '#143828',
+  winTxt:  '#4ade80',
+  conn:    '#2a4a60',
+  gold:    '#c8980a',
+  goldBg:  '#1c2f10'
+};
 
 function _ensureBracketTree() {
   var rawEl = document.getElementById('bracket-data');
   if (!rawEl) return;
   var data;
   try { data = JSON.parse(rawEl.textContent); } catch(e) { return; }
+  if (!data.r32 || !data.r16 || !data.qf || !data.sf || !data.final) return;
 
-  var CARD_W = 178, CARD_H = 62, RGAP = 44, SLOT = 72, TOP_PAD = 20;
-  var STAGE_ORDER = ['r32', 'r16', 'qf', 'sf', 'final'];
-  var stages = STAGE_ORDER.filter(function(k) { return data[k] && data[k].length > 0; });
-  if (stages.length === 0) return;
+  // Dimensions
+  var R32W=128, IW=96, FW=120, CH=56, RH=28, GAP=20;
+  var SG=8, MG=20, LG=40, TOP=32, BOT=20;
 
-  var nRounds = stages.length;
-  var nFirst = data[stages[0]].length;
-  var totalW = nRounds * CARD_W + (nRounds - 1) * SLOT + 20;
-  var totalH = nFirst * (CARD_H + RGAP) - RGAP + 2 * TOP_PAD;
-
-  var positions = [];
-  var first = [];
-  for (var i = 0; i < nFirst; i++) first.push(TOP_PAD + i * (CARD_H + RGAP) + CARD_H / 2);
-  positions.push(first);
-  for (var r = 1; r < nRounds; r++) {
-    var prev = positions[r - 1], curr = [];
-    for (var j = 0; j < Math.ceil(prev.length / 2); j++) {
-      var top = prev[2 * j], bot = prev[2 * j + 1] !== undefined ? prev[2 * j + 1] : top;
-      curr.push((top + bot) / 2);
-    }
-    positions.push(curr);
+  // Compute Y positions from left-side topology (right mirrors exactly)
+  // R32 order: pair[0].home, pair[0].away, pair[1].home, pair[1].away, ... (4 pairs)
+  var r32Tops = [];
+  var y = TOP;
+  for (var p = 0; p < 4; p++) {
+    r32Tops.push(y);         // pair home
+    r32Tops.push(y+CH+SG);  // pair away
+    y += CH+SG+CH+(p<3 ? (p%2===0 ? MG : LG) : 0);
   }
+  var totalH = r32Tops[7]+CH+BOT;
 
+  function cy(top) { return top + RH; } // center of card = top + half height (RH=28=CH/2)
+
+  // R16 centers = midpoint of their 2 r32 feeders
+  var r16Y = [];
+  for (var i = 0; i < 4; i++) {
+    r16Y.push((cy(r32Tops[i*2]) + cy(r32Tops[i*2+1])) / 2);
+  }
+  // QF centers
+  var qfY = [(r16Y[0]+r16Y[1])/2, (r16Y[2]+r16Y[3])/2];
+  // SF center
+  var sfY = (qfY[0]+qfY[1])/2;
+  // Final center
+  var finalY = sfY;
+
+  // Column X positions (left edge)
+  var colX = {
+    Lr32: 0,
+    Lr16: R32W+GAP,
+    Lqf:  R32W+GAP+IW+GAP,
+    Lsf:  R32W+GAP+IW+GAP+IW+GAP,
+    fin:  R32W+GAP+IW+GAP+IW+GAP+IW+GAP,
+    Rsf:  R32W+GAP+IW+GAP+IW+GAP+IW+GAP+FW+GAP,
+    Rqf:  R32W+GAP+IW+GAP+IW+GAP+IW+GAP+FW+GAP+IW+GAP,
+    Rr16: R32W+GAP+IW+GAP+IW+GAP+IW+GAP+FW+GAP+IW+GAP+IW+GAP,
+    Rr32: R32W+GAP+IW+GAP+IW+GAP+IW+GAP+FW+GAP+IW+GAP+IW+GAP+IW+GAP
+  };
+  var totalW = colX.Rr32 + R32W + 1;
+
+  // Container setup
   var container = document.getElementById('ko-bracket-content');
   container.innerHTML = '';
+  container.style.cssText = 'background:'+_COL.bg+';border-radius:12px;overflow:auto;padding:0;';
 
-  var wrapper = document.createElement('div');
-  wrapper.style.cssText = 'position:relative;width:' + totalW + 'px;height:' + totalH + 'px;min-width:' + totalW + 'px;';
+  var outer = document.createElement('div');
+  outer.style.cssText = 'position:relative;width:'+totalW+'px;height:'+totalH+'px;min-width:'+totalW+'px;';
 
-  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;';
-  svg.setAttribute('width', totalW); svg.setAttribute('height', totalH);
+  svg.setAttribute('width',totalW); svg.setAttribute('height',totalH);
 
-  for (var r = 0; r < nRounds; r++) {
-    var stageKey = stages[r];
-    var matches = data[stageKey] || [];
-    var xLeft = r * (CARD_W + SLOT);
-    var xRight = xLeft + CARD_W;
-    var midX = xRight + SLOT / 2;
+  // ── Column headers ──────────────────────────────────────────────────────────
+  var COLS = [
+    {label:'16AVOS',    x:colX.Lr32, w:R32W},
+    {label:'OCTAVOS',   x:colX.Lr16, w:IW},
+    {label:'CUARTOS',   x:colX.Lqf,  w:IW},
+    {label:'SEMIS',     x:colX.Lsf,  w:IW},
+    {label:'FINAL',     x:colX.fin,  w:FW, gold:true},
+    {label:'SEMIS',     x:colX.Rsf,  w:IW},
+    {label:'CUARTOS',   x:colX.Rqf,  w:IW},
+    {label:'OCTAVOS',   x:colX.Rr16, w:IW},
+    {label:'16AVOS',    x:colX.Rr32, w:R32W}
+  ];
+  COLS.forEach(function(c) {
+    var h = document.createElement('div');
+    h.textContent = c.label;
+    h.style.cssText = 'position:absolute;left:'+c.x+'px;top:6px;width:'+c.w+'px;text-align:center;'+
+      'font-size:10px;font-weight:800;letter-spacing:0.08em;'+
+      'color:'+(c.gold?_COL.gold:_COL.hdr)+';';
+    outer.appendChild(h);
+  });
 
-    for (var m = 0; m < matches.length; m++) {
-      var match = matches[m];
-      var centerY = positions[r][m];
-      var topY = Math.round(centerY - CARD_H / 2);
+  // ── Card factory ─────────────────────────────────────────────────────────────
+  function makeCard(x, topY, w, match, isFinal) {
+    var hScore = match.homeScore, aScore = match.awayScore;
+    if (match.matchPk) {
+      var hi = document.getElementById('hs-'+match.matchPk);
+      var ai = document.getElementById('as-'+match.matchPk);
+      if (hi && hi.value !== '') hScore = parseInt(hi.value);
+      if (ai && ai.value !== '') aScore = parseInt(ai.value);
+    }
+    var hasScore = hScore !== null && hScore !== undefined && aScore !== null && aScore !== undefined;
+    var homeWins = hasScore && hScore > aScore;
+    var awayWins = hasScore && aScore > hScore;
+    var isTBD = !match.homeCode && match.home === 'TBD';
 
-      // Read live scores from hidden inputs if matchPk available
-      var hScore = match.homeScore, aScore = match.awayScore;
-      if (match.matchPk) {
-        var hInp = document.getElementById('hs-' + match.matchPk);
-        var aInp = document.getElementById('as-' + match.matchPk);
-        if (hInp && hInp.value !== '') hScore = parseInt(hInp.value);
-        if (aInp && aInp.value !== '') aScore = parseInt(aInp.value);
+    var card = document.createElement('div');
+    var border = isFinal ? ('2px solid '+_COL.gold) : ('1px solid '+_COL.border);
+    var bg = isFinal ? _COL.goldBg : _COL.card;
+    card.style.cssText = 'position:absolute;left:'+x+'px;top:'+Math.round(topY)+'px;'+
+      'width:'+w+'px;height:'+CH+'px;background:'+bg+';border:'+border+';border-radius:6px;'+
+      'overflow:hidden;box-sizing:border-box;';
+
+    function teamRow(code, name, score, wins, isHome) {
+      var flag = code ? _flag(code) : '🏳';
+      var label = code || name.slice(0,3).toUpperCase();
+      var rowBg = wins ? _COL.winBg : 'transparent';
+      var txtColor = wins ? _COL.winTxt : (isTBD ? _COL.muted : _COL.text);
+      var scoreStr = (score !== null && score !== undefined) ? String(score) : '–';
+      var scoreFmt = '<span style="font-size:12px;font-weight:900;color:'+
+        (wins?_COL.score:_COL.muted)+';min-width:16px;text-align:right;">'+scoreStr+'</span>';
+      var bdr = isHome ? ('border-bottom:1px solid '+_COL.border+';') : '';
+      return '<div style="display:flex;align-items:center;justify-content:space-between;'+
+        'padding:0 7px;height:'+RH+'px;background:'+rowBg+';'+bdr+'">'+
+        '<span style="font-size:11px;font-weight:'+(wins?'800':'600')+';color:'+txtColor+
+        ';display:flex;align-items:center;gap:4px;overflow:hidden;white-space:nowrap;">'+
+        '<span>'+flag+'</span><span style="overflow:hidden;text-overflow:ellipsis;">'+label+'</span></span>'+
+        scoreFmt+'</div>';
+    }
+
+    card.innerHTML = teamRow(match.homeCode, match.home, hScore, homeWins, true) +
+                     teamRow(match.awayCode, match.away, aScore, awayWins, false);
+
+    if (!_koSubmitted && match.matchPk) {
+      (function(pk, hn, an) {
+        card.style.cursor = 'pointer';
+        card.onmouseenter = function() { card.style.borderColor = isFinal?_COL.gold:'#3aabcf'; };
+        card.onmouseleave = function() { card.style.borderColor = isFinal?_COL.gold:_COL.border; };
+        card.onclick = function() {
+          GansaPicker.open(card,'hs-'+pk,'as-'+pk,hn,an,function(){
+            updateKoPill(String(pk)); _ensureBracketTree();
+          });
+        };
+      })(match.matchPk, match.home, match.away);
+    }
+    outer.appendChild(card);
+    return { top: Math.round(topY), center: Math.round(topY)+RH };
+  }
+
+  // ── Connector helper ─────────────────────────────────────────────────────────
+  // left-to-right connector: from right edge of src to left edge of dst
+  function connLR(srcX, srcW, srcCY, dstX, dstCY) {
+    var midX = srcX+srcW+Math.round(GAP/2);
+    _svgLine(svg, srcX+srcW, srcCY, midX, srcCY, _COL.conn);
+    if (srcCY !== dstCY) _svgLine(svg, midX, srcCY, midX, dstCY, _COL.conn);
+    _svgLine(svg, midX, dstCY, dstX, dstCY, _COL.conn);
+  }
+  // right-to-left connector: from left edge of src to right edge of dst
+  function connRL(srcX, srcCY, dstX, dstW, dstCY) {
+    var midX = dstX+dstW+Math.round(GAP/2);
+    _svgLine(svg, srcX, srcCY, midX, srcCY, _COL.conn);
+    if (srcCY !== dstCY) _svgLine(svg, midX, srcCY, midX, dstCY, _COL.conn);
+    _svgLine(svg, midX, dstCY, dstX+dstW, dstCY, _COL.conn);
+  }
+
+  // ── Render one side of the bracket ──────────────────────────────────────────
+  function renderSide(side) {
+    var T = _TOPO[side];
+    var isLeft = side === 'L';
+    var r32X  = isLeft ? colX.Lr32 : colX.Rr32;
+    var r16X  = isLeft ? colX.Lr16 : colX.Rr16;
+    var qfX   = isLeft ? colX.Lqf  : colX.Rqf;
+    var sfX   = isLeft ? colX.Lsf  : colX.Rsf;
+
+    var r16CY = [], qfCY = [], sfCY_val;
+
+    // R32 + connectors to R16
+    for (var p = 0; p < 4; p++) {
+      var idxH = T.r32g[p][0], idxA = T.r32g[p][1];
+      var mH = data.r32[idxH], mA = data.r32[idxA];
+      var tH = r32Tops[p*2], tA = r32Tops[p*2+1];
+      var cH = makeCard(r32X, tH, R32W, mH).center;
+      var cA = makeCard(r32X, tA, R32W, mA).center;
+      var r16CenterY = r16Y[p];
+      var r16Top = r16CenterY - RH;
+      var r16m = data.r16[T.r16[p]];
+      makeCard(r16X, r16Top, IW, r16m);
+      r16CY.push(r16CenterY);
+
+      // R32 → R16 connectors
+      if (isLeft) {
+        connLR(r32X, R32W, cH, r16X, r16CenterY);
+        connLR(r32X, R32W, cA, r16X, r16CenterY);
+      } else {
+        connRL(r32X, cH, r16X, IW, r16CenterY);
+        connRL(r32X, cA, r16X, IW, r16CenterY);
       }
-      var hasScore = hScore !== null && hScore !== undefined && aScore !== null && aScore !== undefined;
-      var isTBD = match.home === 'TBD' && match.away === 'TBD';
+    }
 
-      // Determine winner for highlighting
-      var homeWins = hasScore && hScore > aScore;
-      var awayWins = hasScore && aScore > hScore;
-
-      var card = document.createElement('div');
-      card.style.cssText = [
-        'position:absolute', 'left:' + xLeft + 'px', 'top:' + topY + 'px',
-        'width:' + CARD_W + 'px', 'height:' + CARD_H + 'px',
-        'background:' + (isTBD ? 'var(--bg)' : '#fff'),
-        'border:1.5px solid var(--border)', 'border-radius:8px',
-        'overflow:hidden', 'box-sizing:border-box'
-      ].join(';');
-
-      var hColor = homeWins ? 'var(--accent)' : (isTBD ? 'var(--text-muted)' : 'var(--text)');
-      var aColor = awayWins ? 'var(--accent)' : (isTBD ? 'var(--text-muted)' : 'var(--text)');
-      var hWeight = homeWins ? '800' : '600';
-      var aWeight = awayWins ? '800' : '600';
-      var hBg = homeWins ? 'background:var(--accent-light);' : '';
-      var aBg = awayWins ? 'background:var(--accent-light);' : '';
-      var hScoreHtml = hasScore ? '<span style="font-size:11px;font-weight:900;color:' + (homeWins ? 'var(--accent)' : 'var(--text-muted)') + ';flex-shrink:0;">' + hScore + '</span>' : '';
-      var aScoreHtml = hasScore ? '<span style="font-size:11px;font-weight:900;color:' + (awayWins ? 'var(--accent)' : 'var(--text-muted)') + ';flex-shrink:0;">' + aScore + '</span>' : '';
-
-      card.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;border-bottom:1px solid var(--border);height:50%;' + hBg + '">' +
-          '<span style="font-size:11px;font-weight:' + hWeight + ';color:' + hColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.home + '</span>' +
-          hScoreHtml +
-        '</div>' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;height:50%;' + aBg + '">' +
-          '<span style="font-size:11px;font-weight:' + aWeight + ';color:' + aColor + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + match.away + '</span>' +
-          aScoreHtml +
-        '</div>';
-
-      // Make card clickable in Árbol view (opens ScorePicker on the hidden inputs)
-      if (!_koSubmitted && match.matchPk) {
-        (function (pk, home, away) {
-          card.style.cursor = 'pointer';
-          card.addEventListener('mouseenter', function () { card.style.borderColor = 'var(--accent)'; });
-          card.addEventListener('mouseleave', function () { card.style.borderColor = 'var(--border)'; });
-          card.onclick = function () {
-            GansaPicker.open(card, 'hs-' + pk, 'as-' + pk, home, away, function () {
-              updateKoPill(String(pk));
-              _ensureBracketTree();
-            });
-          };
-        })(match.matchPk, match.home, match.away);
+    // R16 → QF
+    for (var q = 0; q < 2; q++) {
+      var qfCenterY = qfY[q];
+      var qfTop = qfCenterY - RH;
+      var qfm = data.qf[T.qf[q]];
+      makeCard(qfX, qfTop, IW, qfm);
+      qfCY.push(qfCenterY);
+      var r16a = r16CY[q*2], r16b = r16CY[q*2+1];
+      if (isLeft) {
+        connLR(r16X, IW, r16a, qfX, qfCenterY);
+        connLR(r16X, IW, r16b, qfX, qfCenterY);
+      } else {
+        connRL(r16X, r16a, qfX, IW, qfCenterY);
+        connRL(r16X, r16b, qfX, IW, qfCenterY);
       }
+    }
 
-      wrapper.appendChild(card);
+    // QF → SF
+    sfCY_val = sfY;
+    var sfTop = sfCY_val - RH;
+    var sfm = data.sf[T.sf];
+    makeCard(sfX, sfTop, IW, sfm);
+    if (isLeft) {
+      connLR(qfX, IW, qfCY[0], sfX, sfCY_val);
+      connLR(qfX, IW, qfCY[1], sfX, sfCY_val);
+    } else {
+      connRL(qfX, qfCY[0], sfX, IW, sfCY_val);
+      connRL(qfX, qfCY[1], sfX, IW, sfCY_val);
+    }
 
-      if (r < nRounds - 1 && m % 2 === 0) {
-        var topCY = positions[r][m];
-        var botCY = positions[r][m + 1] !== undefined ? positions[r][m + 1] : topCY;
-        var nextCY = positions[r + 1][Math.floor(m / 2)];
-        var nextLeftX = (r + 1) * (CARD_W + SLOT);
-        _addSvgLine(svg, xRight, topCY, midX, topCY);
-        if (botCY !== topCY) {
-          _addSvgLine(svg, xRight, botCY, midX, botCY);
-          _addSvgLine(svg, midX, topCY, midX, botCY);
-        }
-        _addSvgLine(svg, midX, nextCY, nextLeftX, nextCY);
-      }
+    // SF → Final connector
+    if (isLeft) {
+      connLR(sfX, IW, sfCY_val, colX.fin, finalY);
+    } else {
+      connRL(sfX, sfCY_val, colX.fin, FW, finalY);
     }
   }
 
-  wrapper.appendChild(svg);
-  container.appendChild(wrapper);
+  renderSide('L');
+  renderSide('R');
+
+  // ── Final card ───────────────────────────────────────────────────────────────
+  var finalM = data.final && data.final[0];
+  if (finalM) {
+    makeCard(colX.fin, finalY - RH, FW, finalM, true);
+    // Trophy below Final
+    var trophyDiv = document.createElement('div');
+    trophyDiv.style.cssText = 'position:absolute;left:'+colX.fin+'px;top:'+(finalY+RH+12)+'px;'+
+      'width:'+FW+'px;text-align:center;';
+    trophyDiv.innerHTML = '<div style="font-size:22px;">🏆</div>'+
+      '<div style="font-size:9px;font-weight:800;letter-spacing:0.08em;color:'+_COL.gold+';margin-top:2px;">TU CAMPEÓN</div>';
+    outer.appendChild(trophyDiv);
+  }
+
+  outer.appendChild(svg);
+  container.appendChild(outer);
 }
 
 (function () {
