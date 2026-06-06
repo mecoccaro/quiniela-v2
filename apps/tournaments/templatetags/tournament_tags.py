@@ -10,12 +10,18 @@ FIFA_TO_ISO2 = {
     # Europe mismatches
     "GER": "DE", "NED": "NL", "POR": "PT", "DEN": "DK", "CRO": "HR",
     "TUR": "TR", "UKR": "UA", "SRB": "RS", "AUT": "AT",
+    "SUI": "CH",  # Switzerland
+    "SWE": "SE",  # Sweden
+    "BIH": "BA",  # Bosnia & Herzegovina
     # Americas mismatches
     "MEX": "MX", "URU": "UY", "PAR": "PY", "HON": "HN", "GUA": "GT",
     "CRC": "CR", "TRI": "TT", "JAM": "JM", "HAI": "HT", "CUB": "CU", "PAN": "PA",
+    "CUW": "CW",  # Curaçao
     # Africa
     "CIV": "CI", "CMR": "CM", "NGA": "NG", "SEN": "SN", "GHA": "GH",
     "MAR": "MA", "TUN": "TN", "EGY": "EG", "ALG": "DZ", "RSA": "ZA",
+    "COD": "CD",  # DR Congo
+    "CPV": "CV",  # Cabo Verde
 }
 
 
