@@ -98,8 +98,10 @@ def _compute_advancement_bonus(user, pool, config) -> int:
         )
         real_ids: set[int] = set()
         for m in stage_matches:
-            real_ids.add(m.home_team_id)
-            real_ids.add(m.away_team_id)
+            if m.home_team_id is not None:
+                real_ids.add(m.home_team_id)
+            if m.away_team_id is not None:
+                real_ids.add(m.away_team_id)
 
         if not real_ids:
             continue  # round hasn't started yet
@@ -119,7 +121,76 @@ def _compute_advancement_bonus(user, pool, config) -> int:
 
 
 def _compute_group_classification_bonus(user, pool) -> int:
-    return 0  # implemented in phase 5
+    from apps.leaderboard.scoring import get_scoring_config
+    from apps.tournaments.models import Match, TournamentTeam
+    from apps.tournaments.services import get_actual_group_standings, get_predicted_group_standings
+    from apps.tournaments.standings import rank_third_place_teams
+
+    tournament = pool.tournament
+    config = get_scoring_config(pool)
+    cls_cfg = config.get("group_classification", {})
+    if not cls_cfg:
+        return 0
+
+    # Guard: only compute once all group matches are complete
+    incomplete = Match.objects.filter(
+        tournament=tournament,
+        stage=Match.Stage.GROUP,
+    ).exclude(status=Match.Status.COMPLETED).exists()
+    if incomplete:
+        return 0
+
+    # Get all group letters from the tournament
+    group_letters = list(
+        TournamentTeam.objects.filter(tournament=tournament)
+        .values_list("group_letter", flat=True)
+        .distinct()
+    )
+
+    total = 0
+    predicted_thirds: dict[str, int] = {}  # group_letter → predicted 3rd team_id
+    actual_thirds: dict[str, int] = {}     # group_letter → actual 3rd team_id
+    all_actual_third_standings = []
+
+    for letter in group_letters:
+        predicted = get_predicted_group_standings(user, pool, letter)
+        actual = get_actual_group_standings(tournament, letter)
+        if not predicted or not actual:
+            continue
+
+        pred_map = {s.position: s.team_id for s in predicted}
+        act_map = {s.position: s.team_id for s in actual}
+
+        if pred_map.get(1) == act_map.get(1):
+            total += cls_cfg.get("first_place", 0)
+        if pred_map.get(2) == act_map.get(2):
+            total += cls_cfg.get("second_place", 0)
+
+        if 3 in pred_map:
+            predicted_thirds[letter] = pred_map[3]
+        if 3 in act_map:
+            actual_thirds[letter] = act_map[3]
+            # Collect the actual 3rd-place TeamStanding for ranking
+            for s in actual:
+                if s.position == 3:
+                    all_actual_third_standings.append(s)
+                    break
+
+    # 3rd place: only score if the predicted team is among the best 8 actual third-placers
+    rankings = {
+        tt.team_id: tt.fifa_ranking
+        for tt in TournamentTeam.objects.filter(tournament=tournament)
+        if tt.fifa_ranking is not None
+    }
+    ranked_thirds = rank_third_place_teams(all_actual_third_standings, rankings)
+    top8_actual_thirds = {s.team_id for s in ranked_thirds[:8]}
+
+    third_pts = cls_cfg.get("third_place", 0)
+    for _letter, pred_3rd in predicted_thirds.items():
+        if pred_3rd in top8_actual_thirds:
+            total += third_pts
+
+    return total
 
 
 def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
