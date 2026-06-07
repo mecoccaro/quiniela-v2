@@ -327,15 +327,6 @@ class BulkSaveKnockoutPredictionsView(LoginRequiredMixin, View):
             .values_list("pk", flat=True)
         )
 
-        winner_pks = {
-            int(item["match_id"]): int(item["winner_pk"])
-            for item in predictions
-            if item.get("winner_pk") is not None
-        }
-        all_winner_teams = {
-            t.pk: t for t in Team.objects.filter(pk__in=winner_pks.values())
-        }
-
         from django.db import transaction
         with transaction.atomic():
             for item in predictions:
@@ -350,8 +341,6 @@ class BulkSaveKnockoutPredictionsView(LoginRequiredMixin, View):
                     home, away = int(home), int(away)
                 except (TypeError, ValueError):
                     continue
-                wpk = winner_pks.get(int(match_id))
-                winner = all_winner_teams.get(wpk) if wpk else None
                 Prediction.objects.update_or_create(
                     user=user,
                     pool=pool,
@@ -359,7 +348,7 @@ class BulkSaveKnockoutPredictionsView(LoginRequiredMixin, View):
                     defaults={
                         "predicted_home_score": home,
                         "predicted_away_score": away,
-                        "predicted_winner": winner,
+                        "predicted_winner": None,
                     },
                 )
 

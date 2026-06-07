@@ -29,34 +29,15 @@
 </div>
 {% endif %}
 
-<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-  <div id="ko-tabs" style="display:flex;gap:6px;overflow-x:auto;flex:1;">
-    {% for stage in stages %}
-    <button
-      class="ko-tab"
-      onclick="switchKoStage('{{ stage.key }}')"
-      id="ko-tab-{{ stage.key }}"
-      data-stage="{{ stage.key }}"
-      style="padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--surface,#fff);color:var(--text-muted);">
-      {{ stage.label }}
-    </button>
-    {% endfor %}
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-    <div style="display:flex;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);">
-      <button id="ko-view-list" onclick="setKoView('list')"
-              style="padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#fff;">Lista</button>
-      <button id="ko-view-bracket" onclick="setKoView('bracket')"
-              style="padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:#fff;color:var(--text-muted);">Árbol</button>
-    </div>
-    {% if not predictions_submitted %}
-    <button onclick="randomizeAllKo(this)"
-            style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
-    {% endif %}
-  </div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;">
+  <h2 style="font-size:20px;font-weight:800;color:var(--text);margin:0;">Eliminatorias</h2>
+  {% if not predictions_submitted %}
+  <button onclick="randomizeAllKo(this)"
+          style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
+  {% endif %}
 </div>
 
-<div id="ko-lista-content">
+<div id="ko-lista-content" style="display:none;">
   <div id="ko-bracket">
     {% include "predictions/partials/knockout_stages.html" %}
   </div>
@@ -72,39 +53,11 @@
 
 {{ bracket_json|json_script:"bracket-data" }}
 
-<div id="ko-bracket-content" style="display:none;border-radius:12px;overflow:auto;max-height:680px;">
+<div id="ko-bracket-content" style="width:100%;overflow-x:auto;">
 </div>
 
 <script>
-let activeKoStage = '{{ stages.0.key }}';
 var _koSubmitted = {% if predictions_submitted %}true{% else %}false{% endif %};
-
-function switchKoStage(key) {
-  activeKoStage = key;
-  document.querySelectorAll('[data-ko-stage]').forEach(function (el) {
-    el.style.display = el.dataset.koStage === key ? '' : 'none';
-  });
-  document.querySelectorAll('.ko-tab').forEach(function (btn) {
-    var active = btn.dataset.stage === key;
-    btn.style.background = active ? 'var(--accent)' : 'var(--surface,#fff)';
-    btn.style.color = active ? '#fff' : 'var(--text-muted)';
-    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
-  });
-}
-
-function setKoView(v) {
-  var lista = document.getElementById('ko-lista-content');
-  var bracket = document.getElementById('ko-bracket-content');
-  var btnList = document.getElementById('ko-view-list');
-  var btnBracket = document.getElementById('ko-view-bracket');
-  lista.style.display = v === 'list' ? '' : 'none';
-  bracket.style.display = v === 'bracket' ? '' : 'none';
-  btnList.style.background = v === 'list' ? 'var(--accent)' : '#fff';
-  btnList.style.color = v === 'list' ? '#fff' : 'var(--text-muted)';
-  btnBracket.style.background = v === 'bracket' ? 'var(--accent)' : '#fff';
-  btnBracket.style.color = v === 'bracket' ? '#fff' : 'var(--text-muted)';
-  if (v === 'bracket') _ensureBracketTree();
-}
 
 // ── Bracket tree renderer ─────────────────────────────────────────────────────
 var _FIFA_ISO = {
@@ -287,7 +240,7 @@ function _ensureBracketTree() {
         card.onmouseleave=function(){card.style.borderColor=isFinal?'var(--accent)':'var(--border)';};
         card.onclick=function(){
           GansaPicker.open(card,'hs-'+pk,'as-'+pk,hn,an,function(){
-            updateKoPill(String(pk));_ensureBracketTree();
+            updateKoPill(String(pk));
           });
         };
       })(match.matchPk,match.home,match.away);
@@ -418,18 +371,11 @@ function _ensureBracketTree() {
       if (!aInp) return;
       var h = Math.floor(Math.random() * 6);
       var a = Math.floor(Math.random() * 6);
+      if (h === a) { a = a > 0 ? a - 1 : a + 1; }
       hInp.value = h;
       aInp.value = a;
       updateKoPill(matchId);
-      var item = { match_id: parseInt(matchId, 10), home: h, away: a };
-      if (h === a) {
-        var form = hInp.closest('.ko-form');
-        if (form) {
-          var firstOpt = form.querySelector('select[name="predicted_winner"] option[value]:not([value=""])');
-          if (firstOpt) item.winner_pk = parseInt(firstOpt.value, 10);
-        }
-      }
-      predictions.push(item);
+      predictions.push({ match_id: parseInt(matchId, 10), home: h, away: a });
     });
 
     fetch('{% url "bulk_save_knockout_predictions" pool.pk %}', {
@@ -474,18 +420,14 @@ function _ensureBracketTree() {
   document.addEventListener('htmx:afterSettle', function () {
     window.scrollTo(0, savedScrollY);
     document.querySelectorAll('.ko-form').forEach(syncWinner);
-    switchKoStage(activeKoStage);
     updateKoProgress();
-    var bracketEl = document.getElementById('ko-bracket-content');
-    if (bracketEl && bracketEl.style.display !== 'none') {
-      _ensureBracketTree();
-    }
+    _ensureBracketTree();
   });
 
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.ko-form').forEach(syncWinner);
-    switchKoStage(activeKoStage);
     updateKoProgress();
+    _ensureBracketTree();
   });
 })();
 </script>
