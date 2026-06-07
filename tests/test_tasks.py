@@ -64,7 +64,7 @@ def test_recalculate_sets_points_awarded(pool, user, membership, group_match):
     group_match.save()
 
     pred = Prediction.objects.get(user=user, pool=pool, match=group_match)
-    assert pred.points_awarded == 3  # exact score default
+    assert pred.points_awarded == 7  # exact score: resultado=3 + goals_a=1 + goals_b=1 + bonus=2
 
 
 @pytest.mark.django_db
@@ -79,7 +79,7 @@ def test_recalculate_creates_leaderboard_entry(pool, user, membership, group_mat
     group_match.save()
 
     entry = LeaderboardEntry.objects.get(pool=pool, user=user)
-    assert entry.total_points == 5  # correct result only
+    assert entry.total_points == 4  # correct result: resultado=3 + goals_b=1 (away=0 matches)
     assert entry.rank == 1
 
 
@@ -98,7 +98,7 @@ def test_recalculate_direct_call(pool, user, membership, group_match):
     recalculate_pool_scores.apply(args=[group_match.pk])
 
     pred = Prediction.objects.get(user=user, pool=pool, match=group_match)
-    assert pred.points_awarded == 5  # correct result (away win)
+    assert pred.points_awarded == 3  # correct result (away win): resultado=3, no individual goals match
 
 
 @pytest.mark.django_db
@@ -112,7 +112,7 @@ def test_recalculate_dense_ranking(pool, tournament, group_match):
     PoolMembership.objects.create(pool=pool, user=user_a)
     PoolMembership.objects.create(pool=pool, user=user_b)
 
-    # user_a: exact score (3 pts), user_b: wrong (0 pts)
+    # user_a: exact score (7 pts), user_b: wrong (0 pts)
     Prediction.objects.create(user=user_a, pool=pool, match=group_match, predicted_home_score=2, predicted_away_score=1)
     Prediction.objects.create(user=user_b, pool=pool, match=group_match, predicted_home_score=0, predicted_away_score=3)
 
@@ -135,7 +135,7 @@ def test_score_final_picks_champion(pool, user, membership, teams, tournament):
     score_final_picks.apply(args=[tournament.pk, ta.pk, "Messi"])
 
     pick = PoolChampionPick.objects.get(user=user, pool=pool)
-    assert pick.points_awarded == 10
+    assert pick.points_awarded == 30
 
 
 @pytest.mark.django_db
@@ -145,7 +145,7 @@ def test_score_final_picks_top_scorer_case_insensitive(pool, user, membership, t
     score_final_picks.apply(args=[tournament.pk, 999, "Messi"])
 
     pick = PoolTopScorerPick.objects.get(user=user, pool=pool)
-    assert pick.points_awarded == 5
+    assert pick.points_awarded == 30
 
 
 @pytest.mark.django_db

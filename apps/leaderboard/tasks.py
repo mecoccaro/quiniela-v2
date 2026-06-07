@@ -77,43 +77,9 @@ def score_final_picks(tournament_id: int, official_champion_id: int, official_to
 
 
 def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
-    """Score a knockout prediction, gating result points on team correctness.
+    """Score a knockout prediction directly. No bracket-slot gating in v4."""
+    from apps.leaderboard.scoring import score_prediction
 
-    Returns (points_awarded, slot_bonus_awarded).
-
-    Scoring tiers:
-    - 0 correct teams in slot → (0, 0)
-    - 1 correct team           → (0, correct_slot × 1)
-    - 2 correct teams          → (result/score pts, correct_slot × 2)
-    """
-    from apps.leaderboard.scoring import get_slot_bonus, score_prediction
-    from apps.tournaments.services import build_predicted_knockout_bracket
-
-    slot_pts = get_slot_bonus(match.stage, config)
-
-    # Can't check team placement without both actual teams assigned
-    if not match.home_team_id or not match.away_team_id or not match.bracket_slot:
-        return 0, 0
-
-    bracket = build_predicted_knockout_bracket(prediction.user, prediction.pool)
-    predicted_slot = next(
-        (s for s in bracket.get(match.stage, []) if s.slot_key == match.bracket_slot),
-        None,
-    )
-
-    num_correct = 0
-    if predicted_slot:
-        if predicted_slot.home_team and predicted_slot.home_team.pk == match.home_team_id:
-            num_correct += 1
-        if predicted_slot.away_team and predicted_slot.away_team.pk == match.away_team_id:
-            num_correct += 1
-
-    slot_bonus = slot_pts * num_correct
-
-    if num_correct < 2:
-        return 0, slot_bonus
-
-    # Both teams correct — apply normal result/score scoring
     points = score_prediction(
         predicted_home=prediction.predicted_home_score,
         predicted_away=prediction.predicted_away_score,
@@ -124,7 +90,7 @@ def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
         official_knockout_winner_id=match.knockout_winner_id,
         config=config,
     )
-    return points, slot_bonus
+    return points, 0  # slot_bonus always 0 in v4
 
 
 def _recalculate_leaderboard(pool_id: int) -> None:
