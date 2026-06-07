@@ -116,12 +116,19 @@
       if (btnA) btnA.textContent = away;
 
       _render();
+      // Position off-screen first so measurement doesn't cause visible flash
+      el.style.top = '-9999px';
+      el.style.left = '-9999px';
       el.style.display = 'block';
-      var r = btn.getBoundingClientRect(), W = 264, est = 420;
-      var top = r.bottom + 8, left = r.left + r.width / 2 - W / 2;
+      var r = btn.getBoundingClientRect();
+      var W = 264;
+      var h = el.offsetHeight;  // actual rendered height
+      var top = r.bottom + 8;
+      var left = r.left + r.width / 2 - W / 2;
       if (left < 8) left = 8;
       if (left + W > window.innerWidth - 8) left = window.innerWidth - W - 8;
-      if (top + est > window.innerHeight - 8) top = r.top - est - 8;
+      if (top + h > window.innerHeight - 8) top = r.top - h - 8;
+      if (top < 8) top = 8;  // never go above viewport
       el.style.top = top + 'px';
       el.style.left = left + 'px';
     },
