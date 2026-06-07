@@ -5,19 +5,73 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from apps.pools.models import Pool
 
-# Per-stage scoring config (new format).
-# Each stage key maps to a dict with exact_score, correct_result, and (for knockout) pens_winner.
+# v4 additive scoring config.
+# Each stage key maps to a dict with correct_resultado, correct_goals_team_a/b,
+# bonus_exact_score, and (for knockout stages) correct_clasificado.
+# advancement and group_classification are bonus categories computed at leaderboard level.
 # champion and top_scorer remain top-level keys.
 DEFAULT_SCORING_CONFIG: dict = {
-    "group":       {"exact_score": 3, "correct_result": 5},
-    "r32":         {"exact_score": 4, "correct_result": 6, "pens_winner": 1, "correct_slot": 2},
-    "r16":         {"exact_score": 5, "correct_result": 7, "pens_winner": 1, "correct_slot": 3},
-    "qf":          {"exact_score": 6, "correct_result": 8, "pens_winner": 1, "correct_slot": 4},
-    "sf":          {"exact_score": 7, "correct_result": 9, "pens_winner": 1, "correct_slot": 5},
-    "third_place": {"exact_score": 5, "correct_result": 7, "pens_winner": 1, "correct_slot": 3},
-    "final":       {"exact_score": 10, "correct_result": 12, "pens_winner": 2, "correct_slot": 6},
-    "champion":    10,
-    "top_scorer":  5,
+    "group": {
+        "correct_resultado": 3,
+        "correct_goals_team_a": 1,
+        "correct_goals_team_b": 1,
+        "bonus_exact_score": 2,
+    },
+    "r32": {
+        "correct_resultado": 6,
+        "correct_clasificado": 2,
+        "correct_goals_team_a": 2,
+        "correct_goals_team_b": 2,
+        "bonus_exact_score": 4,
+    },
+    "r16": {
+        "correct_resultado": 12,
+        "correct_clasificado": 3,
+        "correct_goals_team_a": 3,
+        "correct_goals_team_b": 3,
+        "bonus_exact_score": 6,
+    },
+    "qf": {
+        "correct_resultado": 18,
+        "correct_clasificado": 4,
+        "correct_goals_team_a": 4,
+        "correct_goals_team_b": 4,
+        "bonus_exact_score": 8,
+    },
+    "sf": {
+        "correct_resultado": 24,
+        "correct_clasificado": 5,
+        "correct_goals_team_a": 5,
+        "correct_goals_team_b": 5,
+        "bonus_exact_score": 10,
+    },
+    "third_place": {
+        "correct_resultado": 12,
+        "correct_clasificado": 3,
+        "correct_goals_team_a": 3,
+        "correct_goals_team_b": 3,
+        "bonus_exact_score": 6,
+    },
+    "final": {
+        "correct_resultado": 30,
+        "correct_clasificado": 6,
+        "correct_goals_team_a": 6,
+        "correct_goals_team_b": 6,
+        "bonus_exact_score": 12,
+    },
+    "advancement": {
+        "r16": 4,
+        "qf": 8,
+        "sf": 16,
+        "final": 32,
+    },
+    "group_classification": {
+        "first_place": 6,
+        "second_place": 6,
+        "third_place": 4,
+    },
+    "champion": 30,
+    "top_scorer": 30,
 }
 
 
@@ -38,24 +92,20 @@ def _outcome(home: int, away: int) -> str:
     return "draw"
 
 
-def _stage_values(stage: str, config: dict) -> tuple[int, int, int]:
-    """Return (exact_pts, result_pts, pens_pts) for the given stage and config.
-
-    Supports two config formats:
-    - Per-stage (new): config[stage] is a dict with exact_score / correct_result / pens_winner
-    - Flat (legacy):   config has exact_score / correct_result / pens_winner at top level
-    """
-    stage_config = config.get(stage)
-    if isinstance(stage_config, dict):
-        exact_pts = stage_config.get("exact_score", 3)
-        result_pts = stage_config.get("correct_result", 1)
-        pens_pts = stage_config.get("pens_winner", 1)
-    else:
-        # Legacy flat format
-        exact_pts = config.get("exact_score", 3)
-        result_pts = config.get("correct_result", 1)
-        pens_pts = config.get("pens_winner", 1)
-    return exact_pts, result_pts, pens_pts
+def _v4_stage_values(stage: str, config: dict) -> dict:
+    """Return v4 scoring components for the stage. Falls back to legacy flat-format keys."""
+    stage_cfg = config.get(stage)
+    if isinstance(stage_cfg, dict) and "correct_resultado" in stage_cfg:
+        return stage_cfg  # v4 format
+    # Legacy flat format — map old keys to v4 equivalents
+    flat = stage_cfg if isinstance(stage_cfg, dict) else config
+    return {
+        "correct_resultado": flat.get("correct_result", 0),
+        "correct_goals_team_a": 0,
+        "correct_goals_team_b": 0,
+        "bonus_exact_score": flat.get("exact_score", 0),
+        "correct_clasificado": flat.get("pens_winner", 0),
+    }
 
 
 def score_prediction(
@@ -68,29 +118,31 @@ def score_prediction(
     official_knockout_winner_id: int | None,
     config: dict,
 ) -> int:
-    """Return points awarded for one prediction against the official result."""
-    exact_pts, result_pts, pens_pts = _stage_values(stage, config)
-
+    """Return points for one prediction. All v4 components are additive."""
+    s = _v4_stage_values(stage, config)
     points = 0
-    if predicted_home == official_home and predicted_away == official_away:
-        points += exact_pts
-    elif _outcome(predicted_home, predicted_away) == _outcome(official_home, official_away):
-        points += result_pts
 
+    # Resultado: outcome direction (home/draw/away)
+    if _outcome(predicted_home, predicted_away) == _outcome(official_home, official_away):
+        points += s.get("correct_resultado", 0)
+
+    # Individual goal correctness
+    if predicted_home == official_home:
+        points += s.get("correct_goals_team_a", 0)
+    if predicted_away == official_away:
+        points += s.get("correct_goals_team_b", 0)
+
+    # Bonus: additive when both goals exact
+    if predicted_home == official_home and predicted_away == official_away:
+        points += s.get("bonus_exact_score", 0)
+
+    # Clasificado: knockout only, always scored when IDs are known
     if (
         stage != "group"
         and predicted_winner_id is not None
         and official_knockout_winner_id is not None
         and predicted_winner_id == official_knockout_winner_id
     ):
-        points += pens_pts
+        points += s.get("correct_clasificado", 0)
 
     return points
-
-
-def get_slot_bonus(stage: str, config: dict) -> int:
-    """Return the correct_slot bonus for the given stage, or 0 if not defined."""
-    stage_cfg = config.get(stage, {})
-    if isinstance(stage_cfg, dict):
-        return stage_cfg.get("correct_slot", 0)
-    return 0
