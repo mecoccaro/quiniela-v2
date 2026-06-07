@@ -3,6 +3,15 @@
 {% block title %}Eliminatorias — {{ pool.name }}{% endblock %}
 
 {% block content %}
+<style>
+.bracket-scroll {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  overflow-x: visible;
+}
+@media (max-width: 640px) { .bracket-scroll { overflow-x: auto; } }
+</style>
 
 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
   <div>
@@ -53,7 +62,7 @@
 
 {{ bracket_json|json_script:"bracket-data" }}
 
-<div id="ko-bracket-content" style="width:100%;overflow-x:auto;">
+<div id="ko-bracket-content" class="bracket-scroll">
 </div>
 
 <script>
@@ -195,10 +204,11 @@ function _ensureBracketTree() {
 
   var container = document.getElementById('ko-bracket-content');
   container.innerHTML = '';
-  container.style.cssText = 'background:var(--bg);border-radius:16px;border:1px solid var(--border);overflow:auto;padding:8px 12px 12px;';
+  container.style.cssText = 'padding:8px 0;box-sizing:border-box;';
+  container.classList.add('bracket-scroll');
 
   var outer = document.createElement('div');
-  outer.style.cssText = 'position:relative;width:'+totalW+'px;height:'+totalH+'px;min-width:'+totalW+'px;';
+  outer.style.cssText = 'position:relative;width:'+totalW+'px;height:'+totalH+'px;min-width:'+totalW+'px;margin:0 auto;';
 
   var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;';
