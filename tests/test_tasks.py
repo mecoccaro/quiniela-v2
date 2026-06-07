@@ -1,6 +1,8 @@
+from unittest.mock import patch
+
 import pytest
 
-from apps.leaderboard.tasks import recalculate_pool_scores, score_final_picks
+from apps.leaderboard.tasks import _recalculate_leaderboard, recalculate_pool_scores, score_final_picks
 from apps.pools.models import (
     LeaderboardEntry,
     Pool,
@@ -10,6 +12,7 @@ from apps.pools.models import (
     Prediction,
 )
 from apps.tournaments.models import Match, Team, Tournament, TournamentTeam
+from apps.tournaments.services import BracketSlot
 from apps.users.models import User
 
 
@@ -156,3 +159,104 @@ def test_score_final_picks_wrong_top_scorer(pool, user, membership, tournament):
 
     pick = PoolTopScorerPick.objects.get(user=user, pool=pool)
     assert pick.points_awarded == 0
+
+
+@pytest.mark.django_db
+def test_advancement_bonus_r16(pool, user, membership, tournament):
+    """
+    Advancement bonus: user correctly predicts 2 of the 2 r16 teams.
+    r16 pts_per_team = 4, so expected advancement_bonus_total = 2 * 4 = 8.
+    """
+    # Create 4 teams that will appear in r16
+    team_x = Team.objects.create(name="TeamX", fifa_code="TXX")
+    team_y = Team.objects.create(name="TeamY", fifa_code="TYY")
+    team_z = Team.objects.create(name="TeamZ", fifa_code="TZZ")
+    team_w = Team.objects.create(name="TeamW", fifa_code="TWW")
+
+    # Create one real r16 match with team_x vs team_y (both teams assigned = in this round)
+    Match.objects.create(
+        tournament=tournament,
+        stage=Match.Stage.R16,
+        home_team=team_x,
+        away_team=team_y,
+        bracket_slot="R16_TEST_1",
+        status=Match.Status.SCHEDULED,
+    )
+
+    # Build a fake bracket where the user predicted team_x and team_y in r16
+    # (matching the real teams → 2 correct), and team_z/team_w elsewhere (not in real r16)
+    fake_r16_slots = [
+        BracketSlot(slot_key="R16_TEST_1", home_team=team_x, away_team=team_y, match=None, prediction=None),
+        BracketSlot(slot_key="R16_TEST_2", home_team=team_z, away_team=team_w, match=None, prediction=None),
+    ]
+    fake_bracket = {"r16": fake_r16_slots}
+
+    with patch("apps.tournaments.services.build_predicted_knockout_bracket", return_value=fake_bracket):
+        _recalculate_leaderboard(pool.pk)
+
+    entry = LeaderboardEntry.objects.get(pool=pool, user=user)
+    # r16 pts_per_team = 4 (DEFAULT_SCORING_CONFIG), 2 correct teams → 8 pts
+    assert entry.advancement_bonus_total == 8
+
+
+@pytest.mark.django_db
+def test_advancement_bonus_partial_match(pool, user, membership, tournament):
+    """
+    Advancement bonus: user correctly predicts only 1 of the 2 r16 teams.
+    Expected advancement_bonus_total = 1 * 4 = 4.
+    """
+    team_x = Team.objects.create(name="TeamX2", fifa_code="TX2")
+    team_y = Team.objects.create(name="TeamY2", fifa_code="TY2")
+    team_wrong = Team.objects.create(name="WrongTeam", fifa_code="WRG")
+
+    # Real r16 match has team_x and team_y
+    Match.objects.create(
+        tournament=tournament,
+        stage=Match.Stage.R16,
+        home_team=team_x,
+        away_team=team_y,
+        bracket_slot="R16_P_1",
+        status=Match.Status.SCHEDULED,
+    )
+
+    # User predicted team_x (correct) and team_wrong (incorrect)
+    fake_r16_slots = [
+        BracketSlot(slot_key="R16_P_1", home_team=team_x, away_team=team_wrong, match=None, prediction=None),
+    ]
+    fake_bracket = {"r16": fake_r16_slots}
+
+    with patch("apps.tournaments.services.build_predicted_knockout_bracket", return_value=fake_bracket):
+        _recalculate_leaderboard(pool.pk)
+
+    entry = LeaderboardEntry.objects.get(pool=pool, user=user)
+    assert entry.advancement_bonus_total == 4  # 1 correct team × 4 pts
+
+
+@pytest.mark.django_db
+def test_advancement_bonus_empty_when_no_real_teams(pool, user, membership, tournament):
+    """
+    Advancement bonus: if no r16 matches have teams assigned yet, bonus is 0.
+    """
+    team_x = Team.objects.create(name="TeamX3", fifa_code="TX3")
+    team_y = Team.objects.create(name="TeamY3", fifa_code="TY3")
+
+    # r16 match exists but has no home/away teams assigned (TBD)
+    Match.objects.create(
+        tournament=tournament,
+        stage=Match.Stage.R16,
+        home_team=None,
+        away_team=None,
+        bracket_slot="R16_EMPTY_1",
+        status=Match.Status.SCHEDULED,
+    )
+
+    fake_r16_slots = [
+        BracketSlot(slot_key="R16_EMPTY_1", home_team=team_x, away_team=team_y, match=None, prediction=None),
+    ]
+    fake_bracket = {"r16": fake_r16_slots}
+
+    with patch("apps.tournaments.services.build_predicted_knockout_bracket", return_value=fake_bracket):
+        _recalculate_leaderboard(pool.pk)
+
+    entry = LeaderboardEntry.objects.get(pool=pool, user=user)
+    assert entry.advancement_bonus_total == 0  # no real teams → skipped

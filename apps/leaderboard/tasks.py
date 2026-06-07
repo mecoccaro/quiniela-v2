@@ -77,7 +77,45 @@ def score_final_picks(tournament_id: int, official_champion_id: int, official_to
 
 
 def _compute_advancement_bonus(user, pool, config) -> int:
-    return 0  # implemented in phase 4
+    from apps.tournaments.models import Match
+    from apps.tournaments.services import build_predicted_knockout_bracket
+
+    adv_cfg = config.get("advancement", {})
+    if not adv_cfg:
+        return 0
+
+    tournament = pool.tournament
+    bracket = build_predicted_knockout_bracket(user, pool)
+    total = 0
+
+    for stage, pts_per_team in adv_cfg.items():
+        # Real teams in this round (from completed matches with both teams assigned)
+        stage_matches = Match.objects.filter(
+            tournament=tournament,
+            stage=stage,
+            home_team__isnull=False,
+            away_team__isnull=False,
+        )
+        real_ids: set[int] = set()
+        for m in stage_matches:
+            real_ids.add(m.home_team_id)
+            real_ids.add(m.away_team_id)
+
+        if not real_ids:
+            continue  # round hasn't started yet
+
+        # Predicted teams for this round
+        predicted_ids: set[int] = set()
+        for slot in bracket.get(stage, []):
+            if slot.home_team:
+                predicted_ids.add(slot.home_team.pk)
+            if slot.away_team:
+                predicted_ids.add(slot.away_team.pk)
+
+        correct = predicted_ids & real_ids
+        total += len(correct) * pts_per_team
+
+    return total
 
 
 def _compute_group_classification_bonus(user, pool) -> int:
