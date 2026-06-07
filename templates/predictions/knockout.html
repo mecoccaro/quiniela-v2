@@ -108,6 +108,18 @@ function _propagate(orig, homeTeam, awayTeam) {
     slotKey:   orig.slotKey
   };
 }
+// Set predicted_winner via the hidden lista form select, then trigger HTMX save
+function _setKoWinner(matchPk, side) {
+  var inp = document.getElementById('hs-' + matchPk);
+  if (!inp) return;
+  var form = inp.closest('.ko-form');
+  if (!form) return;
+  var sel = form.querySelector('select[name="predicted_winner"]');
+  if (!sel) return;
+  var opts = sel.querySelectorAll('option[value]:not([value=""])');
+  sel.value = side === 'home' ? (opts[0] ? opts[0].value : '') : (opts[1] ? opts[1].value : '');
+  sel.dispatchEvent(new Event('change', { bubbles: true }));
+}
 
 // WC2026 bracket topology — v2 (knockout_bracket_v2.json)
 // QF_2 now pairs R16_5+R16_6 (not R16_3+4); QF_3 pairs R16_3+R16_4 (not R16_5+6)
@@ -246,6 +258,68 @@ function _ensureBracketTree() {
       })(match.matchPk,match.home,match.away);
     }
     outer.appendChild(card);
+
+    // Winner row for ties — shown below the card when home === away and teams are known
+    if (!_koSubmitted && match.matchPk && hasScore && hScore === aScore && match.homeCode && match.awayCode) {
+      (function(pk, hCode, hName, aCode, aName) {
+        // Read current winner from the lista form select (updated by HTMX on each save)
+        var listaInp = document.getElementById('hs-' + pk);
+        var listaWinnerVal = null;
+        var listaHomePk = null, listaAwayPk = null;
+        if (listaInp) {
+          var listaForm = listaInp.closest('.ko-form');
+          if (listaForm) {
+            var listaSel = listaForm.querySelector('select[name="predicted_winner"]');
+            if (listaSel) {
+              listaWinnerVal = listaSel.value || null;
+              var opts = listaSel.querySelectorAll('option[value]:not([value=""])');
+              listaHomePk = opts[0] ? opts[0].value : null;
+              listaAwayPk = opts[1] ? opts[1].value : null;
+            }
+          }
+        }
+        var homeSelected = listaWinnerVal && listaWinnerVal === listaHomePk;
+        var awaySelected = listaWinnerVal && listaWinnerVal === listaAwayPk;
+
+        var winRow = document.createElement('div');
+        winRow.style.cssText = 'position:absolute;left:'+x+'px;top:'+(Math.round(topY)+CH)+'px;'+
+          'width:'+w+'px;background:var(--bg);border:1px solid var(--border);border-top:none;'+
+          'border-radius:0 0 6px 6px;padding:2px 4px;display:flex;align-items:center;gap:3px;'+
+          'box-sizing:border-box;z-index:1;';
+
+        var lbl = document.createElement('span');
+        lbl.textContent = 'PEN:';
+        lbl.style.cssText = 'font-size:9px;color:var(--text-muted);font-weight:700;flex-shrink:0;';
+        winRow.appendChild(lbl);
+
+        function makeWinBtn(code, name, side, selected) {
+          var btn = document.createElement('button');
+          btn.style.cssText = 'flex:1;padding:1px 3px;border-radius:4px;font-size:9px;font-weight:700;cursor:pointer;'+
+            'border:1px solid '+(selected?'var(--accent)':'var(--border)')+';'+
+            'background:'+(selected?'var(--accent)':'transparent')+';'+
+            'color:'+(selected?'#fff':'var(--text-muted)')+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+          btn.textContent = (code ? _flag(code) : '') + ' ' + (code || name || '?');
+          btn.onclick = function(e) {
+            e.stopPropagation();
+            _setKoWinner(pk, side);
+            winRow.querySelectorAll('button').forEach(function(b) {
+              b.style.background = 'transparent';
+              b.style.color = 'var(--text-muted)';
+              b.style.borderColor = 'var(--border)';
+            });
+            btn.style.background = 'var(--accent)';
+            btn.style.color = '#fff';
+            btn.style.borderColor = 'var(--accent)';
+          };
+          return btn;
+        }
+
+        winRow.appendChild(makeWinBtn(hCode, hName, 'home', homeSelected));
+        winRow.appendChild(makeWinBtn(aCode, aName, 'away', awaySelected));
+        outer.appendChild(winRow);
+      })(match.matchPk, match.homeCode, match.home, match.awayCode, match.away);
+    }
+
     return Math.round(topY)+RH; // return center Y
   }
 
