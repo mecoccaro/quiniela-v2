@@ -89,11 +89,28 @@ function _liveScore(match, which) {
   }
   return match[key] !== null && match[key] !== undefined ? match[key] : null;
 }
-// Return {code, name} of match winner, or null if unknown/tied
+// Return {code, name} of match winner, or null if unknown
 function _winner(match) {
   var h = _liveScore(match,'h'), a = _liveScore(match,'a');
-  if (h===null||a===null||h===a) return null;
-  return h>a ? {code:match.homeCode,name:match.home} : {code:match.awayCode,name:match.away};
+  if (h===null||a===null) return null;
+  if (h > a) return {code:match.homeCode,name:match.home};
+  if (a > h) return {code:match.awayCode,name:match.away};
+  // Tie — check penalty winner from the lista form select
+  if (match.matchPk) {
+    var inp = document.getElementById('hs-' + match.matchPk);
+    if (inp) {
+      var form = inp.closest ? inp.closest('form') : null;
+      if (form) {
+        var sel = form.querySelector('select[name="predicted_winner"]');
+        if (sel && sel.value) {
+          var opts = sel.querySelectorAll('option[value]:not([value=""])');
+          if (opts[0] && sel.value === opts[0].value) return {code:match.homeCode,name:match.home};
+          if (opts[1] && sel.value === opts[1].value) return {code:match.awayCode,name:match.away};
+        }
+      }
+    }
+  }
+  return null;
 }
 // Overlay propagated team data onto a bracket_json slot object
 function _propagate(orig, homeTeam, awayTeam) {
