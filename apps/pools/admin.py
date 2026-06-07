@@ -59,7 +59,7 @@ class PredictionAdmin(admin.ModelAdmin):
     search_fields = ["user__nickname", "match__home_team__name"]
     readonly_fields = [
         "user", "pool", "match", "predicted_home_score", "predicted_away_score",
-        "predicted_winner",
+        "predicted_winner",  "points_awarded"
     ]
 
     def has_add_permission(self, request):        return False
