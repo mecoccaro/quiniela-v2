@@ -154,6 +154,13 @@ class ParticipantsView(LoginRequiredMixin, View):
         })
 
 
+class ScoringGuideView(LoginRequiredMixin, View):
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        pool = get_object_or_404(Pool, pk=pool_id)
+        get_object_or_404(PoolMembership, pool=pool, user=request.user)
+        return render(request, "leaderboard/scoring_guide.html", {"pool": pool})
+
+
 class PoolDayView(LoginRequiredMixin, View):
     def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
         pool = get_object_or_404(Pool, pk=pool_id)
