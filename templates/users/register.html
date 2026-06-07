@@ -25,6 +25,23 @@
           autocomplete="off"
           class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 {% if field.errors %}border-red-500{% endif %}"
         >
+        {% elif field.field.widget.input_type == 'password' %}
+        <div style="position:relative;">
+          <input type="password"
+                 name="{{ field.html_name }}"
+                 id="{{ field.id_for_label }}"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                        focus:outline-none focus:ring-2 focus:ring-green-500 pr-10
+                        {% if field.errors %}border-red-500{% endif %}"
+                 autocomplete="new-password">
+          <button type="button"
+            onclick="var i=document.getElementById('{{ field.id_for_label }}');
+                     i.type=i.type==='password'?'text':'password';
+                     this.textContent=i.type==='password'?'👁':'🙈';"
+            style="position:absolute;right:8px;top:50%;transform:translateY(-50%);
+                   background:none;border:none;cursor:pointer;font-size:16px;padding:0;
+                   color:var(--text-muted);">👁</button>
+        </div>
         {% else %}
         <input
           type="{{ field.field.widget.input_type }}"

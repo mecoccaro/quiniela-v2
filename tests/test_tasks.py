@@ -2,7 +2,11 @@ from unittest.mock import patch
 
 import pytest
 
-from apps.leaderboard.tasks import _recalculate_leaderboard, recalculate_pool_scores, score_final_picks
+from apps.leaderboard.tasks import (
+    _recalculate_leaderboard,
+    recalculate_pool_scores,
+    score_final_picks,
+)
 from apps.pools.models import (
     LeaderboardEntry,
     Pool,
