@@ -76,6 +76,14 @@ def score_final_picks(tournament_id: int, official_champion_id: int, official_to
         _recalculate_leaderboard(pool.pk)
 
 
+def _compute_advancement_bonus(user, pool, config) -> int:
+    return 0  # implemented in phase 4
+
+
+def _compute_group_classification_bonus(user, pool) -> int:
+    return 0  # implemented in phase 5
+
+
 def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
     """Score a knockout prediction directly. No bracket-slot gating in v4."""
     from apps.leaderboard.scoring import score_prediction
@@ -94,6 +102,7 @@ def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
 
 
 def _recalculate_leaderboard(pool_id: int) -> None:
+    from apps.leaderboard.scoring import get_scoring_config  # noqa: PLC0415
     from apps.pools.models import (  # noqa: PLC0415
         LeaderboardEntry,
         Pool,
@@ -104,6 +113,7 @@ def _recalculate_leaderboard(pool_id: int) -> None:
 
     with transaction.atomic():
         pool = Pool.objects.get(pk=pool_id)
+        config = get_scoring_config(pool)
 
         for membership in pool.memberships.select_related("user"):
             user = membership.user
@@ -119,12 +129,16 @@ def _recalculate_leaderboard(pool_id: int) -> None:
             scorer_pts = (
                 PoolTopScorerPick.objects.filter(pool=pool, user=user).aggregate(t=Sum("points_awarded"))["t"] or 0
             )
+            adv_bonus = _compute_advancement_bonus(user, pool, config)
+            cls_bonus = _compute_group_classification_bonus(user, pool)
 
             LeaderboardEntry.objects.update_or_create(
                 pool=pool,
                 user=user,
                 defaults={
-                    "total_points": pred_pts + champ_pts + scorer_pts,
+                    "total_points": pred_pts + champ_pts + scorer_pts + adv_bonus + cls_bonus,
+                    "advancement_bonus_total": adv_bonus,
+                    "group_classification_bonus": cls_bonus,
                     "last_calculated_at": timezone.now(),
                 },
             )
