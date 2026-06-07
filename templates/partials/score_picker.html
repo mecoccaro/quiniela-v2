@@ -35,6 +35,7 @@
           '<button id="gp-wa" onclick="GansaPicker._pickWinner(\'away\')" style="'+WBTN+'"></button>' +
         '</div>' +
       '</div>' +
+      '<div id="gp-error" style="display:none;color:var(--danger);font-size:12px;font-weight:600;text-align:center;margin-bottom:8px;padding:4px 8px;background:var(--danger-light);border-radius:6px;"></div>' +
       '<div style="display:flex;gap:8px;">' +
         '<button onclick="GansaPicker._clear()" style="flex:1;padding:9px 0;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:var(--text-muted);">Borrar</button>' +
         '<button onclick="GansaPicker._confirm()" style="flex:2;padding:9px 0;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Listo</button>' +
@@ -70,6 +71,8 @@
     if (wrap) {
       var showWinner = !!_winnerSel && H === A;
       wrap.style.display = showWinner ? '' : 'none';
+      var errEl = el.querySelector('#gp-error');
+      if (!showWinner && errEl) { errEl.style.display = 'none'; }
       if (btnH) {
         var hActive = _winnerChoice === 'home';
         btnH.style.background = hActive ? 'var(--accent)' : '#fff';
@@ -140,10 +143,21 @@
     },
     _pickWinner: function (side) {
       _winnerChoice = side;
+      var errEl = el.querySelector('#gp-error');
+      if (errEl) errEl.style.display = 'none';
       _render();
     },
     _confirm: function () {
       if (!pk) return;
+      // Guard: tied score with no penalty winner selected
+      if (H === A && _winnerSel && !_winnerChoice) {
+        var errEl = el.querySelector('#gp-error');
+        if (errEl) {
+          errEl.textContent = 'Elige al ganador en penales antes de confirmar.';
+          errEl.style.display = '';
+        }
+        return;  // do not submit
+      }
       pk.h.value = H; pk.a.value = A;
       if (_winnerSel) {
         if (H === A && _winnerChoice) {

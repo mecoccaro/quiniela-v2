@@ -46,6 +46,12 @@
   {% endif %}
 </div>
 
+<div id="ko-error-banner"
+     style="display:none;color:var(--danger);background:var(--danger-light);
+            border-radius:8px;padding:8px 16px;font-size:13px;font-weight:600;
+            margin-bottom:8px;text-align:center;">
+</div>
+
 <div id="ko-lista-content" style="display:none;">
   <div id="ko-bracket">
     {% include "predictions/partials/knockout_stages.html" %}
@@ -449,6 +455,18 @@ function _ensureBracketTree() {
     document.querySelectorAll('.ko-form').forEach(syncWinner);
     updateKoProgress();
     _ensureBracketTree();
+  });
+
+  document.body.addEventListener('htmx:responseError', function(e) {
+    if (e.detail.xhr && e.detail.xhr.status === 400) {
+      var msg = (e.detail.xhr.responseText || 'Error al guardar. Intentá de nuevo.').trim();
+      var banner = document.getElementById('ko-error-banner');
+      if (banner) {
+        banner.textContent = msg;
+        banner.style.display = '';
+        setTimeout(function() { banner.style.display = 'none'; }, 4000);
+      }
+    }
   });
 
   document.addEventListener('DOMContentLoaded', function () {
