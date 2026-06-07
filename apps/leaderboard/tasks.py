@@ -76,44 +76,127 @@ def score_final_picks(tournament_id: int, official_champion_id: int, official_to
         _recalculate_leaderboard(pool.pk)
 
 
-def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
-    """Score a knockout prediction, gating result points on team correctness.
-
-    Returns (points_awarded, slot_bonus_awarded).
-
-    Scoring tiers:
-    - 0 correct teams in slot → (0, 0)
-    - 1 correct team           → (0, correct_slot × 1)
-    - 2 correct teams          → (result/score pts, correct_slot × 2)
-    """
-    from apps.leaderboard.scoring import get_slot_bonus, score_prediction
+def _compute_advancement_bonus(user, pool, config) -> int:
+    from apps.tournaments.models import Match
     from apps.tournaments.services import build_predicted_knockout_bracket
 
-    slot_pts = get_slot_bonus(match.stage, config)
+    adv_cfg = config.get("advancement", {})
+    if not adv_cfg:
+        return 0
 
-    # Can't check team placement without both actual teams assigned
-    if not match.home_team_id or not match.away_team_id or not match.bracket_slot:
-        return 0, 0
+    tournament = pool.tournament
+    bracket = build_predicted_knockout_bracket(user, pool)
+    total = 0
 
-    bracket = build_predicted_knockout_bracket(prediction.user, prediction.pool)
-    predicted_slot = next(
-        (s for s in bracket.get(match.stage, []) if s.slot_key == match.bracket_slot),
-        None,
+    for stage, pts_per_team in adv_cfg.items():
+        # Real teams in this round (from completed matches with both teams assigned)
+        stage_matches = Match.objects.filter(
+            tournament=tournament,
+            stage=stage,
+            home_team__isnull=False,
+            away_team__isnull=False,
+        )
+        real_ids: set[int] = set()
+        for m in stage_matches:
+            if m.home_team_id is not None:
+                real_ids.add(m.home_team_id)
+            if m.away_team_id is not None:
+                real_ids.add(m.away_team_id)
+
+        if not real_ids:
+            continue  # round hasn't started yet
+
+        # Predicted teams for this round
+        predicted_ids: set[int] = set()
+        for slot in bracket.get(stage, []):
+            if slot.home_team:
+                predicted_ids.add(slot.home_team.pk)
+            if slot.away_team:
+                predicted_ids.add(slot.away_team.pk)
+
+        correct = predicted_ids & real_ids
+        total += len(correct) * pts_per_team
+
+    return total
+
+
+def _compute_group_classification_bonus(user, pool) -> int:
+    from apps.leaderboard.scoring import get_scoring_config
+    from apps.tournaments.models import Match, TournamentTeam
+    from apps.tournaments.services import get_actual_group_standings, get_predicted_group_standings
+    from apps.tournaments.standings import rank_third_place_teams
+
+    tournament = pool.tournament
+    config = get_scoring_config(pool)
+    cls_cfg = config.get("group_classification", {})
+    if not cls_cfg:
+        return 0
+
+    # Guard: only compute once all group matches are complete
+    incomplete = Match.objects.filter(
+        tournament=tournament,
+        stage=Match.Stage.GROUP,
+    ).exclude(status=Match.Status.COMPLETED).exists()
+    if incomplete:
+        return 0
+
+    # Get all group letters from the tournament
+    group_letters = list(
+        TournamentTeam.objects.filter(tournament=tournament)
+        .values_list("group_letter", flat=True)
+        .distinct()
     )
 
-    num_correct = 0
-    if predicted_slot:
-        if predicted_slot.home_team and predicted_slot.home_team.pk == match.home_team_id:
-            num_correct += 1
-        if predicted_slot.away_team and predicted_slot.away_team.pk == match.away_team_id:
-            num_correct += 1
+    total = 0
+    predicted_thirds: dict[str, int] = {}  # group_letter → predicted 3rd team_id
+    actual_thirds: dict[str, int] = {}     # group_letter → actual 3rd team_id
+    all_actual_third_standings = []
 
-    slot_bonus = slot_pts * num_correct
+    for letter in group_letters:
+        predicted = get_predicted_group_standings(user, pool, letter)
+        actual = get_actual_group_standings(tournament, letter)
+        if not predicted or not actual:
+            continue
 
-    if num_correct < 2:
-        return 0, slot_bonus
+        pred_map = {s.position: s.team_id for s in predicted}
+        act_map = {s.position: s.team_id for s in actual}
 
-    # Both teams correct — apply normal result/score scoring
+        if pred_map.get(1) == act_map.get(1):
+            total += cls_cfg.get("first_place", 0)
+        if pred_map.get(2) == act_map.get(2):
+            total += cls_cfg.get("second_place", 0)
+
+        if 3 in pred_map:
+            predicted_thirds[letter] = pred_map[3]
+        if 3 in act_map:
+            actual_thirds[letter] = act_map[3]
+            # Collect the actual 3rd-place TeamStanding for ranking
+            for s in actual:
+                if s.position == 3:
+                    all_actual_third_standings.append(s)
+                    break
+
+    # 3rd place: only score if the predicted team is among the best 8 actual third-placers
+    rankings = {
+        tt.team_id: tt.fifa_ranking
+        for tt in TournamentTeam.objects.filter(tournament=tournament)
+        if tt.fifa_ranking is not None
+    }
+    ranked_thirds = rank_third_place_teams(all_actual_third_standings, rankings)
+    top8_actual_thirds = {s.team_id for s in ranked_thirds[:8]}
+
+    third_pts = cls_cfg.get("third_place", 0)
+    for _letter, pred_3rd in predicted_thirds.items():
+        if pred_3rd in top8_actual_thirds:
+            total += third_pts
+
+    return total
+
+
+def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
+    """Score a knockout prediction directly. No bracket-slot gating in v4."""
+    from apps.leaderboard.scoring import score_prediction
+
     points = score_prediction(
         predicted_home=prediction.predicted_home_score,
         predicted_away=prediction.predicted_away_score,
@@ -124,10 +207,11 @@ def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
         official_knockout_winner_id=match.knockout_winner_id,
         config=config,
     )
-    return points, slot_bonus
+    return points, 0  # slot_bonus always 0 in v4
 
 
 def _recalculate_leaderboard(pool_id: int) -> None:
+    from apps.leaderboard.scoring import get_scoring_config  # noqa: PLC0415
     from apps.pools.models import (  # noqa: PLC0415
         LeaderboardEntry,
         Pool,
@@ -138,6 +222,7 @@ def _recalculate_leaderboard(pool_id: int) -> None:
 
     with transaction.atomic():
         pool = Pool.objects.get(pk=pool_id)
+        config = get_scoring_config(pool)
 
         for membership in pool.memberships.select_related("user"):
             user = membership.user
@@ -153,12 +238,16 @@ def _recalculate_leaderboard(pool_id: int) -> None:
             scorer_pts = (
                 PoolTopScorerPick.objects.filter(pool=pool, user=user).aggregate(t=Sum("points_awarded"))["t"] or 0
             )
+            adv_bonus = _compute_advancement_bonus(user, pool, config)
+            cls_bonus = _compute_group_classification_bonus(user, pool)
 
             LeaderboardEntry.objects.update_or_create(
                 pool=pool,
                 user=user,
                 defaults={
-                    "total_points": pred_pts + champ_pts + scorer_pts,
+                    "total_points": pred_pts + champ_pts + scorer_pts + adv_bonus + cls_bonus,
+                    "advancement_bonus_total": adv_bonus,
+                    "group_classification_bonus": cls_bonus,
                     "last_calculated_at": timezone.now(),
                 },
             )

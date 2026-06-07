@@ -7,7 +7,7 @@ from .standings import MatchResult, TeamStanding, calculate_group_standings, ran
 
 if TYPE_CHECKING:
     from apps.pools.models import Pool, Prediction
-    from apps.tournaments.models import Match, Team
+    from apps.tournaments.models import Match, Team, Tournament
     from apps.users.models import User
 
 KNOCKOUT_BRACKET_PATH = Path(__file__).resolve().parents[2] / "data" / "knockout_bracket.json"
@@ -63,6 +63,41 @@ def get_predicted_group_standings(
     conduct_scores = {tt.team_id: tt.conduct_score for tt in tournament_teams}
 
     return calculate_group_standings(match_results, fifa_rankings, conduct_scores)
+
+
+def get_actual_group_standings(
+    tournament: "Tournament",
+    group_letter: str,
+) -> "list[TeamStanding]":
+    """Compute actual standings for a group from official match results."""
+    from apps.tournaments.models import Match, TournamentTeam
+
+    matches = Match.objects.filter(
+        tournament=tournament,
+        stage=Match.Stage.GROUP,
+        group_letter=group_letter,
+        status=Match.Status.COMPLETED,
+    ).select_related("home_team", "away_team")
+
+    results = [
+        MatchResult(m.home_team_id, m.away_team_id, m.home_score, m.away_score)
+        for m in matches
+        if m.home_team_id is not None
+        and m.away_team_id is not None
+        and m.home_score is not None
+        and m.away_score is not None
+    ]
+
+    if not results:
+        return []
+
+    tournament_teams = TournamentTeam.objects.filter(
+        tournament=tournament,
+        group_letter=group_letter,
+    )
+    rankings = {tt.team_id: tt.fifa_ranking for tt in tournament_teams if tt.fifa_ranking is not None}
+    conduct = {tt.team_id: tt.conduct_score for tt in tournament_teams}
+    return calculate_group_standings(results, rankings, conduct)
 
 
 def _get_all_third_place_standings(

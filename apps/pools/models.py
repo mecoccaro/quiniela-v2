@@ -99,6 +99,8 @@ class LeaderboardEntry(models.Model):
     pool = models.ForeignKey(Pool, on_delete=models.CASCADE, related_name="leaderboard_entries")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="leaderboard_entries")
     total_points = models.IntegerField(default=0)
+    advancement_bonus_total = models.IntegerField(default=0)
+    group_classification_bonus = models.IntegerField(default=0)
     rank = models.PositiveIntegerField(default=0)
     previous_rank = models.PositiveIntegerField(null=True, blank=True)
     last_calculated_at = models.DateTimeField(null=True, blank=True)
