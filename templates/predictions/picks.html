@@ -42,28 +42,43 @@
         Tu pick: <strong>{{ top_scorer_pick.player_name|default:"Sin pick" }}</strong>
       </p>
     {% else %}
-    <form
-      hx-post="{% url 'save_top_scorer_pick' pool.pk %}"
-      hx-swap="none"
-      hx-trigger="change delay:400ms"
-      hx-indicator="#scorer-spinner"
-    >
+    <form id="scorer-form"
+          hx-post="{% url 'save_top_scorer_pick' pool.pk %}"
+          hx-target="#scorer-feedback"
+          hx-swap="innerHTML"
+          hx-indicator="#scorer-spinner">
       {% csrf_token %}
-      <input
-        type="text"
-        name="player_name"
-        list="players-datalist"
-        maxlength="100"
-        value="{{ top_scorer_pick.player_name|default:'' }}"
-        placeholder="Buscar jugador..."
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-400 focus:outline-none">
+      <input type="text"
+             id="scorer-input"
+             name="player_name"
+             list="players-datalist"
+             maxlength="100"
+             value="{{ top_scorer_pick.player_name|default:'' }}"
+             placeholder="Buscar jugador..."
+             hx-trigger="change"
+             hx-post="{% url 'save_top_scorer_pick' pool.pk %}"
+             hx-target="#scorer-feedback"
+             hx-swap="innerHTML"
+             hx-indicator="#scorer-spinner"
+             class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm
+                    focus:ring-2 focus:ring-green-400 focus:outline-none">
       <datalist id="players-datalist">
         {% for player in players %}
           <option value="{{ player.name }}">{{ player.name }} ({{ player.team }})</option>
         {% endfor %}
       </datalist>
-      <span id="scorer-spinner" class="htmx-indicator text-green-500 text-xs mt-1 block">⏳ Guardando...</span>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:4px;min-height:20px;">
+        <span id="scorer-spinner" class="htmx-indicator text-green-500 text-xs">⏳ Guardando...</span>
+        <span id="scorer-feedback" class="text-xs"></span>
+      </div>
     </form>
+    <script>
+      document.getElementById('scorer-input').addEventListener('htmx:confirm', function(e) {
+        var list = document.getElementById('players-datalist');
+        var valid = list && Array.from(list.options).some(function(o) { return o.value === e.target.value; });
+        if (!valid) e.preventDefault();
+      });
+    </script>
     {% endif %}
   </div>
 

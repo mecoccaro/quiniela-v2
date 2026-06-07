@@ -7,8 +7,6 @@ The function assigns ranked 3rd-place teams to pool-based bracket descriptors
 import json
 from pathlib import Path
 
-import pytest
-
 from apps.tournaments.services import _build_third_pool_map
 from apps.tournaments.standings import TeamStanding
 
@@ -167,7 +165,7 @@ def test_fewer_thirds_remaining_slots_none() -> None:
 
     # Slots with eligible teams should be assigned
     assigned = {desc: tid for desc, tid in result.items() if tid is not None}
-    nones = {desc for desc, tid in result.items() if tid is None}
+    _ = {desc for desc, tid in result.items() if tid is None}
 
     # At most 4 assignments possible (we only have 4 teams)
     assert len(assigned) <= 4
@@ -211,7 +209,7 @@ def test_all_same_group_only_compatible_slots_assigned() -> None:
         assert result[desc] is None, f"Slot {desc} (no E) should be None"
 
     # Each assigned team must be from group E
-    for desc, team_id in result.items():
+    for _desc, team_id in result.items():
         if team_id is not None:
             assert group_map[team_id] == "E"
 

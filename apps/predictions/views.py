@@ -469,12 +469,16 @@ class SaveTopScorerPickView(LoginRequiredMixin, View):
 
         form = TopScorerPickForm(request.POST)
         if not form.is_valid():
-            return HttpResponse("Datos inválidos.", status=400)
+            return HttpResponse(
+                '<span style="color:var(--danger);font-weight:600;">Nombre inválido.</span>'
+            )
 
         PoolTopScorerPick.objects.update_or_create(
             user=user, pool=pool, defaults={"player_name": form.cleaned_data["player_name"]}
         )
-        return HttpResponse(status=200)
+        return HttpResponse(
+            '<span style="color:var(--success);font-weight:600;">✓ Guardado</span>'
+        )
 
 
 # ─── Submission ───────────────────────────────────────────────────────────────
