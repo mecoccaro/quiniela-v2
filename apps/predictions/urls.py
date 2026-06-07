@@ -9,6 +9,11 @@ urlpatterns = [
         name="group_predictions",
     ),
     path(
+        "pool/<int:pool_id>/group-stage/bulk/",
+        views.BulkSaveGroupPredictionsView.as_view(),
+        name="bulk_save_group_predictions",
+    ),
+    path(
         "pool/<int:pool_id>/match/<int:match_id>/",
         views.SaveMatchPredictionView.as_view(),
         name="save_match_prediction",
@@ -22,6 +27,11 @@ urlpatterns = [
         "pool/<int:pool_id>/third-place-tiebreaker/",
         views.ThirdPlaceTiebreakerView.as_view(),
         name="third_place_tiebreaker",
+    ),
+    path(
+        "pool/<int:pool_id>/knockout/bulk/",
+        views.BulkSaveKnockoutPredictionsView.as_view(),
+        name="bulk_save_knockout_predictions",
     ),
     path(
         "pool/<int:pool_id>/knockout/match/<int:match_id>/",

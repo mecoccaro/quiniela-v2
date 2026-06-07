@@ -2,9 +2,11 @@
 (function () {
   'use strict';
   var el = null, pk = null, H = 0, A = 0, onDone = null;
+  var _winnerSel = null, _winnerChoice = null;
   var PRESETS = [[0,0],[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],[2,2],[3,0],[0,3],[3,1],[1,3],[3,2],[2,3],[4,0],[0,4],[4,1],[1,4]];
 
   var BTN = 'width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:18px;cursor:pointer;line-height:1;color:var(--text);';
+  var WBTN = 'flex:1;padding:6px 4px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-muted);';
 
   function create() {
     var d = document.createElement('div');
@@ -26,6 +28,13 @@
         '</div>' +
       '</div>' +
       '<div id="gp-presets" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:14px;"></div>' +
+      '<div id="gp-winner-wrap" style="display:none;margin-bottom:14px;">' +
+        '<div style="font-size:11px;font-weight:700;color:var(--text-muted);text-align:center;margin-bottom:6px;letter-spacing:0.04em;">GANADOR EN PENALES</div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button id="gp-wh" onclick="GansaPicker._pickWinner(\'home\')" style="'+WBTN+'"></button>' +
+          '<button id="gp-wa" onclick="GansaPicker._pickWinner(\'away\')" style="'+WBTN+'"></button>' +
+        '</div>' +
+      '</div>' +
       '<div style="display:flex;gap:8px;">' +
         '<button onclick="GansaPicker._clear()" style="flex:1;padding:9px 0;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:var(--text-muted);">Borrar</button>' +
         '<button onclick="GansaPicker._confirm()" style="flex:2;padding:9px 0;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer;">Listo</button>' +
@@ -54,6 +63,26 @@
       b.style.color = active ? '#fff' : 'var(--text)';
       b.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
     });
+
+    var wrap = el.querySelector('#gp-winner-wrap');
+    var btnH = el.querySelector('#gp-wh');
+    var btnA = el.querySelector('#gp-wa');
+    if (wrap) {
+      var showWinner = !!_winnerSel && H === A;
+      wrap.style.display = showWinner ? '' : 'none';
+      if (btnH) {
+        var hActive = _winnerChoice === 'home';
+        btnH.style.background = hActive ? 'var(--accent)' : '#fff';
+        btnH.style.color = hActive ? '#fff' : 'var(--text-muted)';
+        btnH.style.borderColor = hActive ? 'var(--accent)' : 'var(--border)';
+      }
+      if (btnA) {
+        var aActive = _winnerChoice === 'away';
+        btnA.style.background = aActive ? 'var(--accent)' : '#fff';
+        btnA.style.color = aActive ? '#fff' : 'var(--text-muted)';
+        btnA.style.borderColor = aActive ? 'var(--accent)' : 'var(--border)';
+      }
+    }
   }
 
   document.addEventListener('mousedown', function (e) {
@@ -70,9 +99,25 @@
       H = parseInt(pk.h.value) || 0;
       A = parseInt(pk.a.value) || 0;
       el.querySelector('#gp-title').textContent = home + ' vs ' + away;
+
+      // Find the winner select in the same form, if any (knockout matches only)
+      var form = pk.h.closest ? pk.h.closest('form') : null;
+      _winnerSel = form ? form.querySelector('select[name="predicted_winner"]') : null;
+      _winnerChoice = null;
+      if (_winnerSel && _winnerSel.value) {
+        var opts = _winnerSel.querySelectorAll('option[value]:not([value=""])');
+        if (opts[0] && _winnerSel.value === opts[0].value) _winnerChoice = 'home';
+        else if (opts[1] && _winnerSel.value === opts[1].value) _winnerChoice = 'away';
+      }
+
+      // Set winner button labels
+      var btnH = el.querySelector('#gp-wh'), btnA = el.querySelector('#gp-wa');
+      if (btnH) btnH.textContent = home;
+      if (btnA) btnA.textContent = away;
+
       _render();
       el.style.display = 'block';
-      var r = btn.getBoundingClientRect(), W = 264, est = 340;
+      var r = btn.getBoundingClientRect(), W = 264, est = 420;
       var top = r.bottom + 8, left = r.left + r.width / 2 - W / 2;
       if (left < 8) left = 8;
       if (left + W > window.innerWidth - 8) left = window.innerWidth - W - 8;
@@ -86,9 +131,21 @@
       A = Math.max(0, Math.min(20, A + da));
       _render();
     },
+    _pickWinner: function (side) {
+      _winnerChoice = side;
+      _render();
+    },
     _confirm: function () {
       if (!pk) return;
       pk.h.value = H; pk.a.value = A;
+      if (_winnerSel) {
+        if (H === A && _winnerChoice) {
+          var opts = _winnerSel.querySelectorAll('option[value]:not([value=""])');
+          _winnerSel.value = _winnerChoice === 'home' ? (opts[0] ? opts[0].value : '') : (opts[1] ? opts[1].value : '');
+        } else {
+          _winnerSel.value = '';
+        }
+      }
       pk.h.dispatchEvent(new Event('change', { bubbles: true }));
       if (onDone) onDone();
       GansaPicker.close();
@@ -96,6 +153,8 @@
     _clear: function () {
       if (!pk) return;
       pk.h.value = ''; pk.a.value = '';
+      if (_winnerSel) _winnerSel.value = '';
+      _winnerChoice = null;
       pk.h.dispatchEvent(new Event('change', { bubbles: true }));
       if (onDone) onDone();
       GansaPicker.close();

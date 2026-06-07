@@ -3,6 +3,15 @@
 {% block title %}Eliminatorias — {{ pool.name }}{% endblock %}
 
 {% block content %}
+<style>
+.bracket-scroll {
+  width: 100vw;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  overflow-x: visible;
+}
+@media (max-width: 640px) { .bracket-scroll { overflow-x: auto; } }
+</style>
 
 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
   <div>
@@ -29,34 +38,15 @@
 </div>
 {% endif %}
 
-<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-  <div id="ko-tabs" style="display:flex;gap:6px;overflow-x:auto;flex:1;">
-    {% for stage in stages %}
-    <button
-      class="ko-tab"
-      onclick="switchKoStage('{{ stage.key }}')"
-      id="ko-tab-{{ stage.key }}"
-      data-stage="{{ stage.key }}"
-      style="padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;border:1.5px solid var(--border);background:var(--surface,#fff);color:var(--text-muted);">
-      {{ stage.label }}
-    </button>
-    {% endfor %}
-  </div>
-  <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-    <div style="display:flex;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);">
-      <button id="ko-view-list" onclick="setKoView('list')"
-              style="padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:var(--accent);color:#fff;">Lista</button>
-      <button id="ko-view-bracket" onclick="setKoView('bracket')"
-              style="padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:#fff;color:var(--text-muted);">Árbol</button>
-    </div>
-    {% if not predictions_submitted %}
-    <button onclick="randomizeAllKo(this)"
-            style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
-    {% endif %}
-  </div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;">
+  <h2 style="font-size:20px;font-weight:800;color:var(--text);margin:0;">Eliminatorias</h2>
+  {% if not predictions_submitted %}
+  <button onclick="randomizeAllKo(this)"
+          style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:7px 16px;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;">🎲 Randomizar</button>
+  {% endif %}
 </div>
 
-<div id="ko-lista-content">
+<div id="ko-lista-content" style="display:none;">
   <div id="ko-bracket">
     {% include "predictions/partials/knockout_stages.html" %}
   </div>
@@ -72,39 +62,11 @@
 
 {{ bracket_json|json_script:"bracket-data" }}
 
-<div id="ko-bracket-content" style="display:none;border-radius:12px;overflow:auto;max-height:680px;">
+<div id="ko-bracket-content" class="bracket-scroll">
 </div>
 
 <script>
-let activeKoStage = '{{ stages.0.key }}';
 var _koSubmitted = {% if predictions_submitted %}true{% else %}false{% endif %};
-
-function switchKoStage(key) {
-  activeKoStage = key;
-  document.querySelectorAll('[data-ko-stage]').forEach(function (el) {
-    el.style.display = el.dataset.koStage === key ? '' : 'none';
-  });
-  document.querySelectorAll('.ko-tab').forEach(function (btn) {
-    var active = btn.dataset.stage === key;
-    btn.style.background = active ? 'var(--accent)' : 'var(--surface,#fff)';
-    btn.style.color = active ? '#fff' : 'var(--text-muted)';
-    btn.style.borderColor = active ? 'var(--accent)' : 'var(--border)';
-  });
-}
-
-function setKoView(v) {
-  var lista = document.getElementById('ko-lista-content');
-  var bracket = document.getElementById('ko-bracket-content');
-  var btnList = document.getElementById('ko-view-list');
-  var btnBracket = document.getElementById('ko-view-bracket');
-  lista.style.display = v === 'list' ? '' : 'none';
-  bracket.style.display = v === 'bracket' ? '' : 'none';
-  btnList.style.background = v === 'list' ? 'var(--accent)' : '#fff';
-  btnList.style.color = v === 'list' ? '#fff' : 'var(--text-muted)';
-  btnBracket.style.background = v === 'bracket' ? 'var(--accent)' : '#fff';
-  btnBracket.style.color = v === 'bracket' ? '#fff' : 'var(--text-muted)';
-  if (v === 'bracket') _ensureBracketTree();
-}
 
 // ── Bracket tree renderer ─────────────────────────────────────────────────────
 var _FIFA_ISO = {
@@ -136,11 +98,28 @@ function _liveScore(match, which) {
   }
   return match[key] !== null && match[key] !== undefined ? match[key] : null;
 }
-// Return {code, name} of match winner, or null if unknown/tied
+// Return {code, name} of match winner, or null if unknown
 function _winner(match) {
   var h = _liveScore(match,'h'), a = _liveScore(match,'a');
-  if (h===null||a===null||h===a) return null;
-  return h>a ? {code:match.homeCode,name:match.home} : {code:match.awayCode,name:match.away};
+  if (h===null||a===null) return null;
+  if (h > a) return {code:match.homeCode,name:match.home};
+  if (a > h) return {code:match.awayCode,name:match.away};
+  // Tie — check penalty winner from the lista form select
+  if (match.matchPk) {
+    var inp = document.getElementById('hs-' + match.matchPk);
+    if (inp) {
+      var form = inp.closest ? inp.closest('form') : null;
+      if (form) {
+        var sel = form.querySelector('select[name="predicted_winner"]');
+        if (sel && sel.value) {
+          var opts = sel.querySelectorAll('option[value]:not([value=""])');
+          if (opts[0] && sel.value === opts[0].value) return {code:match.homeCode,name:match.home};
+          if (opts[1] && sel.value === opts[1].value) return {code:match.awayCode,name:match.away};
+        }
+      }
+    }
+  }
+  return null;
 }
 // Overlay propagated team data onto a bracket_json slot object
 function _propagate(orig, homeTeam, awayTeam) {
@@ -225,10 +204,11 @@ function _ensureBracketTree() {
 
   var container = document.getElementById('ko-bracket-content');
   container.innerHTML = '';
-  container.style.cssText = 'background:var(--bg);border-radius:16px;border:1px solid var(--border);overflow:auto;padding:8px 12px 12px;';
+  container.style.cssText = 'padding:8px 0;box-sizing:border-box;';
+  container.classList.add('bracket-scroll');
 
   var outer = document.createElement('div');
-  outer.style.cssText = 'position:relative;width:'+totalW+'px;height:'+totalH+'px;min-width:'+totalW+'px;';
+  outer.style.cssText = 'position:relative;width:'+totalW+'px;height:'+totalH+'px;min-width:'+totalW+'px;margin:0 auto;';
 
   var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
   svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;overflow:visible;';
@@ -287,7 +267,7 @@ function _ensureBracketTree() {
         card.onmouseleave=function(){card.style.borderColor=isFinal?'var(--accent)':'var(--border)';};
         card.onclick=function(){
           GansaPicker.open(card,'hs-'+pk,'as-'+pk,hn,an,function(){
-            updateKoPill(String(pk));_ensureBracketTree();
+            updateKoPill(String(pk));
           });
         };
       })(match.matchPk,match.home,match.away);
@@ -410,19 +390,33 @@ function _ensureBracketTree() {
     var inputs = document.querySelectorAll('#ko-lista-content [id^="hs-"]');
     if (inputs.length === 0) return;
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="gansa-spinner"></span>Guardando...'; }
+
+    var predictions = [];
     inputs.forEach(function (hInp) {
       var matchId = hInp.id.replace('hs-', '');
       var aInp = document.getElementById('as-' + matchId);
       if (!aInp) return;
-      hInp.value = Math.floor(Math.random() * 6);
-      aInp.value = Math.floor(Math.random() * 6);
+      var h = Math.floor(Math.random() * 6);
+      var a = Math.floor(Math.random() * 6);
+      if (h === a) { a = a > 0 ? a - 1 : a + 1; }
+      hInp.value = h;
+      aInp.value = a;
       updateKoPill(matchId);
-      hInp.dispatchEvent(new Event('change', { bubbles: true }));
+      predictions.push({ match_id: parseInt(matchId, 10), home: h, away: a });
     });
-    var ms = Math.max(2500, inputs.length * 60 + 1000);
-    setTimeout(function () {
+
+    fetch('{% url "bulk_save_knockout_predictions" pool.pk %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({ predictions: predictions })
+    }).then(function () {
+      window.location.reload();
+    }).catch(function () {
       if (btn) { btn.disabled = false; btn.textContent = '🎲 Randomizar'; }
-    }, ms);
+    });
   };
   {% endif %}
 
@@ -453,18 +447,14 @@ function _ensureBracketTree() {
   document.addEventListener('htmx:afterSettle', function () {
     window.scrollTo(0, savedScrollY);
     document.querySelectorAll('.ko-form').forEach(syncWinner);
-    switchKoStage(activeKoStage);
     updateKoProgress();
-    var bracketEl = document.getElementById('ko-bracket-content');
-    if (bracketEl && bracketEl.style.display !== 'none') {
-      _ensureBracketTree();
-    }
+    _ensureBracketTree();
   });
 
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.ko-form').forEach(syncWinner);
-    switchKoStage(activeKoStage);
     updateKoProgress();
+    _ensureBracketTree();
   });
 })();
 </script>

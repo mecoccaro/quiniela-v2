@@ -98,6 +98,54 @@ class GroupPredictionsView(LoginRequiredMixin, TemplateView):
         return ctx
 
 
+class BulkSaveGroupPredictionsView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        import json as _json
+        user: User = request.user  # type: ignore[assignment]
+        pool = get_object_or_404(Pool, pk=pool_id)
+        membership = get_object_or_404(PoolMembership, pool=pool, user=user)
+
+        if membership.predictions_submitted:
+            return HttpResponse("Predicciones ya enviadas.", status=403)
+
+        try:
+            body = _json.loads(request.body)
+            predictions = body.get("predictions", [])
+        except (_json.JSONDecodeError, AttributeError):
+            return HttpResponse("Invalid JSON.", status=400)
+
+        group_match_ids = set(
+            Match.objects.filter(tournament=pool.tournament, stage=Match.Stage.GROUP)
+            .values_list("pk", flat=True)
+        )
+
+        from django.db import transaction
+        with transaction.atomic():
+            for item in predictions:
+                match_id = item.get("match_id")
+                home = item.get("home")
+                away = item.get("away")
+                if match_id is None or home is None or away is None:
+                    continue
+                if int(match_id) not in group_match_ids:
+                    continue
+                try:
+                    home, away = int(home), int(away)
+                except (TypeError, ValueError):
+                    continue
+                Prediction.objects.update_or_create(
+                    user=user,
+                    pool=pool,
+                    match_id=match_id,
+                    defaults={
+                        "predicted_home_score": home,
+                        "predicted_away_score": away,
+                    },
+                )
+
+        return HttpResponse(status=200)
+
+
 class SaveMatchPredictionView(LoginRequiredMixin, View):
     def post(self, request: HttpRequest, pool_id: int, match_id: int) -> HttpResponse:
         user: User = request.user  # type: ignore[assignment]
@@ -254,6 +302,57 @@ class ThirdPlaceTiebreakerView(LoginRequiredMixin, View):
             "existing_picks": existing_picks,
             "error": error_msg,
         })
+
+
+class BulkSaveKnockoutPredictionsView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        import json as _json
+        user: User = request.user  # type: ignore[assignment]
+        pool = get_object_or_404(Pool, pk=pool_id)
+        membership = get_object_or_404(PoolMembership, pool=pool, user=user)
+
+        if membership.predictions_submitted:
+            return HttpResponse("Predicciones ya enviadas.", status=403)
+
+        try:
+            body = _json.loads(request.body)
+            predictions = body.get("predictions", [])
+        except (_json.JSONDecodeError, AttributeError):
+            return HttpResponse("Invalid JSON.", status=400)
+
+        ko_match_ids = set(
+            Match.objects.filter(tournament=pool.tournament)
+            .exclude(stage=Match.Stage.GROUP)
+            .exclude(stage=Match.Stage.THIRD_PLACE)
+            .values_list("pk", flat=True)
+        )
+
+        from django.db import transaction
+        with transaction.atomic():
+            for item in predictions:
+                match_id = item.get("match_id")
+                home = item.get("home")
+                away = item.get("away")
+                if match_id is None or home is None or away is None:
+                    continue
+                if int(match_id) not in ko_match_ids:
+                    continue
+                try:
+                    home, away = int(home), int(away)
+                except (TypeError, ValueError):
+                    continue
+                Prediction.objects.update_or_create(
+                    user=user,
+                    pool=pool,
+                    match_id=match_id,
+                    defaults={
+                        "predicted_home_score": home,
+                        "predicted_away_score": away,
+                        "predicted_winner": None,
+                    },
+                )
+
+        return HttpResponse(status=200)
 
 
 class SaveKnockoutPredictionView(LoginRequiredMixin, View):

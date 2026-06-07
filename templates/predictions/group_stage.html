@@ -152,6 +152,8 @@
   }
 
   var _total = {{ total_matches }};
+  var _pendingSaves = 0;
+
   function _updateProgress() {
     var filled = 0;
     document.querySelectorAll('[id^="hs-"]').forEach(function (inp) {
@@ -164,7 +166,7 @@
       countEl.innerHTML = filled + '<span style="font-size:13px;font-weight:400;color:var(--text-muted);"> / ' + _total + ' partidos predichos</span>';
       countEl.style.color = filled === _total ? 'var(--success)' : 'var(--accent)';
     }
-    if (koLink) koLink.style.display = filled === _total ? '' : 'none';
+    if (koLink) koLink.style.display = (filled === _total && _pendingSaves === 0) ? '' : 'none';
   }
 
   window.toggleGroup = function (letter) {
@@ -185,26 +187,61 @@
 
   {% if not predictions_submitted %}
   window.randomizeAll = function (btn) {
-    var inputs = document.querySelectorAll('[id^="hs-"]');
-    if (inputs.length === 0) return;
+    var inputs = Array.from(document.querySelectorAll('[id^="hs-"]'));
+    if (!inputs.length) return;
     if (btn) { btn.disabled = true; btn.innerHTML = '<span class="gansa-spinner"></span>Guardando...'; }
+
+    // Build random values and update UI immediately
+    var predictions = [];
     inputs.forEach(function (hInp) {
       var matchId = hInp.id.replace('hs-', '');
       var aInp = document.getElementById('as-' + matchId);
       if (!aInp) return;
-      hInp.value = Math.floor(Math.random() * 6);
-      aInp.value = Math.floor(Math.random() * 6);
+      var h = Math.floor(Math.random() * 6);
+      var a = Math.floor(Math.random() * 6);
+      hInp.value = h;
+      aInp.value = a;
       updatePill(matchId);
-      hInp.dispatchEvent(new Event('change', { bubbles: true }));
+      predictions.push({ match_id: parseInt(matchId, 10), home: h, away: a });
     });
-    var ms = Math.max(2500, inputs.length * 60 + 1000);
-    setTimeout(function () {
+
+    // Single bulk POST (one DB transaction) to avoid SQLite concurrent-write locks
+    fetch('{% url "bulk_save_group_predictions" pool.pk %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}'
+      },
+      body: JSON.stringify({ predictions: predictions })
+    }).then(function () {
+      window.location.reload();
+    }).catch(function () {
       if (btn) { btn.disabled = false; btn.textContent = '🎲 Randomizar'; }
-    }, ms);
+    });
   };
   {% endif %}
 
-  document.addEventListener('htmx:afterSettle', _updateProgress);
+  // htmx:beforeRequest fires on the form (score-form-*); afterSettle fires on the target (standings-*)
+  document.addEventListener('htmx:beforeRequest', function (e) {
+    if (e.target && e.target.id && e.target.id.indexOf('score-form-') === 0) {
+      _pendingSaves++;
+      _updateProgress();
+    }
+  });
+
+  document.addEventListener('htmx:afterSettle', function (e) {
+    if (e.target && e.target.id && e.target.id.indexOf('standings-') === 0) {
+      _pendingSaves = Math.max(0, _pendingSaves - 1);
+    }
+    _updateProgress();
+  });
+
+  document.addEventListener('htmx:responseError', function (e) {
+    if (e.target && e.target.id && e.target.id.indexOf('score-form-') === 0) {
+      _pendingSaves = Math.max(0, _pendingSaves - 1);
+    }
+    _updateProgress();
+  });
 
   document.addEventListener('DOMContentLoaded', function () {
     var letters = {};
