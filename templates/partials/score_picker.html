@@ -95,7 +95,9 @@
   });
 
   window.GansaPicker = {
+    _busy: false,
     open: function (btn, hId, aId, home, away, cb) {
+      if (GansaPicker._busy) return;
       if (!el) el = create();
       pk = { h: document.getElementById(hId), a: document.getElementById(aId) };
       onDone = cb || null;

@@ -445,12 +445,17 @@ function _ensureBracketTree() {
   }
 
   document.addEventListener('htmx:beforeRequest', function (e) {
+    if (e.target.classList && e.target.classList.contains('ko-form')) {
+      GansaPicker._busy = true;
+      GansaPicker.close();
+    }
     if (e.target.closest && e.target.closest('.ko-form')) {
       savedScrollY = window.scrollY;
     }
   });
 
   document.addEventListener('htmx:afterSettle', function () {
+    GansaPicker._busy = false;
     window.scrollTo(0, savedScrollY);
     document.querySelectorAll('.ko-form').forEach(syncWinner);
     updateKoProgress();
@@ -458,6 +463,7 @@ function _ensureBracketTree() {
   });
 
   document.body.addEventListener('htmx:responseError', function(e) {
+    GansaPicker._busy = false;
     if (e.detail.xhr && e.detail.xhr.status === 400) {
       var msg = (e.detail.xhr.responseText || 'Error al guardar. Intentá de nuevo.').trim();
       var banner = document.getElementById('ko-error-banner');
@@ -467,6 +473,10 @@ function _ensureBracketTree() {
         setTimeout(function() { banner.style.display = 'none'; }, 4000);
       }
     }
+  });
+
+  document.body.addEventListener('htmx:sendError', function() {
+    GansaPicker._busy = false;
   });
 
   document.addEventListener('DOMContentLoaded', function () {
