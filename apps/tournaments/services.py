@@ -194,29 +194,59 @@ def _build_third_pool_map(
     third_group_letter: "dict[int, str]",
 ) -> "dict[str, int | None]":
     """
-    Greedily assign ranked 3rd-place teams to pool-based descriptors (e.g. '3RD_ABCDF').
-    Keys stored uppercase; iterates R32 slots in order, picks highest-ranked unassigned
-    3rd-place team whose group letter is in the pool.
+    Assign ranked 3rd-place teams to pool-based descriptors (e.g. '3RD_ABCDF') using
+    backtracking to avoid greedy assignment failures where an early assignment blocks
+    a later slot from finding any eligible team.
+    Keys stored uppercase; ordered by first appearance in R32 slots JSON.
     """
-    result: dict[str, int | None] = {}
-    assigned: set[int] = set()
-    for slot_def in r32_slots:
+    # Collect unique 3RD_ descriptors in JSON slot order
+    descriptors: list[str] = []
+    seen: set[str] = set()
+    for slot in r32_slots:
         for field in ("home", "away"):
-            desc = slot_def[field]
-            if not desc.upper().startswith("3RD_"):
-                continue
-            canonical = desc.upper()
-            if canonical in result:
-                continue
-            pool_letters = set(canonical[4:])
-            chosen = None
-            for s in ranked_third:
-                if s.team_id not in assigned and third_group_letter.get(s.team_id) in pool_letters:
-                    chosen = s.team_id
-                    assigned.add(s.team_id)
-                    break
-            result[canonical] = chosen
-    return result
+            raw = slot.get(field, "")
+            if isinstance(raw, str):
+                upper = raw.upper()
+                if upper.startswith("3RD_") and upper not in seen:
+                    descriptors.append(upper)
+                    seen.add(upper)
+
+    pool_letters = {d: set(d[4:]) for d in descriptors}
+    # Track the best (most-filled) assignment found.  Lists allow mutation in closures.
+    best_result: list[dict[str, int | None]] = [{}]
+    best_filled: list[int] = [-1]
+    current: dict[str, int | None] = {}
+    assigned: set[int] = set()
+
+    def backtrack(i: int, filled: int) -> None:
+        if i == len(descriptors):
+            if filled > best_filled[0]:
+                best_filled[0] = filled
+                best_result[0] = dict(current)
+            return
+
+        # Pruning: even if every remaining slot is filled, can we beat the best?
+        remaining = len(descriptors) - i
+        if filled + remaining <= best_filled[0]:
+            return  # Cannot improve; prune this branch.
+
+        desc = descriptors[i]
+        letters = pool_letters[desc]
+        # Try assigning each eligible unassigned team (best-ranked first)
+        for s in ranked_third:
+            if s.team_id not in assigned and third_group_letter.get(s.team_id) in letters:
+                current[desc] = s.team_id
+                assigned.add(s.team_id)
+                backtrack(i + 1, filled + 1)
+                del current[desc]
+                assigned.discard(s.team_id)
+        # Also explore leaving this slot as None (team supply may be insufficient)
+        current[desc] = None
+        backtrack(i + 1, filled)
+        del current[desc]
+
+    backtrack(0, 0)
+    return best_result[0]
 
 
 def build_predicted_knockout_bracket(
