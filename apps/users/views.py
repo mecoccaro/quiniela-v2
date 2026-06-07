@@ -19,6 +19,12 @@ class RegisterView(CreateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         login(self.request, self.object)
+        invite_code = form.cleaned_data.get("invite_code")
+        if invite_code:
+            from apps.pools.models import Pool, PoolMembership
+            pool = Pool.objects.filter(invite_code=invite_code).first()
+            if pool:
+                PoolMembership.objects.get_or_create(pool=pool, user=self.object)
         return response
 
 

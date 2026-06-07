@@ -116,6 +116,7 @@
 <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
   <a href="{% url 'leaderboard' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Tabla de posiciones</a>
   <a href="{% url 'participants' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Participantes</a>
+  <a href="{% url 'scoring_guide' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Guía de puntuación</a>
 </div>
 
 {% endblock %}

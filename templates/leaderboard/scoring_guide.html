@@ -1,0 +1,639 @@
+{% extends "base.html" %}
+
+{% block title %}Guía de puntuación — {{ pool.name }}{% endblock %}
+
+{% block content %}
+
+<style>
+  .scoring-guide {
+    --purple: var(--accent);
+    --purple-dark: var(--accent);
+    --purple-light: var(--accent-light);
+    --teal: var(--success);
+    --green: var(--success);
+    --teal-light: var(--success-light);
+    --green-light: var(--success-light);
+    --coral: var(--danger);
+    --red: var(--danger);
+    --coral-light: var(--danger-light);
+    --red-light: var(--danger-light);
+    --amber: var(--pending);
+    --amber-light: var(--pending-light);
+    --bg-surface: var(--bg);
+    --gray-light: var(--bg);
+    --gray-mid: var(--border);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--text);
+  }
+  .scoring-guide * { box-sizing: border-box; }
+  .scoring-guide h1 { font-size: 28px; font-weight: bold; color: var(--accent); margin-bottom: 6px; letter-spacing: -0.3px; }
+  .scoring-guide h2 { font-size: 20px; font-weight: bold; color: var(--accent); margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--accent); }
+  .scoring-guide h3 { font-size: 16px; font-weight: bold; color: var(--text); margin: 24px 0 8px; }
+  .scoring-guide h4 { font-size: 14px; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin: 20px 0 6px; }
+  .scoring-guide p { margin-bottom: 12px; }
+  .scoring-guide ul { margin: 8px 0 12px 20px; }
+  .scoring-guide li { margin-bottom: 4px; }
+  .scoring-guide strong { font-weight: bold; }
+  .scoring-guide em { font-style: italic; color: var(--text-muted); }
+  .scoring-guide .subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 32px; }
+  .scoring-guide .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+  .scoring-guide .badge-purple { background: var(--accent-light); color: var(--accent); }
+  .scoring-guide .badge-teal   { background: var(--success-light); color: var(--success); }
+  .scoring-guide .badge-amber  { background: var(--pending-light); color: var(--pending); }
+  .scoring-guide table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 12px 0 20px; }
+  .scoring-guide th { background: var(--bg); padding: 8px 10px; text-align: left; font-weight: bold; border: 1px solid var(--border); font-size: 12px; }
+  .scoring-guide td { padding: 7px 10px; border: 1px solid var(--border); vertical-align: top; }
+  .scoring-guide tr:nth-child(even) td { background: #FAFAF8; }
+  .scoring-guide .pts { text-align: right; font-weight: bold; color: var(--accent); }
+  .scoring-guide .max-row td { background: var(--accent-light) !important; font-weight: bold; color: var(--accent); }
+  .scoring-guide .yes { color: var(--success); font-weight: bold; }
+  .scoring-guide .no  { color: var(--danger); }
+  .scoring-guide .warn { color: var(--pending); font-weight: bold; }
+  .scoring-guide .box { border-radius: 8px; padding: 16px 20px; margin: 16px 0; }
+  .scoring-guide .box-rule    { background: var(--accent-light); border-left: 4px solid var(--accent); }
+  .scoring-guide .box-example { background: var(--bg); border-left: 4px solid var(--border); }
+  .scoring-guide .box-warning { background: var(--pending-light); border-left: 4px solid var(--pending); }
+  .scoring-guide .box-green   { background: var(--success-light); border-left: 4px solid var(--success); }
+  .scoring-guide .box-red     { background: var(--danger-light);  border-left: 4px solid var(--danger); }
+  .scoring-guide .box-title   { font-weight: bold; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .scoring-guide .box-rule .box-title    { color: var(--accent); }
+  .scoring-guide .box-warning .box-title { color: var(--pending); }
+  .scoring-guide .box-green .box-title   { color: var(--success); }
+  .scoring-guide .box-red .box-title     { color: var(--danger); }
+  .scoring-guide .score-ex { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .scoring-guide .score-line { font-family: 'Courier New', monospace; font-size: 13px; color: var(--text); background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 4px 10px; }
+  .scoring-guide .divider { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+  .scoring-guide .round-header { display: flex; align-items: center; gap: 12px; margin: 32px 0 16px; }
+  .scoring-guide .round-pts { font-size: 12px; color: var(--text-muted); }
+  .scoring-guide .qref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+  .scoring-guide .qref-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .scoring-guide .qref-round { font-size: 11px; font-weight: bold; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 6px; }
+  .scoring-guide .qref-vals  { font-size: 12px; color: var(--text); }
+  .scoring-guide .qref-max   { font-size: 16px; font-weight: bold; color: var(--accent); margin-top: 4px; }
+  .scoring-guide .toc { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 24px 0; }
+  .scoring-guide .toc a { color: var(--accent); text-decoration: none; font-size: 13px; display: block; padding: 2px 0; }
+  .scoring-guide .toc a:hover { text-decoration: underline; }
+  .scoring-guide .toc-section { font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin: 10px 0 4px; }
+</style>
+
+<div class="scoring-guide" style="max-width:860px;margin:0 auto;padding:24px 16px 80px;">
+
+<h1>Guía Oficial de Puntuación</h1>
+<p class="subtitle">Quiniela FIFA 2026 &nbsp;·&nbsp; Versión 4.0 &nbsp;·&nbsp; Referencia definitiva para participantes</p>
+
+<div class="toc">
+  <div class="toc-section">Fase de grupos</div>
+  <a href="#grupos-partidos">1. Partidos de grupos (72 partidos)</a>
+  <a href="#grupos-clasificacion">2. Clasificación de grupos (12 grupos)</a>
+  <div class="toc-section">Rondas eliminatorias</div>
+  <a href="#ko-intro">3. Cómo funciona el bracket KO</a>
+  <a href="#ko-16avos">4. 16avos de Final</a>
+  <a href="#ko-octavos">5. Octavos de Final</a>
+  <a href="#ko-cuartos">6. Cuartos de Final</a>
+  <a href="#ko-semis">7. Semifinales</a>
+  <a href="#ko-tercero">8. Partido por 3er y 4to lugar</a>
+  <a href="#ko-final">9. Final</a>
+  <div class="toc-section">Bonos</div>
+  <a href="#bonos-avance">10. Bonos de Avance por Equipo</a>
+  <a href="#bonos-especiales">11. Bonos Especiales (campeón + goleador)</a>
+  <div class="toc-section">Referencia</div>
+  <a href="#resumen">12. Tabla resumen de todos los puntos</a>
+  <a href="#faq">13. Preguntas frecuentes y casos especiales</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="grupos-partidos">1. Partidos de Grupos</h2>
+
+<p>La fase de grupos tiene <strong>72 partidos</strong> distribuidos en 12 grupos. Para cada partido predijiste tres cosas:</p>
+<ul>
+  <li><strong>El resultado:</strong> Gana A &nbsp;/&nbsp; Gana B &nbsp;/&nbsp; Empate</li>
+  <li><strong>Los goles del Equipo A</strong> (número exacto)</li>
+  <li><strong>Los goles del Equipo B</strong> (número exacto)</li>
+</ul>
+
+<div class="box box-rule">
+  <div class="box-title">Regla de goles — grupos</div>
+  Los goles se cuentan al final de los <strong>90 minutos reglamentarios</strong>. En fase de grupos no hay prórroga ni penales. Un empate es un resultado válido y definitivo.
+</div>
+
+<table>
+  <thead><tr><th>Evento</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>Resultado correcto (Gana A / Gana B / Empate)</td><td class="pts">3 pts</td></tr>
+    <tr><td>Goles exactos Equipo A</td><td class="pts">1 pt</td></tr>
+    <tr><td>Goles exactos Equipo B</td><td class="pts">1 pt</td></tr>
+    <tr><td>Bonus marcador exacto <em>(solo si AMBOS goles son correctos)</em></td><td class="pts">+2 pts</td></tr>
+    <tr class="max-row"><td>Máximo por partido</td><td class="pts">7 pts</td></tr>
+  </tbody>
+</table>
+
+<h3>Ejemplos — España (A) vs México (B)</h3>
+
+<table>
+  <thead>
+    <tr><th>Tu predicción</th><th>Resultado real</th><th>Resultado</th><th>Goles A</th><th>Goles B</th><th>Bonus</th><th class="pts">Total</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>España 2 – México 1 <em>(Gana A)</em></td>
+      <td>España 2 – México 1</td>
+      <td class="yes">✓ 3</td><td class="yes">✓ 1</td><td class="yes">✓ 1</td><td class="yes">✓ +2</td>
+      <td class="pts">7</td>
+    </tr>
+    <tr>
+      <td>España 2 – México 1 <em>(Gana A)</em></td>
+      <td>España 3 – México 1</td>
+      <td class="yes">✓ 3</td><td class="no">✗ 0</td><td class="yes">✓ 1</td><td class="no">✗ 0</td>
+      <td class="pts">4</td>
+    </tr>
+    <tr>
+      <td>España 2 – México 1 <em>(Gana A)</em></td>
+      <td>España 2 – México 0</td>
+      <td class="yes">✓ 3</td><td class="yes">✓ 1</td><td class="no">✗ 0</td><td class="no">✗ 0</td>
+      <td class="pts">4</td>
+    </tr>
+    <tr>
+      <td>España 2 – México 1 <em>(Gana A)</em></td>
+      <td>España 1 – México 1 <em>(Empate)</em></td>
+      <td class="no">✗ 0</td><td class="no">✗ 0</td><td class="yes">✓ 1</td><td class="no">✗ 0</td>
+      <td class="pts">1</td>
+    </tr>
+    <tr>
+      <td>Empate 1–1</td>
+      <td>España 1 – México 1 <em>(Empate)</em></td>
+      <td class="yes">✓ 3</td><td class="yes">✓ 1</td><td class="yes">✓ 1</td><td class="yes">✓ +2</td>
+      <td class="pts">7</td>
+    </tr>
+    <tr>
+      <td>Empate 0–0</td>
+      <td>España 1 – México 1 <em>(Empate)</em></td>
+      <td class="yes">✓ 3</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td>
+      <td class="pts">3</td>
+    </tr>
+    <tr>
+      <td>México 1 – España 0 <em>(Gana B)</em></td>
+      <td>España 1 – México 0 <em>(Gana A)</em></td>
+      <td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td>
+      <td class="pts">0</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="box box-warning">
+  <div class="box-title">Atención — el bonus exacto</div>
+  El bono de +2 puntos <strong>solo se activa cuando AMBOS goles son correctos al mismo tiempo</strong>. Acertar los goles del Equipo A pero no los del B no activa el bono, aunque sí da 1 punto por el gol individual correcto.
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="grupos-clasificacion">2. Clasificación de Grupos</h2>
+
+<p>Para cada uno de los <strong>12 grupos</strong> predijiste quién termina en cada posición. Esto se evalúa <strong>una sola vez</strong>, cuando terminan todos los partidos del grupo.</p>
+
+<table>
+  <thead><tr><th>Evento</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>Acertaste el 1er clasificado del grupo</td><td class="pts">6 pts</td></tr>
+    <tr><td>Acertaste el 2do clasificado del grupo</td><td class="pts">6 pts</td></tr>
+    <tr><td>Acertaste el 3er clasificado del grupo</td><td class="pts">4 pts <em>(condición especial)</em></td></tr>
+    <tr class="max-row"><td>Máximo por grupo</td><td class="pts">16 pts</td></tr>
+  </tbody>
+</table>
+
+<div class="box box-warning">
+  <div class="box-title">Regla especial del 3er lugar</div>
+  <p>De los 12 grupos, los 8 mejores terceros clasificados avanzan a 16avos. Los otros 4 terceros quedan eliminados.</p>
+  <p><strong>Condición:</strong> Los 4 puntos del 3er lugar <strong>solo se otorgan</strong> si el equipo que predijiste en 3ra posición es uno de los 8 que efectivamente avanza. Si tu equipo quedó 3ro en el grupo pero no fue uno de los 8 mejores terceros, no recibís puntos por esa predicción.</p>
+</div>
+
+<h3>Ejemplo — Grupo A</h3>
+<table>
+  <thead><tr><th>Tu predicción</th><th>Resultado real</th><th>Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>1° Argentina</td><td>1° Argentina</td><td class="pts yes">✓ 6 pts</td></tr>
+    <tr><td>2° Brasil</td><td>2° Ecuador</td><td class="pts no">✗ 0 pts</td></tr>
+    <tr><td>3° Ecuador → avanzó entre los 8 mejores</td><td>3° Brasil → también avanzó</td><td class="pts no">✗ 0 pts <em>(predijiste Ecuador, 3ro fue Brasil)</em></td></tr>
+    <tr class="max-row"><td colspan="2"><strong>Total del grupo</strong></td><td class="pts">6 pts</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<hr class="divider">
+<h2 id="ko-intro">3. Las Rondas Eliminatorias — Cómo Funciona</h2>
+
+<h3>El bracket</h3>
+<p>Antes del torneo llenaste un bracket completo. Eso significa que para cada partido de 16avos en adelante <strong>ya predijiste qué dos equipos se iban a enfrentar</strong>, quién ganaría y con qué marcador.</p>
+
+<h3>¿Qué predijiste para cada partido KO?</h3>
+<ul>
+  <li><strong>Resultado a 120 minutos:</strong> Gana A &nbsp;/&nbsp; Gana B &nbsp;/&nbsp; Empate</li>
+  <li><strong>Clasificado:</strong> quién avanza de ronda (A o B)</li>
+  <li><strong>Goles Equipo A</strong> (número exacto)</li>
+  <li><strong>Goles Equipo B</strong> (número exacto)</li>
+</ul>
+
+<div class="box box-rule">
+  <div class="box-title">Regla de goles y resultado — rondas KO</div>
+  <ul>
+    <li>Los goles cuentan incluyendo tiempo regular <strong>y prórroga</strong> (hasta 120 min). Los goles anotados en la tanda de penales <strong>no cuentan</strong>.</li>
+    <li><strong>Gana A</strong> = El Equipo A ganó dentro de los 120 minutos (incluyendo goles en prórroga).</li>
+    <li><strong>Gana B</strong> = El Equipo B ganó dentro de los 120 minutos.</li>
+    <li><strong>Empate</strong> = El marcador estaba igualado al término de los 120 minutos. El partido fue a penales.</li>
+  </ul>
+</div>
+
+<div class="box box-warning">
+  <div class="box-title">Importante — "Gana A" vs "Empate"</div>
+  <p>Si un equipo gana en tiempo extra (por ejemplo, gol en el minuto 115), eso es <strong>Gana A o Gana B</strong>, no un empate. El empate solo ocurre cuando el partido llega a penales.</p>
+</div>
+
+<h3>Las tres situaciones del bracket</h3>
+<p>Cuando llega el momento del partido, puede suceder una de tres cosas con respecto a los equipos que habías predicho:</p>
+
+<table>
+  <thead><tr><th>Situación</th><th>¿Qué equipos juegan?</th><th>Puntuación</th></tr></thead>
+  <tbody>
+    <tr style="background: var(--success-light)">
+      <td><strong>CASO A — Bracket perfecto</strong></td>
+      <td>Ambos equipos que predijiste son los que realmente juegan</td>
+      <td><strong>Puntuación COMPLETA</strong> (resultado + clasificado + goles + bonus)</td>
+    </tr>
+    <tr style="background: var(--pending-light)">
+      <td><strong>CASO B — Bracket parcial</strong></td>
+      <td>Solo uno de los dos equipos que predijiste está en el partido</td>
+      <td><strong>Puntuación PARCIAL</strong> (ver reglas detalladas abajo)</td>
+    </tr>
+    <tr style="background: var(--danger-light)">
+      <td><strong>CASO C — Bracket fallido</strong></td>
+      <td>Ninguno de los dos equipos que predijiste está en el partido</td>
+      <td><strong>0 puntos</strong> en ese partido</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Reglas del Caso B — Un equipo correcto</h3>
+<p>Cuando uno de tus equipos predichos está presente en el partido y el otro no:</p>
+
+<table>
+  <thead><tr><th>Campo</th><th>Cómo se puntúa</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Resultado</strong></td>
+      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo correcto que predijiste como ganador efectivamente ganó. Si tu equipo correcto perdió, no hay puntos de resultado aunque "su slot" haya ganado.</td>
+    </tr>
+    <tr>
+      <td><strong>Clasificado</strong></td>
+      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo correcto que predijiste como clasificado efectivamente avanzó de ronda.</td>
+    </tr>
+    <tr>
+      <td><strong>Goles A y Goles B</strong></td>
+      <td>Basado en la <strong>posición (slot)</strong>: se compara el número de goles que predijiste para cada slot (A o B) con los goles reales anotados por el equipo que juega en ese slot, sin importar si el equipo es el que predijiste o no.</td>
+    </tr>
+    <tr>
+      <td><strong>Bonus marcador exacto</strong></td>
+      <td>Se activa si los goles de ambos slots son correctos (usando la lógica posicional de arriba).</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="ko-16avos">4. 16avos de Final</h2>
+
+<table>
+  <thead><tr><th>Evento</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>Resultado correcto (Gana A / Gana B / Empate a 120 min)</td><td class="pts">6 pts</td></tr>
+    <tr><td>Clasificado correcto (quién avanza)</td><td class="pts">2 pts</td></tr>
+    <tr><td>Goles exactos Equipo A</td><td class="pts">2 pts</td></tr>
+    <tr><td>Goles exactos Equipo B</td><td class="pts">2 pts</td></tr>
+    <tr><td>Bonus marcador exacto <em>(ambos goles correctos)</em></td><td class="pts">+4 pts</td></tr>
+    <tr class="max-row"><td>Máximo por partido</td><td class="pts">16 pts</td></tr>
+  </tbody>
+</table>
+
+<h3>CASO A — Ambos equipos correctos</h3>
+<h4>Predicción: España (A) vs Francia (B) · España gana 2-1 · España clasifica</h4>
+
+<table>
+  <thead>
+    <tr><th>Resultado real</th><th>Resultado</th><th>Clasif.</th><th>Goles A</th><th>Goles B</th><th>Bonus</th><th class="pts">Total</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>España 2–1 Francia <em>(tiempo reg.)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ +4</td><td class="pts">16</td></tr>
+    <tr><td>España 3–1 Francia</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">10</td></tr>
+    <tr><td>España 2–0 Francia</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
+    <tr><td>España 1–0 Francia <em>(gol en prórroga)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
+    <tr><td>España 1–1 Francia → <strong>España</strong> gana penales</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">4</td></tr>
+    <tr><td>Francia 1–0 España <em>(Francia gana)</em></td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">0</td></tr>
+  </tbody>
+</table>
+
+<div class="box box-rule">
+  <div class="box-title">Nota — fila 5 arriba</div>
+  Predijiste "España gana 2-1" pero el partido terminó empatado 1-1 a 120 min y España avanzó por penales. El <strong>resultado predicho fue "Gana A"</strong> pero el resultado real fue <strong>"Empate"</strong> → 0 pts de resultado. Sin embargo, <strong>España sí avanzó</strong> como predijiste → 2 pts de clasificado. Los goles de España fueron 1 (predijiste 2 → ✗) y los de Francia 1 (predijiste 1 → ✓).
+</div>
+
+<h4>Predicción: España (A) vs Francia (B) · Empate 1-1 · España por penales</h4>
+
+<table>
+  <thead>
+    <tr><th>Resultado real</th><th>Resultado</th><th>Clasif.</th><th>Goles A</th><th>Goles B</th><th>Bonus</th><th class="pts">Total</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>España 1–1 Francia → <strong>España</strong> pen.</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ +4</td><td class="pts">16</td></tr>
+    <tr><td>España 1–1 Francia → <strong>Francia</strong> pen.</td><td class="yes">✓ 6</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ +4</td><td class="pts">14</td></tr>
+    <tr><td>España 0–0 Francia → <strong>España</strong> pen.</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
+    <tr><td>España 2–1 Francia <em>(ganó en reg.)</em></td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">4</td></tr>
+  </tbody>
+</table>
+
+<div class="box box-rule">
+  <div class="box-title">Nota — fila 2 arriba (caso interesante)</div>
+  Predijiste empate 1-1 y España avanza. El partido fue 1-1 pero <strong>Francia ganó los penales</strong>. Resultado: correcto (fue empate a 120 min ✓), clasificado: incorrecto (Francia avanzó, no España ✗), goles: ambos correctos (1-1 ✓✓) → bonus se activa. Total: 14 pts a pesar de errar quién ganó los penales.
+</div>
+
+<h3>CASO B — Un equipo correcto</h3>
+<h4>Predicción: España (A) vs Suiza (B) · España gana 2-1 · España clasifica</h4>
+<p><em>El partido real es España vs Holanda (Suiza no clasificó del Grupo)</em></p>
+
+<table>
+  <thead>
+    <tr><th>Resultado real</th><th>Resultado</th><th>Clasif.</th><th>Goles A</th><th>Goles B</th><th>Bonus</th><th class="pts">Total</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>España 2–1 Holanda <em>(España gana)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ +4</td><td class="pts">16</td></tr>
+    <tr><td>España 3–1 Holanda</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">10</td></tr>
+    <tr><td>España 2–0 Holanda</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
+    <tr><td>España 1–1 Holanda → España pen.</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">4</td></tr>
+    <tr><td>Holanda 1–0 España <em>(Holanda gana)</em></td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">0</td></tr>
+    <tr><td>Holanda 2–1 España</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">2</td></tr>
+  </tbody>
+</table>
+
+<p><em>Nota fila 6: Holanda ganó 2-1. Tus goles B predichos eran 1 (para Suiza), y Holanda anotó 1. Coincidencia de posición → 2 pts de goles B. Pero España perdió (0 pts resultado + clasificado).</em></p>
+
+<h3>CASO C — Ningún equipo correcto</h3>
+<div class="box box-red">
+  <div class="box-title">0 puntos totales</div>
+  <p>Si ninguno de los dos equipos que predijiste para ese slot aparece en el partido real, el partido te da <strong>0 puntos en todos los campos</strong>: resultado, clasificado, goles A, goles B y bonus.</p>
+  <p><strong>Ejemplo:</strong> Predijiste Argentina vs Alemania. El partido real es Brasil vs Francia. → 0 pts.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="ko-octavos">5. Octavos de Final</h2>
+<p>Las reglas son <strong>idénticas</strong> a 16avos. Solo cambian los valores.</p>
+<table>
+  <thead><tr><th>Evento</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>Resultado correcto</td><td class="pts">12 pts</td></tr>
+    <tr><td>Clasificado correcto</td><td class="pts">3 pts</td></tr>
+    <tr><td>Goles exactos Equipo A</td><td class="pts">3 pts</td></tr>
+    <tr><td>Goles exactos Equipo B</td><td class="pts">3 pts</td></tr>
+    <tr><td>Bonus marcador exacto</td><td class="pts">+6 pts</td></tr>
+    <tr class="max-row"><td>Máximo por partido</td><td class="pts">27 pts</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="ko-cuartos">6. Cuartos de Final</h2>
+<table>
+  <thead><tr><th>Evento</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>Resultado correcto</td><td class="pts">18 pts</td></tr>
+    <tr><td>Clasificado correcto</td><td class="pts">4 pts</td></tr>
+    <tr><td>Goles exactos Equipo A</td><td class="pts">4 pts</td></tr>
+    <tr><td>Goles exactos Equipo B</td><td class="pts">4 pts</td></tr>
+    <tr><td>Bonus marcador exacto</td><td class="pts">+8 pts</td></tr>
+    <tr class="max-row"><td>Máximo por partido</td><td class="pts">38 pts</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="ko-semis">7. Semifinales</h2>
+<table>
+  <thead><tr><th>Evento</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>Resultado correcto</td><td class="pts">24 pts</td></tr>
+    <tr><td>Clasificado correcto</td><td class="pts">5 pts</td></tr>
+    <tr><td>Goles exactos Equipo A</td><td class="pts">5 pts</td></tr>
+    <tr><td>Goles exactos Equipo B</td><td class="pts">5 pts</td></tr>
+    <tr><td>Bonus marcador exacto</td><td class="pts">+10 pts</td></tr>
+    <tr class="max-row"><td>Máximo por partido</td><td class="pts">49 pts</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="ko-tercero">8. Partido por 3er y 4to Lugar</h2>
+<p>Las reglas son las mismas que los demás partidos KO. El partido puede ir a prórroga y penales (aplican las mismas reglas de resultado y goles).</p>
+<table>
+  <thead><tr><th>Evento</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>Resultado correcto</td><td class="pts">12 pts</td></tr>
+    <tr><td>Clasificado correcto <em>(quién termina 3ro)</em></td><td class="pts">3 pts</td></tr>
+    <tr><td>Goles exactos Equipo A</td><td class="pts">3 pts</td></tr>
+    <tr><td>Goles exactos Equipo B</td><td class="pts">3 pts</td></tr>
+    <tr><td>Bonus marcador exacto</td><td class="pts">+6 pts</td></tr>
+    <tr class="max-row"><td>Máximo por partido</td><td class="pts">27 pts</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="ko-final">9. La Final</h2>
+<p>Las mismas reglas que todos los partidos KO, con los valores más altos del torneo.</p>
+<table>
+  <thead><tr><th>Evento</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>Resultado correcto</td><td class="pts">30 pts</td></tr>
+    <tr><td>Clasificado correcto <em>(campeón)</em></td><td class="pts">6 pts</td></tr>
+    <tr><td>Goles exactos Equipo A</td><td class="pts">6 pts</td></tr>
+    <tr><td>Goles exactos Equipo B</td><td class="pts">6 pts</td></tr>
+    <tr><td>Bonus marcador exacto</td><td class="pts">+12 pts</td></tr>
+    <tr class="max-row"><td>Máximo por partido</td><td class="pts">60 pts</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<hr class="divider">
+<h2 id="bonos-avance">10. Bonos de Avance por Equipo</h2>
+
+<p>Independientemente de los partidos, tu bracket predice implícitamente <strong>qué equipos llegarán a cada ronda</strong>. Esto se evalúa por separado: si un equipo que pusiste en determinada ronda efectivamente la alcanza, ganás puntos.</p>
+
+<div class="box box-rule">
+  <div class="box-title">Principio clave — inmune al bracket exacto</div>
+  No importa en qué slot específico está el equipo ni a quién se enfrenta. Solo importa que el equipo llegó a esa ronda. Si predijiste a Brasil en cuartos y Brasil llegó a cuartos, ganás los puntos aunque en tu bracket Brasil jugara contra Argentina y en realidad jugó contra Portugal.
+</div>
+
+<table>
+  <thead><tr><th>Ronda</th><th>Equipos que llegan</th><th class="pts">Puntos por equipo correcto</th><th class="pts">Máx total</th></tr></thead>
+  <tbody>
+    <tr><td>Octavos de Final</td><td>16 equipos</td><td class="pts">4 pts c/u</td><td class="pts">64 pts</td></tr>
+    <tr><td>Cuartos de Final</td><td>8 equipos</td><td class="pts">8 pts c/u</td><td class="pts">64 pts</td></tr>
+    <tr><td>Semifinales</td><td>4 equipos</td><td class="pts">16 pts c/u</td><td class="pts">64 pts</td></tr>
+    <tr><td>Final</td><td>2 equipos</td><td class="pts">32 pts c/u</td><td class="pts">64 pts</td></tr>
+    <tr class="max-row"><td colspan="3">Máximo total de bonos de avance</td><td class="pts">256 pts</td></tr>
+  </tbody>
+</table>
+
+<h3>Ejemplo</h3>
+<p>Tu bracket predijo los siguientes equipos en Semifinales: España, Brasil, Francia, Argentina.</p>
+<p>Los semifinalistas reales son: España, Alemania, Francia, Holanda.</p>
+
+<table>
+  <thead><tr><th>Tu predicción</th><th>¿Llegó a semis?</th><th class="pts">Puntos</th></tr></thead>
+  <tbody>
+    <tr><td>España</td><td class="yes">✓ Sí</td><td class="pts">16 pts</td></tr>
+    <tr><td>Brasil</td><td class="no">✗ No</td><td class="pts">0 pts</td></tr>
+    <tr><td>Francia</td><td class="yes">✓ Sí</td><td class="pts">16 pts</td></tr>
+    <tr><td>Argentina</td><td class="no">✗ No</td><td class="pts">0 pts</td></tr>
+    <tr class="max-row"><td colspan="2">Total bonos de semis</td><td class="pts">32 pts</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="bonos-especiales">11. Bonos Especiales</h2>
+
+<p>Antes del inicio del torneo registraste dos predicciones especiales. <strong>Se bloquean el 11 de junio</strong> y no pueden modificarse.</p>
+
+<table>
+  <thead><tr><th>Predicción</th><th>Puntos si acertás</th><th>Nota</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Campeón del torneo</strong></td>
+      <td class="pts">30 pts <em>(especial)</em></td>
+      <td>Más el bono de avance de Final (32 pts) porque tu campeón siempre llega a la Final. <strong>Total combinado: 62 pts.</strong></td>
+    </tr>
+    <tr>
+      <td><strong>Goleador del torneo</strong></td>
+      <td class="pts">30 pts</td>
+      <td>Se aplica el criterio oficial de la FIFA para desempates si dos jugadores terminan con los mismos goles.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="box box-rule">
+  <div class="box-title">¿Por qué el campeón vale 62 puntos en total?</div>
+  <p>Si acertás al campeón, inevitablemente también predijiste que ese equipo llegaría a la Final (de lo contrario no podrías haberlo puesto como campeón). Eso activa el bono de avance de Final: <strong>32 pts</strong>.</p>
+  <p>Además recibís el bono especial de campeón: <strong>30 pts</strong>.</p>
+  <p>Total: 32 + 30 = <strong>62 pts</strong>.</p>
+  <p>El subcampeón (el finalista que perdió) también recibe <strong>32 pts de bono de avance</strong> si lo predijiste correctamente en Final, pero no recibe los 30 pts especiales.</p>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<hr class="divider">
+<h2 id="resumen">12. Tabla Resumen — Todos los Puntos</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Fase / Ronda</th>
+      <th>Resultado</th>
+      <th>Clasif.</th>
+      <th>Goles A</th>
+      <th>Goles B</th>
+      <th>Bonus exacto</th>
+      <th class="pts">Máx/partido</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Grupos (×72)</td><td class="pts">3</td><td>—</td><td class="pts">1</td><td class="pts">1</td><td class="pts">+2</td><td class="pts">7</td></tr>
+    <tr><td>16avos (×16)</td><td class="pts">6</td><td class="pts">2</td><td class="pts">2</td><td class="pts">2</td><td class="pts">+4</td><td class="pts">16</td></tr>
+    <tr><td>Octavos (×8)</td><td class="pts">12</td><td class="pts">3</td><td class="pts">3</td><td class="pts">3</td><td class="pts">+6</td><td class="pts">27</td></tr>
+    <tr><td>Cuartos (×4)</td><td class="pts">18</td><td class="pts">4</td><td class="pts">4</td><td class="pts">4</td><td class="pts">+8</td><td class="pts">38</td></tr>
+    <tr><td>Semifinales (×2)</td><td class="pts">24</td><td class="pts">5</td><td class="pts">5</td><td class="pts">5</td><td class="pts">+10</td><td class="pts">49</td></tr>
+    <tr><td>3er Lugar (×1)</td><td class="pts">12</td><td class="pts">3</td><td class="pts">3</td><td class="pts">3</td><td class="pts">+6</td><td class="pts">27</td></tr>
+    <tr><td>Final (×1)</td><td class="pts">30</td><td class="pts">6</td><td class="pts">6</td><td class="pts">6</td><td class="pts">+12</td><td class="pts">60</td></tr>
+  </tbody>
+</table>
+
+<table>
+  <thead><tr><th>Componente</th><th class="pts">Máximo posible</th></tr></thead>
+  <tbody>
+    <tr><td>Partidos de grupos (72 partidos × 7)</td><td class="pts">504 pts</td></tr>
+    <tr><td>Clasificación de grupos (12 grupos × 16)</td><td class="pts">192 pts</td></tr>
+    <tr><td>Partidos KO (16avos → Final)</td><td class="pts">809 pts</td></tr>
+    <tr><td>Bonos de Avance (Octavos → Final)</td><td class="pts">256 pts</td></tr>
+    <tr><td>Bono Campeón (especial)</td><td class="pts">30 pts</td></tr>
+    <tr><td>Bono Goleador (especial)</td><td class="pts">30 pts</td></tr>
+    <tr class="max-row"><td><strong>TOTAL MÁXIMO POSIBLE</strong></td><td class="pts"><strong>1,821 pts</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<h2 id="faq">13. Preguntas Frecuentes y Casos Especiales</h2>
+
+<h3>Sobre los goles</h3>
+
+<h4>¿Los goles anotados en penales cuentan para el marcador?</h4>
+<p><strong>No.</strong> Los penales no son parte del marcador. Si el partido termina 1-1 en 120 min y un equipo gana 4-3 en penales, el marcador del partido es 1-1. Para efectos de goles, 1-1 es el número que se compara con tu predicción.</p>
+
+<h4>¿Qué pasa con los goles en tiempo extra (prórroga)?</h4>
+<p><strong>Sí cuentan.</strong> En partidos KO, los goles se cuentan hasta el final de los 120 minutos, incluyendo los goles de la prórroga. Si España anota en el minuto 115, ese gol cuenta para el marcador.</p>
+
+<h4>¿Y en grupos, hay prórroga?</h4>
+<p><strong>No.</strong> En fase de grupos no hay prórroga. El partido termina a los 90 minutos. Un empate en grupos es resultado definitivo.</p>
+
+<h3>Sobre el resultado en rondas KO</h3>
+
+<h4>Predije "Gana A" pero el equipo A ganó recién en la prórroga. ¿Cuenta como "Gana A"?</h4>
+<p><strong>Sí.</strong> "Gana A" significa que el Equipo A ganó el partido antes de que terminaran los 120 minutos. No importa si fue en el minuto 1 o en el minuto 119 de la prórroga. Solo el Empate (que lleva a penales) es distinto.</p>
+
+<h4>Predije "Empate" pero el equipo A ganó en tiempo extra. ¿Era correcto o incorrecto?</h4>
+<p><strong>Incorrecto.</strong> "Empate" significa que el marcador estaba igualado al final de los 120 minutos y el partido fue a penales. Si un equipo anota en la prórroga y no hay penales, el resultado es "Gana A" o "Gana B", no empate.</p>
+
+<h4>¿Puedo predecir "Empate" en 16avos aunque sé que siempre habrá un ganador?</h4>
+<p><strong>Sí.</strong> "Empate" es siempre una opción en KO porque puede haber 1-1 a 120 min y penales. En ese caso también debés indicar quién gana los penales (ese es tu clasificado).</p>
+
+<h3>Sobre el bracket y el efecto cascada</h3>
+
+<h4>Predije que Argentina llegaba a cuartos, pero no sobrevivió los 16avos. ¿Qué pasa con mi predicción de cuartos?</h4>
+<p>Si Argentina no llegó a cuartos, el slot de cuartos donde pusiste a Argentina tiene una situación de <strong>equipo incorrecto</strong>. Si el otro equipo en ese slot sí es correcto, es <strong>Caso B (puntuación parcial)</strong>. Si ninguno de los dos equipos del slot de cuartos aparece en el partido real, es <strong>Caso C (0 puntos)</strong>.</p>
+
+<h4>Predije que Francia llegaba a semis, y llegó, aunque no era el equipo que yo tenía de ese lado del bracket. ¿Me dan los puntos de bono de avance?</h4>
+<p><strong>Sí.</strong> El bono de avance no requiere que el equipo esté en el slot correcto. Si France está en tu bracket de Semis y France efectivamente llegó a Semis, recibís los 16 puntos de bono de Semis.</p>
+
+<h3>Sobre la clasificación de grupos</h3>
+
+<h4>Predije bien al 3er lugar de mi grupo, pero no fue uno de los 8 mejores terceros. ¿Me dan los puntos?</h4>
+<p><strong>No.</strong> Los 4 puntos del tercer clasificado de grupo solo se otorgan si ese equipo avanza efectivamente a 16avos (es decir, si está entre los 8 mejores terceros).</p>
+
+<h4>¿Cómo se decide qué 8 terceros avanzan?</h4>
+<p>La FIFA usa un sistema oficial de comparación entre los 12 terceros clasificados. Los 8 con mejores resultados avanzan. Se usa el criterio oficial de FIFA; si hay necesidad de desempate se aplican los criterios en el orden que establece el reglamento (puntos, diferencia de goles, goles a favor, etc.).</p>
+
+<h3>Sobre los bonos especiales</h3>
+
+<h4>Acerté al campeón. ¿Cuántos puntos recibo en total?</h4>
+<p><strong>62 puntos</strong> combinados: 32 de bono de avance de Final (porque tu campeón inevitablemente está en tu bracket de Final) + 30 del bono especial de campeón.</p>
+
+<h4>Predije correctamente al finalista que perdió (el subcampeón). ¿Cuántos puntos?</h4>
+<p><strong>32 puntos</strong> de bono de avance de Final. No recibís el bono especial de campeón (ese solo aplica para el ganador del torneo).</p>
+
+<h4>¿Qué pasa si dos jugadores terminan empatados en goles para el goleador?</h4>
+<p>Se aplica el criterio oficial de desempate de la FIFA. Si vos predijiste a uno de los jugadores empatados en primera posición, también recibís los puntos.</p>
+
+<h4>¿Hasta cuándo puedo registrar al campeón y al goleador?</h4>
+<p>Hasta el inicio del primer partido del torneo, el <strong>11 de junio de 2026</strong>. Una vez que el primer partido comienza, no se pueden modificar.</p>
+
+<h3>Preguntas generales</h3>
+
+<h4>¿Puedo recibir puntos negativos?</h4>
+<p><strong>No.</strong> El mínimo por cualquier predicción es 0 puntos. Las predicciones incorrectas no restan puntos.</p>
+
+<h4>¿Qué pasa si un partido se suspende o reprograma?</h4>
+<p>Se usará el resultado oficial que determine la FIFA. Si el partido no se juega dentro del torneo, la predicción quedará nula (0 puntos) para ese partido.</p>
+
+<h4>¿El marcador incluye tiempo añadido (minutos de compensación)?</h4>
+<p><strong>Sí.</strong> El tiempo añadido (minuto 90+1, 90+5, etc.) es parte del tiempo reglamentario. Un gol en el minuto 90+4 cuenta igual que uno en el minuto 30. En KO, la prórroga va hasta los 120 minutos más su tiempo añadido.</p>
+
+<hr class="divider">
+<p style="text-align:center; color:var(--text-muted); font-size:13px;">Quiniela FIFA 2026 &nbsp;·&nbsp; Guía de Puntuación v4.0 &nbsp;·&nbsp; Total máximo: 1,821 puntos</p>
+
+  <div style="margin-top:24px;display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{% url 'leaderboard' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Tabla</a>
+    <a href="{% url 'my_predictions' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Mis predicciones</a>
+    <a href="{% url 'participants' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Participantes</a>
+  </div>
+
+</div>
+
+{% endblock %}

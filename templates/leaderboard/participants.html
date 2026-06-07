@@ -51,5 +51,6 @@
 <div class="mt-4 flex gap-2 text-sm">
   <a href="{% url 'leaderboard' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Tabla de posiciones</a>
   <a href="{% url 'my_predictions' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Mis predicciones</a>
+  <a href="{% url 'scoring_guide' pool.pk %}" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg">Guía de puntuación</a>
 </div>
 {% endblock %}

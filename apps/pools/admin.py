@@ -30,7 +30,7 @@ class PoolAdmin(admin.ModelAdmin):
     inlines = [PoolMembershipInline]
     actions = [lock_pools]
     fieldsets = [
-        (None, {"fields": ["name", "tournament", "status", "lock_deadline"]}),
+        (None, {"fields": ["name", "tournament", "status", "lock_deadline", "invite_code"]}),
         ("Scoring config (overrides tournament)", {
             "fields": ["scoring_config"],
             "description": "Leave empty to inherit the tournament's scoring config.",
