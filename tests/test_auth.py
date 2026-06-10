@@ -10,6 +10,15 @@ def client() -> Client:
 
 
 @pytest.fixture
+def invited_pool(db):
+    from apps.pools.models import Pool
+    from apps.tournaments.models import Tournament
+
+    tournament = Tournament.objects.create(name="Test Cup", slug="test-cup")
+    return Pool.objects.create(name="Test Pool", tournament=tournament, invite_code="ABC12")
+
+
+@pytest.fixture
 def existing_user(db) -> User:
     return User.objects.create_user(
         email="existing@example.com",
@@ -21,7 +30,7 @@ def existing_user(db) -> User:
 
 
 @pytest.mark.django_db
-def test_registration_creates_user(client: Client) -> None:
+def test_registration_creates_user(client: Client, invited_pool) -> None:
     response = client.post("/users/register/", {
         "email": "new@example.com",
         "nickname": "newuser",
@@ -29,13 +38,28 @@ def test_registration_creates_user(client: Client) -> None:
         "last_name": "User",
         "password1": "SecurePass123!",
         "password2": "SecurePass123!",
+        "invite_code": invited_pool.invite_code,
     })
     assert response.status_code == 302
     assert User.objects.filter(email="new@example.com").exists()
 
 
 @pytest.mark.django_db
-def test_registration_redirects_to_dashboard(client: Client) -> None:
+def test_registration_requires_invite_code(client: Client) -> None:
+    response = client.post("/users/register/", {
+        "email": "noinvite@example.com",
+        "nickname": "noinvite",
+        "first_name": "No",
+        "last_name": "Invite",
+        "password1": "SecurePass123!",
+        "password2": "SecurePass123!",
+    })
+    assert response.status_code == 200
+    assert not User.objects.filter(email="noinvite@example.com").exists()
+
+
+@pytest.mark.django_db
+def test_registration_redirects_to_dashboard(client: Client, invited_pool) -> None:
     response = client.post("/users/register/", {
         "email": "redirect@example.com",
         "nickname": "redirectuser",
@@ -43,6 +67,7 @@ def test_registration_redirects_to_dashboard(client: Client) -> None:
         "last_name": "B",
         "password1": "SecurePass123!",
         "password2": "SecurePass123!",
+        "invite_code": invited_pool.invite_code,
     }, follow=True)
     assert response.status_code == 200
     assert b"Hola" in response.content

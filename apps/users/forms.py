@@ -6,8 +6,8 @@ from .models import User
 class RegistrationForm(forms.ModelForm):
     invite_code = forms.CharField(
         max_length=5,
-        required=False,
-        label="Código de invitación (opcional)",
+        required=True,
+        label="Código de invitación",
     )
     password1 = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
     password2 = forms.CharField(label="Confirmar contraseña", widget=forms.PasswordInput)
@@ -24,10 +24,11 @@ class RegistrationForm(forms.ModelForm):
 
     def clean_invite_code(self) -> str:
         code = self.cleaned_data.get("invite_code", "").strip().upper()
-        if code:
-            from apps.pools.models import Pool
-            if not Pool.objects.filter(invite_code=code).exists():
-                raise forms.ValidationError("Código de invitación no válido.")
+        if not code:
+            raise forms.ValidationError("El código de invitación es obligatorio.")
+        from apps.pools.models import Pool
+        if not Pool.objects.filter(invite_code=code).exists():
+            raise forms.ValidationError("Código de invitación no válido.")
         return code
 
     def clean_password2(self) -> str:

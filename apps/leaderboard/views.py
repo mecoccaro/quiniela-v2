@@ -62,7 +62,7 @@ class MyPredictionsView(LoginRequiredMixin, View):
         predictions = (
             Prediction.objects.filter(user=user, pool=pool)
             .select_related("match__home_team", "match__away_team", "predicted_winner")
-            .order_by("match__stage", "match__group_letter", "match__id")
+            .order_by("match__scheduled_at", "match__id")
         )
 
         # Build knockout bracket to resolve actual team names for knockout slots
