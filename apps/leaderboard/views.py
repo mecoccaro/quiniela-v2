@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
@@ -13,8 +14,11 @@ from apps.pools.models import (
     PoolTopScorerPick,
     Prediction,
 )
-from apps.tournaments.models import Match
-from apps.tournaments.services import build_predicted_knockout_bracket
+from apps.tournaments.models import Match, Team
+from apps.tournaments.services import (
+    build_predicted_knockout_bracket,
+    get_predicted_group_standings,
+)
 from apps.users.models import User
 
 STAGE_LABELS = {
@@ -26,6 +30,8 @@ STAGE_LABELS = {
     "third_place": "Tercer puesto",
     "final": "Final",
 }
+
+KO_STAGE_ORDER = ("r32", "r16", "qf", "sf", "final")
 
 
 class LeaderboardView(LoginRequiredMixin, View):
@@ -58,48 +64,66 @@ class MyPredictionsView(LoginRequiredMixin, View):
         user: User = request.user  # type: ignore[assignment]
         pool = get_object_or_404(Pool, pk=pool_id)
         membership = get_object_or_404(PoolMembership, pool=pool, user=user)
+        tournament = pool.tournament
 
-        predictions = (
-            Prediction.objects.filter(user=user, pool=pool)
-            .select_related("match__home_team", "match__away_team", "predicted_winner")
-            .order_by("match__scheduled_at", "match__id")
+        # ── Group stage: matches + predicted standings (read-only mirror of the
+        #    group-stage prediction view) ──────────────────────────────────────
+        group_matches = (
+            Match.objects.filter(tournament=tournament, stage=Match.Stage.GROUP)
+            .select_related("home_team", "away_team")
+            .order_by("group_letter", "id")
         )
+        pred_map = {
+            p.match_id: p
+            for p in Prediction.objects.filter(user=user, pool=pool)
+            .select_related("predicted_winner")
+        }
 
-        # Build knockout bracket to resolve actual team names for knockout slots
-        # (knockout Match records have home_team/away_team = None until official results)
-        ko_team_map: dict[int, tuple] = {}
+        groups: dict[str, list] = {}
+        for match in group_matches:
+            groups.setdefault(match.group_letter, []).append(
+                {"match": match, "prediction": pred_map.get(match.pk)}
+            )
+
+        team_ids = {m.home_team_id for m in group_matches} | {m.away_team_id for m in group_matches}
+        team_map = {t.pk: t for t in Team.objects.filter(pk__in=team_ids)}
+
+        group_data = []
+        for letter in sorted(groups.keys()):
+            standings = get_predicted_group_standings(user, pool, letter)
+            enriched = [(s, team_map.get(s.team_id)) for s in standings]
+            group_data.append(
+                {"letter": letter, "matches": groups[letter], "standings": enriched}
+            )
+
+        # ── Knockout: bracket tree (bracket_json) + per-match list with points ──
+        ko_stages: list[dict] = []
+        bracket_json: dict[str, list] = {}
         try:
             bracket = build_predicted_knockout_bracket(user, pool)
-            for stage_slots in bracket.values():
-                for slot in stage_slots:
-                    if slot.match:
-                        ko_team_map[slot.match.pk] = (slot.home_team, slot.away_team)
         except Exception:
-            pass  # bracket may fail if group predictions are incomplete
+            bracket = {}  # bracket may fail if group predictions are incomplete
 
-        stage_order = ["group", "r32", "r16", "qf", "sf", "third_place", "final"]
-        grouped: dict[str, list] = {}
-        for pred in predictions:
-            stage = pred.match.stage
-            grouped.setdefault(stage, []).append(pred)
-
-        stages = []
-        for s in stage_order:
-            if s not in grouped:
+        for key in KO_STAGE_ORDER:
+            slots = bracket.get(key, [])
+            if not slots:
                 continue
-            enriched = []
-            for pred in grouped[s]:
-                if pred.match.stage != "group" and pred.match.pk in ko_team_map:
-                    home_team, away_team = ko_team_map[pred.match.pk]
-                else:
-                    home_team = pred.match.home_team
-                    away_team = pred.match.away_team
-                enriched.append({
-                    "pred": pred,
-                    "home_team": home_team,
-                    "away_team": away_team,
-                })
-            stages.append({"key": s, "label": STAGE_LABELS.get(s, s), "predictions": enriched})
+            ko_stages.append(
+                {"key": key, "label": STAGE_LABELS.get(key, key), "slots": slots}
+            )
+            bracket_json[key] = [
+                {
+                    "home": slot.home_team.name if slot.home_team else "TBD",
+                    "homeCode": slot.home_team.fifa_code if slot.home_team else None,
+                    "away": slot.away_team.name if slot.away_team else "TBD",
+                    "awayCode": slot.away_team.fifa_code if slot.away_team else None,
+                    "homeScore": slot.prediction.predicted_home_score if slot.prediction else None,
+                    "awayScore": slot.prediction.predicted_away_score if slot.prediction else None,
+                    "slotKey": slot.slot_key,
+                    "matchPk": slot.match.pk if slot.match else None,
+                }
+                for slot in slots
+            ]
 
         champion_pick = PoolChampionPick.objects.filter(user=user, pool=pool).first()
         top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=pool).first()
@@ -109,7 +133,9 @@ class MyPredictionsView(LoginRequiredMixin, View):
         return render(request, "leaderboard/my_predictions.html", {
             "pool": pool,
             "membership": membership,
-            "stages": stages,
+            "group_data": group_data,
+            "ko_stages": ko_stages,
+            "bracket_json": bracket_json,
             "champion_pick": champion_pick,
             "top_scorer_pick": top_scorer_pick,
             "total_points": total_points,
@@ -159,6 +185,123 @@ class ScoringGuideView(LoginRequiredMixin, View):
         pool = get_object_or_404(Pool, pk=pool_id)
         get_object_or_404(PoolMembership, pool=pool, user=request.user)
         return render(request, "leaderboard/scoring_guide.html", {"pool": pool})
+
+
+class PredictionDistributionView(LoginRequiredMixin, View):
+    """How popular each team is at each knockout stage, across all submitted
+    participants. Based only on participants who have submitted (they have a
+    complete predicted bracket + champion pick). The champion column is
+    expandable to reveal who picked each team as champion."""
+
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        pool = get_object_or_404(Pool, pk=pool_id)
+        get_object_or_404(PoolMembership, pool=pool, user=request.user)
+
+        memberships = (
+            PoolMembership.objects.filter(pool=pool, predictions_submitted=True)
+            .select_related("user")
+        )
+
+        champ_count: dict[int, int] = defaultdict(int)
+        sub_count: dict[int, int] = defaultdict(int)
+        top4_count: dict[int, int] = defaultdict(int)
+        top8_count: dict[int, int] = defaultdict(int)
+        top16_count: dict[int, int] = defaultdict(int)
+        champ_participants: dict[int, list] = defaultdict(list)
+        all_team_ids: set[int] = set()
+
+        n = 0
+        for m in memberships:
+            user = m.user
+            try:
+                bracket = build_predicted_knockout_bracket(user, pool)
+            except Exception:
+                continue
+            if not bracket.get("final"):
+                continue
+            n += 1
+
+            t16 = self._teams_in(bracket, "r16")
+            t8 = self._teams_in(bracket, "qf")
+            t4 = self._teams_in(bracket, "sf")
+            for tid in t16:
+                top16_count[tid] += 1
+            for tid in t8:
+                top8_count[tid] += 1
+            for tid in t4:
+                top4_count[tid] += 1
+            all_team_ids |= t16
+
+            champ_id, runner_id = self._final_result(bracket.get("final", []))
+            if champ_id:
+                champ_count[champ_id] += 1
+                champ_participants[champ_id].append(user)
+                all_team_ids.add(champ_id)
+            if runner_id:
+                sub_count[runner_id] += 1
+                all_team_ids.add(runner_id)
+
+        team_map = {t.pk: t for t in Team.objects.filter(pk__in=all_team_ids)}
+
+        def pct(c: int) -> int:
+            return round(c / n * 100) if n else 0
+
+        rows = []
+        for tid, team in team_map.items():
+            rows.append({
+                "team": team,
+                "champ_count": champ_count[tid], "champ_pct": pct(champ_count[tid]),
+                "sub_count": sub_count[tid], "sub_pct": pct(sub_count[tid]),
+                "top4_count": top4_count[tid], "top4_pct": pct(top4_count[tid]),
+                "top8_count": top8_count[tid], "top8_pct": pct(top8_count[tid]),
+                "top16_count": top16_count[tid], "top16_pct": pct(top16_count[tid]),
+                "champ_participants": sorted(
+                    champ_participants[tid],
+                    key=lambda u: (u.get_full_name() or u.nickname).lower(),
+                ),
+            })
+        rows.sort(key=lambda r: (-r["champ_count"], -r["top16_count"], r["team"].name))
+
+        return render(request, "leaderboard/distribution.html", {
+            "pool": pool,
+            "rows": rows,
+            "participant_count": n,
+        })
+
+    @staticmethod
+    def _teams_in(bracket: dict, stage: str) -> set[int]:
+        """Team ids that reached `stage` in this predicted bracket."""
+        ids: set[int] = set()
+        for slot in bracket.get(stage, []):
+            if slot.home_team:
+                ids.add(slot.home_team.pk)
+            if slot.away_team:
+                ids.add(slot.away_team.pk)
+        return ids
+
+    @staticmethod
+    def _final_result(final_slots) -> tuple[int | None, int | None]:
+        """Return (champion_team_id, runner_up_team_id) from the Final slot."""
+        if not final_slots:
+            return None, None
+        fs = final_slots[0]
+        pred = fs.prediction
+        home = fs.home_team.pk if fs.home_team else None
+        away = fs.away_team.pk if fs.away_team else None
+        if not pred or home is None or away is None:
+            return None, None
+        champ: int | None = None
+        if pred.predicted_winner_id:
+            champ = pred.predicted_winner_id
+        elif pred.predicted_home_score is not None and pred.predicted_away_score is not None:
+            if pred.predicted_home_score > pred.predicted_away_score:
+                champ = home
+            elif pred.predicted_away_score > pred.predicted_home_score:
+                champ = away
+        if champ is None:
+            return None, None
+        runner = away if champ == home else home
+        return champ, runner
 
 
 class PoolDayView(LoginRequiredMixin, View):

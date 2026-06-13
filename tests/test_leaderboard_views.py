@@ -139,3 +139,33 @@ def test_participants_shows_picks_for_submitted(client_logged_in, pool, user, us
     assert response.status_code == 200
     assert b"VisibleTeam" in response.content
     assert b"VisibleScorer" in response.content
+
+
+# ─── Prediction distribution ──────────────────────────────────────────────────
+
+@pytest.mark.django_db
+def test_distribution_returns_200(client_logged_in, pool, membership):
+    resp = client_logged_in.get(f"/pool/{pool.pk}/distribution/")
+    assert resp.status_code == 200
+    assert b"Distribuci\xc3\xb3n de pron\xc3\xb3sticos" in resp.content
+
+
+@pytest.mark.django_db
+def test_distribution_empty_when_no_submissions(client_logged_in, pool, membership):
+    resp = client_logged_in.get(f"/pool/{pool.pk}/distribution/")
+    assert resp.status_code == 200
+    assert resp.context["participant_count"] == 0
+    assert resp.context["rows"] == []
+
+
+@pytest.mark.django_db
+def test_distribution_requires_login(pool, membership):
+    resp = Client().get(f"/pool/{pool.pk}/distribution/")
+    assert resp.status_code == 302
+
+
+@pytest.mark.django_db
+def test_distribution_requires_membership(client_logged_in, tournament):
+    other_pool = Pool.objects.create(name="Other", tournament=tournament)
+    resp = client_logged_in.get(f"/pool/{other_pool.pk}/distribution/")
+    assert resp.status_code == 404
