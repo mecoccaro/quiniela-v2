@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse
@@ -184,6 +185,123 @@ class ScoringGuideView(LoginRequiredMixin, View):
         pool = get_object_or_404(Pool, pk=pool_id)
         get_object_or_404(PoolMembership, pool=pool, user=request.user)
         return render(request, "leaderboard/scoring_guide.html", {"pool": pool})
+
+
+class PredictionDistributionView(LoginRequiredMixin, View):
+    """How popular each team is at each knockout stage, across all submitted
+    participants. Based only on participants who have submitted (they have a
+    complete predicted bracket + champion pick). The champion column is
+    expandable to reveal who picked each team as champion."""
+
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        pool = get_object_or_404(Pool, pk=pool_id)
+        get_object_or_404(PoolMembership, pool=pool, user=request.user)
+
+        memberships = (
+            PoolMembership.objects.filter(pool=pool, predictions_submitted=True)
+            .select_related("user")
+        )
+
+        champ_count: dict[int, int] = defaultdict(int)
+        sub_count: dict[int, int] = defaultdict(int)
+        top4_count: dict[int, int] = defaultdict(int)
+        top8_count: dict[int, int] = defaultdict(int)
+        top16_count: dict[int, int] = defaultdict(int)
+        champ_participants: dict[int, list] = defaultdict(list)
+        all_team_ids: set[int] = set()
+
+        n = 0
+        for m in memberships:
+            user = m.user
+            try:
+                bracket = build_predicted_knockout_bracket(user, pool)
+            except Exception:
+                continue
+            if not bracket.get("final"):
+                continue
+            n += 1
+
+            t16 = self._teams_in(bracket, "r16")
+            t8 = self._teams_in(bracket, "qf")
+            t4 = self._teams_in(bracket, "sf")
+            for tid in t16:
+                top16_count[tid] += 1
+            for tid in t8:
+                top8_count[tid] += 1
+            for tid in t4:
+                top4_count[tid] += 1
+            all_team_ids |= t16
+
+            champ_id, runner_id = self._final_result(bracket.get("final", []))
+            if champ_id:
+                champ_count[champ_id] += 1
+                champ_participants[champ_id].append(user)
+                all_team_ids.add(champ_id)
+            if runner_id:
+                sub_count[runner_id] += 1
+                all_team_ids.add(runner_id)
+
+        team_map = {t.pk: t for t in Team.objects.filter(pk__in=all_team_ids)}
+
+        def pct(c: int) -> int:
+            return round(c / n * 100) if n else 0
+
+        rows = []
+        for tid, team in team_map.items():
+            rows.append({
+                "team": team,
+                "champ_count": champ_count[tid], "champ_pct": pct(champ_count[tid]),
+                "sub_count": sub_count[tid], "sub_pct": pct(sub_count[tid]),
+                "top4_count": top4_count[tid], "top4_pct": pct(top4_count[tid]),
+                "top8_count": top8_count[tid], "top8_pct": pct(top8_count[tid]),
+                "top16_count": top16_count[tid], "top16_pct": pct(top16_count[tid]),
+                "champ_participants": sorted(
+                    champ_participants[tid],
+                    key=lambda u: (u.get_full_name() or u.nickname).lower(),
+                ),
+            })
+        rows.sort(key=lambda r: (-r["champ_count"], -r["top16_count"], r["team"].name))
+
+        return render(request, "leaderboard/distribution.html", {
+            "pool": pool,
+            "rows": rows,
+            "participant_count": n,
+        })
+
+    @staticmethod
+    def _teams_in(bracket: dict, stage: str) -> set[int]:
+        """Team ids that reached `stage` in this predicted bracket."""
+        ids: set[int] = set()
+        for slot in bracket.get(stage, []):
+            if slot.home_team:
+                ids.add(slot.home_team.pk)
+            if slot.away_team:
+                ids.add(slot.away_team.pk)
+        return ids
+
+    @staticmethod
+    def _final_result(final_slots) -> tuple[int | None, int | None]:
+        """Return (champion_team_id, runner_up_team_id) from the Final slot."""
+        if not final_slots:
+            return None, None
+        fs = final_slots[0]
+        pred = fs.prediction
+        home = fs.home_team.pk if fs.home_team else None
+        away = fs.away_team.pk if fs.away_team else None
+        if not pred or home is None or away is None:
+            return None, None
+        champ: int | None = None
+        if pred.predicted_winner_id:
+            champ = pred.predicted_winner_id
+        elif pred.predicted_home_score is not None and pred.predicted_away_score is not None:
+            if pred.predicted_home_score > pred.predicted_away_score:
+                champ = home
+            elif pred.predicted_away_score > pred.predicted_home_score:
+                champ = away
+        if champ is None:
+            return None, None
+        runner = away if champ == home else home
+        return champ, runner
 
 
 class PoolDayView(LoginRequiredMixin, View):

@@ -8,4 +8,5 @@ urlpatterns = [
     path("pool/<int:pool_id>/participants/", views.ParticipantsView.as_view(), name="participants"),
     path("pool/<int:pool_id>/day/", views.PoolDayView.as_view(), name="pool_day"),
     path("pool/<int:pool_id>/scoring-guide/", views.ScoringGuideView.as_view(), name="scoring_guide"),
+    path("pool/<int:pool_id>/distribution/", views.PredictionDistributionView.as_view(), name="prediction_distribution"),
 ]
