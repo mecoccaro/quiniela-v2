@@ -1,0 +1,9 @@
+{% comment %}A read-only distribution cell: percentage + count. Expects `pct`, `count`, optional `last`.{% endcomment %}
+<td style="padding:14px {% if last %}20px 14px{% else %}12px{% endif %} 14px 12px;text-align:center;line-height:1.15;">
+  {% if count %}
+  <div style="font-size:17px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;">{{ pct }}%</div>
+  <div style="font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;">{{ count }}</div>
+  {% else %}
+  <div style="font-size:17px;font-weight:800;color:var(--text-muted);">—</div>
+  {% endif %}
+</td>

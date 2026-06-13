@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load tournament_tags %}
+
+{% block title %}Distribución de pronósticos — {{ pool.name }}{% endblock %}
+
+{% block content %}
+
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:12px;">
+  <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.5px;color:var(--text);margin:0;">Distribución de pronósticos</h1>
+  <span style="font-size:13px;color:var(--text-muted);font-weight:600;white-space:nowrap;">{{ participant_count }} participante{{ participant_count|pluralize }} con picks</span>
+</div>
+<p style="font-size:14px;color:var(--text-muted);margin:0 0 20px;max-width:760px;line-height:1.5;">
+  Qué tan popular es cada selección en cada etapa del bracket, según los picks de los {{ participant_count }} participante{{ participant_count|pluralize }} con predicciones enviadas. Dale click al % de <strong style="color:var(--text);">Campeón</strong> para ver quiénes lo picaron.
+</p>
+
+{% if rows %}
+<div style="background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;min-width:640px;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--border);">
+        <th style="text-align:left;padding:16px 20px;font-size:11px;font-weight:800;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;">Selección</th>
+        <th style="text-align:center;padding:16px 12px;font-size:11px;font-weight:800;letter-spacing:0.06em;color:var(--accent);text-transform:uppercase;">Campeón</th>
+        <th style="text-align:center;padding:16px 12px;font-size:11px;font-weight:800;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;">Sub</th>
+        <th style="text-align:center;padding:16px 12px;font-size:11px;font-weight:800;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;">Top 4</th>
+        <th style="text-align:center;padding:16px 12px;font-size:11px;font-weight:800;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;">Top 8</th>
+        <th style="text-align:center;padding:16px 20px 16px 12px;font-size:11px;font-weight:800;letter-spacing:0.06em;color:var(--text-muted);text-transform:uppercase;">Top 16</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:14px 20px;white-space:nowrap;">
+          <span style="font-size:18px;vertical-align:middle;">{{ row.team.fifa_code|flag_emoji }}</span>
+          <span style="font-size:15px;font-weight:800;color:var(--text);margin-left:6px;">{{ row.team.fifa_code }}</span>
+          <span style="font-size:14px;color:var(--text-muted);margin-left:6px;">{{ row.team.name }}</span>
+        </td>
+
+        {# CAMPEÓN — clickable #}
+        <td style="padding:8px 12px;text-align:center;">
+          {% if row.champ_count %}
+          <button type="button" onclick="toggleDist('{{ row.team.pk }}', this)"
+                  data-dist-pct
+                  style="background:none;border:1.5px solid transparent;border-radius:10px;padding:6px 12px;cursor:pointer;line-height:1.1;min-width:60px;">
+            <div style="font-size:18px;font-weight:900;color:var(--accent);font-variant-numeric:tabular-nums;">
+              {{ row.champ_pct }}% <span class="dist-chevron" style="font-size:11px;display:inline-block;transition:transform 0.2s;">⌄</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;">{{ row.champ_count }}</div>
+          </button>
+          {% else %}
+          <div style="font-size:18px;font-weight:900;color:var(--text-muted);">—</div>
+          {% endif %}
+        </td>
+
+        {% include "leaderboard/partials/dist_cell.html" with pct=row.sub_pct count=row.sub_count %}
+        {% include "leaderboard/partials/dist_cell.html" with pct=row.top4_pct count=row.top4_count %}
+        {% include "leaderboard/partials/dist_cell.html" with pct=row.top8_pct count=row.top8_count %}
+        {% include "leaderboard/partials/dist_cell.html" with pct=row.top16_pct count=row.top16_count last=True %}
+      </tr>
+
+      {# Champion expansion row #}
+      {% if row.champ_count %}
+      <tr id="dist-detail-{{ row.team.pk }}" style="display:none;background:var(--accent-light);">
+        <td colspan="6" style="padding:16px 20px 20px;">
+          <p style="font-size:13px;font-weight:800;color:var(--text);margin:0 0 12px;letter-spacing:0.02em;">
+            {{ row.champ_count }} persona{{ row.champ_count|pluralize }} picaron a {{ row.team.fifa_code|flag_emoji }} {{ row.team.name }} como campeón
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            {% for p in row.champ_participants %}
+            <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:100px;padding:5px 14px 5px 5px;">
+              <span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;font-weight:800;flex-shrink:0;">{{ p.first_name|default:p.nickname|first|upper }}</span>
+              <span style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;">{{ p.get_full_name|default:p.nickname }}</span>
+            </span>
+            {% endfor %}
+          </div>
+        </td>
+      </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div style="background:#fff;border-radius:16px;border:1px solid var(--border);padding:48px 32px;text-align:center;color:var(--text-muted);">
+  Todavía no hay predicciones enviadas para analizar.
+</div>
+{% endif %}
+
+<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
+  <a href="{% url 'leaderboard' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Tabla de posiciones</a>
+  <a href="{% url 'participants' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Participantes</a>
+</div>
+
+<script>
+(function () {
+  window.toggleDist = function (teamId, btn) {
+    var detail = document.getElementById('dist-detail-' + teamId);
+    if (!detail) return;
+    var open = detail.style.display !== 'none';
+    // Close any other open detail
+    document.querySelectorAll('[id^="dist-detail-"]').forEach(function (el) {
+      if (el !== detail) el.style.display = 'none';
+    });
+    document.querySelectorAll('[data-dist-pct]').forEach(function (b) {
+      if (b !== btn) {
+        b.style.borderColor = 'transparent';
+        b.style.background = 'none';
+        var ch = b.querySelector('.dist-chevron');
+        if (ch) ch.style.transform = 'rotate(0deg)';
+      }
+    });
+    detail.style.display = open ? 'none' : '';
+    btn.style.borderColor = open ? 'transparent' : 'var(--accent)';
+    btn.style.background = open ? 'none' : '#fff';
+    var chev = btn.querySelector('.dist-chevron');
+    if (chev) chev.style.transform = open ? 'rotate(0deg)' : 'rotate(180deg)';
+  };
+})();
+</script>
+
+{% endblock %}
