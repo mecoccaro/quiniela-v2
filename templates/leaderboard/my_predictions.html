@@ -22,53 +22,100 @@
   </div>
 </div>
 
-{% for stage in stages %}
-<div style="margin-bottom:16px;">
-  <div style="background:#fff;border-radius:16px;border:1px solid var(--border);overflow:hidden;">
-    <div style="padding:14px 20px;border-bottom:1px solid var(--border);">
-      <span style="font-size:17px;font-weight:800;color:var(--text);">{{ stage.label }}</span>
-    </div>
-    {% for pred_data in stage.predictions %}
-    {% with pred=pred_data.pred %}
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;">
-      <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
-        <span style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-          {{ pred_data.home_team.fifa_code|flag_emoji }} {{ pred_data.home_team|default:"TBD" }} vs {{ pred_data.away_team.fifa_code|flag_emoji }} {{ pred_data.away_team|default:"TBD" }}
-        </span>
-        {% if pred.match.stage != "group" and pred.predicted_winner %}
-          <span style="font-size:11px;color:var(--accent);white-space:nowrap;">(pen: {{ pred.predicted_winner.fifa_code|flag_emoji }})</span>
-        {% endif %}
+{# ─── Group stage: matches + predicted standings ──────────────────────────── #}
+{% if group_data %}
+<h2 style="font-size:20px;font-weight:800;color:var(--text);margin:0 0 12px;">Fase de Grupos</h2>
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+{% for group in group_data %}
+<div id="group-{{ group.letter }}" data-open="{% if forloop.first %}1{% else %}0{% endif %}"
+     style="background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;">
+
+  <div onclick="toggleGroup('{{ group.letter }}')"
+       style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;user-select:none;">
+    <span style="font-size:18px;font-weight:800;color:var(--text);">Grupo {{ group.letter }}</span>
+    <span id="chevron-{{ group.letter }}"
+          style="color:var(--text-muted);font-size:20px;display:inline-block;transform:{% if forloop.first %}rotate(90deg){% else %}rotate(0deg){% endif %};transition:transform 0.2s;">›</span>
+  </div>
+
+  <div id="group-content-{{ group.letter }}"
+       class="grid grid-cols-1 md:grid-cols-2 gap-5 px-5 pb-5"
+       {% if not forloop.first %}style="display:none"{% endif %}>
+
+    <div>
+      {% for item in group.matches %}
+      {% with match=item.match pred=item.prediction %}
+      <div style="display:grid;grid-template-columns:1fr 88px 1fr;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:13px;color:var(--text);text-align:right;padding-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+              title="{{ match.home_team.name }}">{{ match.home_team.fifa_code|flag_emoji }} {{ match.home_team.name }}</span>
+        <div style="background:var(--bg);border-radius:8px;padding:7px 0;font-size:15px;font-weight:900;color:{% if pred.predicted_home_score is not None %}var(--text){% else %}var(--text-muted){% endif %};text-align:center;font-variant-numeric:tabular-nums;">
+          {% if pred.predicted_home_score is not None %}{{ pred.predicted_home_score }} : {{ pred.predicted_away_score }}{% else %}– : –{% endif %}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;padding-left:8px;min-width:0;">
+          <span style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                title="{{ match.away_team.name }}">{{ match.away_team.fifa_code|flag_emoji }} {{ match.away_team.name }}</span>
+          {% include "leaderboard/partials/points_badge.html" with pts=pred.points_awarded %}
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-        <span style="font-weight:900;font-variant-numeric:tabular-nums;font-size:15px;color:var(--text);">
-          {{ pred.predicted_home_score }} – {{ pred.predicted_away_score }}
-        </span>
-        {% if pred.points_awarded is not None %}
-          {% with pts=pred.points_awarded %}
-          {% if pts >= 3 %}
-            <span style="background:var(--success-light);color:var(--success);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;">{{ pts }}pts</span>
-          {% elif pts >= 1 %}
-            <span style="background:var(--accent-light);color:var(--accent);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;">{{ pts }}pt</span>
-          {% else %}
-            <span style="background:var(--bg);color:var(--text-muted);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;border:1px solid var(--border);">{{ pts }}pts</span>
-          {% endif %}
-          {% endwith %}
-        {% endif %}
-        {% if pred.slot_bonus_awarded %}
-          <span style="background:#EFF6FF;color:#3B82F6;border-radius:100px;font-size:11px;font-weight:700;padding:3px 8px;">+{{ pred.slot_bonus_awarded }} slot</span>
-        {% endif %}
-      </div>
+      {% endwith %}
+      {% endfor %}
     </div>
-    {% endwith %}
-    {% endfor %}
+
+    <div>
+      {% include "predictions/partials/group_standings.html" with standings=group.standings group_letter=group.letter %}
+    </div>
+
   </div>
 </div>
-{% empty %}
-<div style="background:#fff;border-radius:16px;border:1px solid var(--border);padding:48px 32px;text-align:center;color:var(--text-muted);">
-  No hay predicciones todavía.
+{% endfor %}
+</div>
+{% endif %}
+
+{# ─── Knockout: bracket tree (read-only) + per-match list with points ──────── #}
+{% if ko_stages %}
+<h2 style="font-size:20px;font-weight:800;color:var(--text);margin:0 0 12px;">Eliminatorias</h2>
+
+<script>window._koSubmitted = true;</script>
+{% include "predictions/partials/bracket_tree.html" %}
+
+<div style="display:flex;flex-direction:column;gap:12px;margin:16px 0 24px;">
+{% for stage in ko_stages %}
+<div style="background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:0 2px 12px rgba(0,0,0,0.04);overflow:hidden;">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border);">
+    <span style="font-size:17px;font-weight:800;color:var(--text);">{{ stage.label }}</span>
+    <span style="font-size:12px;color:var(--text-muted);">{{ stage.slots|length }} partidos</span>
+  </div>
+  {% for slot in stage.slots %}
+  {% with pred=slot.prediction %}
+  <div style="padding:9px 20px;border-bottom:1px solid var(--border);">
+    <div style="display:grid;grid-template-columns:1fr 88px 1fr;align-items:center;">
+      <span style="font-size:13px;color:var(--text);text-align:right;padding-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+        {{ slot.home_team.fifa_code|flag_emoji }} {{ slot.home_team.name|default:"TBD" }}
+      </span>
+      <div style="background:var(--bg);border-radius:8px;padding:7px 0;font-size:15px;font-weight:900;color:{% if pred.predicted_home_score is not None %}var(--text){% else %}var(--text-muted){% endif %};text-align:center;font-variant-numeric:tabular-nums;">
+        {% if pred.predicted_home_score is not None %}{{ pred.predicted_home_score }} : {{ pred.predicted_away_score }}{% else %}– : –{% endif %}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;padding-left:8px;min-width:0;flex-wrap:wrap;">
+        <span style="font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          {{ slot.away_team.fifa_code|flag_emoji }} {{ slot.away_team.name|default:"TBD" }}
+        </span>
+        {% include "leaderboard/partials/points_badge.html" with pts=pred.points_awarded %}
+        {% if pred.slot_bonus_awarded %}
+        <span style="background:#EFF6FF;color:#3B82F6;border-radius:100px;font-size:11px;font-weight:700;padding:3px 8px;">+{{ pred.slot_bonus_awarded }} slot</span>
+        {% endif %}
+      </div>
+    </div>
+    {% if pred.predicted_winner %}
+    <p style="text-align:center;font-size:11px;color:var(--accent);margin:4px 0 0;">(pen: {{ pred.predicted_winner.fifa_code|flag_emoji }} {{ pred.predicted_winner.fifa_code }})</p>
+    {% endif %}
+  </div>
+  {% endwith %}
+  {% endfor %}
 </div>
 {% endfor %}
+</div>
+{% endif %}
 
+{# ─── Final picks ──────────────────────────────────────────────────────────── #}
 {% if champion_pick or top_scorer_pick %}
 <div style="margin-bottom:16px;">
   <div style="background:#fff;border-radius:16px;border:1px solid var(--border);overflow:hidden;">
@@ -80,15 +127,7 @@
       <span style="font-size:13px;color:var(--text-muted);font-weight:600;">Campeón</span>
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:15px;font-weight:700;color:var(--text);">{{ champion_pick.team.fifa_code|flag_emoji }} {{ champion_pick.team }}</span>
-        {% if champion_pick.points_awarded is not None %}
-          {% with pts=champion_pick.points_awarded %}
-          {% if pts >= 1 %}
-            <span style="background:var(--success-light);color:var(--success);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;">{{ pts }}pts</span>
-          {% else %}
-            <span style="background:var(--bg);color:var(--text-muted);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;border:1px solid var(--border);">{{ pts }}pts</span>
-          {% endif %}
-          {% endwith %}
-        {% endif %}
+        {% include "leaderboard/partials/points_badge.html" with pts=champion_pick.points_awarded %}
       </div>
     </div>
     {% endif %}
@@ -97,19 +136,17 @@
       <span style="font-size:13px;color:var(--text-muted);font-weight:600;">Goleador</span>
       <div style="display:flex;align-items:center;gap:8px;">
         <span style="font-size:15px;font-weight:700;color:var(--text);">{{ top_scorer_pick.player_name }}</span>
-        {% if top_scorer_pick.points_awarded is not None %}
-          {% with pts=top_scorer_pick.points_awarded %}
-          {% if pts >= 1 %}
-            <span style="background:var(--success-light);color:var(--success);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;">{{ pts }}pts</span>
-          {% else %}
-            <span style="background:var(--bg);color:var(--text-muted);border-radius:100px;font-size:12px;font-weight:700;padding:3px 8px;border:1px solid var(--border);">{{ pts }}pts</span>
-          {% endif %}
-          {% endwith %}
-        {% endif %}
+        {% include "leaderboard/partials/points_badge.html" with pts=top_scorer_pick.points_awarded %}
       </div>
     </div>
     {% endif %}
   </div>
+</div>
+{% endif %}
+
+{% if not group_data and not ko_stages %}
+<div style="background:#fff;border-radius:16px;border:1px solid var(--border);padding:48px 32px;text-align:center;color:var(--text-muted);">
+  No hay predicciones todavía.
 </div>
 {% endif %}
 
@@ -118,5 +155,24 @@
   <a href="{% url 'participants' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Participantes</a>
   <a href="{% url 'scoring_guide' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Guía de puntuación</a>
 </div>
+
+<script>
+(function () {
+  window.toggleGroup = function (letter) {
+    var card = document.getElementById('group-' + letter);
+    var content = document.getElementById('group-content-' + letter);
+    var chevron = document.getElementById('chevron-' + letter);
+    if (!card || !content) return;
+    var open = card.dataset.open === '1';
+    content.style.display = open ? 'none' : '';
+    if (chevron) chevron.style.transform = open ? 'rotate(0deg)' : 'rotate(90deg)';
+    card.dataset.open = open ? '0' : '1';
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+    if (typeof _ensureBracketTree === 'function') _ensureBracketTree();
+  });
+})();
+</script>
 
 {% endblock %}
