@@ -59,6 +59,7 @@
   <a href="{% url 'my_predictions' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Mis predicciones</a>
   <a href="{% url 'participants' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Participantes</a>
   <a href="{% url 'scoring_guide' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Guía de puntuación</a>
+  <a href="{% url 'prediction_distribution' pool.pk %}" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none;">Distribución</a>
 </div>
 
 {% endblock %}

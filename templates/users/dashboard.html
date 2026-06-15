@@ -42,6 +42,8 @@
                style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Tabla</a>
             <a href="{% url 'pool_day' membership.pool.pk %}"
                style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Partidos</a>
+            <a href="{% url 'prediction_distribution' membership.pool.pk %}"
+               style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Distribución</a>
           {% else %}
             <a href="{% url 'group_predictions' membership.pool.pk %}"
                style="background:var(--accent); color:#fff; border-radius:8px; padding:9px 20px; font-size:14px; font-weight:700; text-decoration:none; border:none;">Predecir →</a>
@@ -49,6 +51,8 @@
                style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Tabla</a>
             <a href="{% url 'pool_day' membership.pool.pk %}"
                style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Partidos</a>
+            <a href="{% url 'prediction_distribution' membership.pool.pk %}"
+               style="background:var(--bg); border:1.5px solid var(--border); border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; color:var(--text); text-decoration:none;">Distribución</a>
           {% endif %}
         </div>
 
