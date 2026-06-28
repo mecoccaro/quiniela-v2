@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 {% load tournament_tags %}
 
-{% block title %}Mis predicciones — {{ pool.name }}{% endblock %}
+{% block title %}{% if is_self %}Mis predicciones{% else %}Picks de {{ viewing_user.nickname }}{% endif %} — {{ pool.name }}{% endblock %}
 
 {% block content %}
 
+{% if not is_self %}
+<a href="{% url 'leaderboard' pool.pk %}" style="display:inline-block;font-size:13px;font-weight:600;color:var(--text-muted);text-decoration:none;margin-bottom:12px;">‹ Volver a la tabla</a>
+{% endif %}
+
 <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:16px;">
   <div>
-    <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.5px;color:var(--text);margin:0 0 8px;">Mis predicciones</h1>
+    <h1 style="font-size:28px;font-weight:900;letter-spacing:-0.5px;color:var(--text);margin:0 0 8px;">{% if is_self %}Mis predicciones{% else %}Picks de {{ viewing_user.nickname }}{% endif %}</h1>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
       {% if membership.predictions_submitted %}
         <span style="background:var(--success-light);color:var(--success);border-radius:100px;font-size:12px;font-weight:700;padding:3px 10px;">Enviado</span>

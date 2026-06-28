@@ -59,17 +59,19 @@
         {# Predictions table #}
         {% if participants %}
         <div style="border-top:1px solid var(--border);">
-          <div style="display:grid;grid-template-columns:1fr 120px 72px;background:var(--bg);padding:0 20px;">
+          <div style="display:grid;grid-template-columns:1fr 160px 72px;background:var(--bg);padding:0 20px;">
             <div style="padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;">USUARIO</div>
             <div style="padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;text-align:center;">PREDICCIÓN</div>
             <div style="padding:8px 0;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.05em;text-align:center;">PUNTOS</div>
           </div>
           {% for p in participants %}
-          <div style="display:grid;grid-template-columns:1fr 120px 72px;padding:0 20px;align-items:center;border-top:1px solid var(--border);{% if p.user.nickname == request.user.nickname %}background:var(--accent-light);{% endif %}">
+          <div style="display:grid;grid-template-columns:1fr 160px 72px;padding:0 20px;align-items:center;border-top:1px solid var(--border);{% if p.user.nickname == request.user.nickname %}background:var(--accent-light);{% endif %}">
             <div style="padding:10px 0;font-size:14px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ p.user.nickname }}{% if p.user.nickname == request.user.nickname %} <span style="font-size:11px;color:var(--accent);">(vos)</span>{% endif %}</div>
-            <div style="padding:10px 0;text-align:center;">
+            <div style="padding:10px 0;text-align:center;white-space:nowrap;">
               {% if p.prediction %}
+                {% if item.is_ko and p.home_code %}<span style="font-size:11px;font-weight:700;color:var(--text-muted);">{{ p.home_code }}</span> {% endif %}
                 <span style="font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;color:var(--text);">{{ p.prediction.predicted_home_score }} – {{ p.prediction.predicted_away_score }}</span>
+                {% if item.is_ko and p.away_code %} <span style="font-size:11px;font-weight:700;color:var(--text-muted);">{{ p.away_code }}</span>{% endif %}
                 {% if p.prediction.predicted_winner %}
                   <span style="font-size:11px;color:var(--text-muted);margin-left:4px;">({{ p.prediction.predicted_winner.fifa_code|flag_emoji }})</span>
                 {% endif %}

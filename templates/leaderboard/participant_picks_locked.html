@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Picks de {{ viewing_user.nickname }} — {{ pool.name }}{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'leaderboard' pool.pk %}" style="display:inline-block;font-size:13px;font-weight:600;color:var(--text-muted);text-decoration:none;margin-bottom:12px;">‹ Volver a la tabla</a>
+
+<h1 style="font-size:28px;font-weight:900;letter-spacing:-0.5px;color:var(--text);margin:0 0 24px;">Picks de {{ viewing_user.nickname }}</h1>
+
+<div style="background:#fff;border-radius:16px;border:1px solid var(--border);padding:48px 32px;text-align:center;color:var(--text-muted);">
+  <p style="font-size:18px;margin:0 0 8px;">🔒 Predicciones no disponibles</p>
+  <p style="font-size:14px;margin:0;">{{ viewing_user.nickname }} aún no ha enviado sus predicciones.</p>
+</div>
+
+{% endblock %}

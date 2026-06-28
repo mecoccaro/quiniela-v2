@@ -59,87 +59,130 @@ class LeaderboardView(LoginRequiredMixin, View):
         return render(request, "leaderboard/leaderboard.html", context)
 
 
+def _build_predictions_context(target_user: User, pool: Pool) -> dict:
+    """Build the read-only predictions context (group stage + knockout bracket
+    + final picks) for a single participant. Shared by the "mis picks" view and
+    the per-participant "ver picks" view."""
+    tournament = pool.tournament
+
+    # ── Group stage: matches + predicted standings ───────────────────────────
+    group_matches = (
+        Match.objects.filter(tournament=tournament, stage=Match.Stage.GROUP)
+        .select_related("home_team", "away_team")
+        .order_by("group_letter", "id")
+    )
+    pred_map = {
+        p.match_id: p
+        for p in Prediction.objects.filter(user=target_user, pool=pool)
+        .select_related("predicted_winner")
+    }
+
+    groups: dict[str, list] = {}
+    for match in group_matches:
+        groups.setdefault(match.group_letter, []).append(
+            {"match": match, "prediction": pred_map.get(match.pk)}
+        )
+
+    team_ids = {m.home_team_id for m in group_matches} | {m.away_team_id for m in group_matches}
+    team_map = {t.pk: t for t in Team.objects.filter(pk__in=team_ids)}
+
+    group_data = []
+    for letter in sorted(groups.keys()):
+        standings = get_predicted_group_standings(target_user, pool, letter)
+        enriched = [(s, team_map.get(s.team_id)) for s in standings]
+        group_data.append(
+            {"letter": letter, "matches": groups[letter], "standings": enriched}
+        )
+
+    # ── Knockout: bracket tree (bracket_json) + per-match list with points ──
+    ko_stages: list[dict] = []
+    bracket_json: dict[str, list] = {}
+    try:
+        bracket = build_predicted_knockout_bracket(target_user, pool)
+    except Exception:
+        bracket = {}  # bracket may fail if group predictions are incomplete
+
+    for key in KO_STAGE_ORDER:
+        slots = bracket.get(key, [])
+        if not slots:
+            continue
+        ko_stages.append(
+            {"key": key, "label": STAGE_LABELS.get(key, key), "slots": slots}
+        )
+        bracket_json[key] = [
+            {
+                "home": slot.home_team.name if slot.home_team else "TBD",
+                "homeCode": slot.home_team.fifa_code if slot.home_team else None,
+                "away": slot.away_team.name if slot.away_team else "TBD",
+                "awayCode": slot.away_team.fifa_code if slot.away_team else None,
+                "homeScore": slot.prediction.predicted_home_score if slot.prediction else None,
+                "awayScore": slot.prediction.predicted_away_score if slot.prediction else None,
+                "slotKey": slot.slot_key,
+                "matchPk": slot.match.pk if slot.match else None,
+            }
+            for slot in slots
+        ]
+
+    champion_pick = PoolChampionPick.objects.filter(user=target_user, pool=pool).first()
+    top_scorer_pick = PoolTopScorerPick.objects.filter(user=target_user, pool=pool).first()
+    entry = LeaderboardEntry.objects.filter(user=target_user, pool=pool).first()
+    total_points = entry.total_points if entry else 0
+
+    return {
+        "group_data": group_data,
+        "ko_stages": ko_stages,
+        "bracket_json": bracket_json,
+        "champion_pick": champion_pick,
+        "top_scorer_pick": top_scorer_pick,
+        "total_points": total_points,
+    }
+
+
 class MyPredictionsView(LoginRequiredMixin, View):
     def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
         user: User = request.user  # type: ignore[assignment]
         pool = get_object_or_404(Pool, pk=pool_id)
         membership = get_object_or_404(PoolMembership, pool=pool, user=user)
-        tournament = pool.tournament
 
-        # ── Group stage: matches + predicted standings (read-only mirror of the
-        #    group-stage prediction view) ──────────────────────────────────────
-        group_matches = (
-            Match.objects.filter(tournament=tournament, stage=Match.Stage.GROUP)
-            .select_related("home_team", "away_team")
-            .order_by("group_letter", "id")
-        )
-        pred_map = {
-            p.match_id: p
-            for p in Prediction.objects.filter(user=user, pool=pool)
-            .select_related("predicted_winner")
-        }
-
-        groups: dict[str, list] = {}
-        for match in group_matches:
-            groups.setdefault(match.group_letter, []).append(
-                {"match": match, "prediction": pred_map.get(match.pk)}
-            )
-
-        team_ids = {m.home_team_id for m in group_matches} | {m.away_team_id for m in group_matches}
-        team_map = {t.pk: t for t in Team.objects.filter(pk__in=team_ids)}
-
-        group_data = []
-        for letter in sorted(groups.keys()):
-            standings = get_predicted_group_standings(user, pool, letter)
-            enriched = [(s, team_map.get(s.team_id)) for s in standings]
-            group_data.append(
-                {"letter": letter, "matches": groups[letter], "standings": enriched}
-            )
-
-        # ── Knockout: bracket tree (bracket_json) + per-match list with points ──
-        ko_stages: list[dict] = []
-        bracket_json: dict[str, list] = {}
-        try:
-            bracket = build_predicted_knockout_bracket(user, pool)
-        except Exception:
-            bracket = {}  # bracket may fail if group predictions are incomplete
-
-        for key in KO_STAGE_ORDER:
-            slots = bracket.get(key, [])
-            if not slots:
-                continue
-            ko_stages.append(
-                {"key": key, "label": STAGE_LABELS.get(key, key), "slots": slots}
-            )
-            bracket_json[key] = [
-                {
-                    "home": slot.home_team.name if slot.home_team else "TBD",
-                    "homeCode": slot.home_team.fifa_code if slot.home_team else None,
-                    "away": slot.away_team.name if slot.away_team else "TBD",
-                    "awayCode": slot.away_team.fifa_code if slot.away_team else None,
-                    "homeScore": slot.prediction.predicted_home_score if slot.prediction else None,
-                    "awayScore": slot.prediction.predicted_away_score if slot.prediction else None,
-                    "slotKey": slot.slot_key,
-                    "matchPk": slot.match.pk if slot.match else None,
-                }
-                for slot in slots
-            ]
-
-        champion_pick = PoolChampionPick.objects.filter(user=user, pool=pool).first()
-        top_scorer_pick = PoolTopScorerPick.objects.filter(user=user, pool=pool).first()
-        entry = LeaderboardEntry.objects.filter(user=user, pool=pool).first()
-        total_points = entry.total_points if entry else 0
-
-        return render(request, "leaderboard/my_predictions.html", {
+        context = _build_predictions_context(user, pool)
+        context.update({
             "pool": pool,
             "membership": membership,
-            "group_data": group_data,
-            "ko_stages": ko_stages,
-            "bracket_json": bracket_json,
-            "champion_pick": champion_pick,
-            "top_scorer_pick": top_scorer_pick,
-            "total_points": total_points,
+            "is_self": True,
+            "viewing_user": user,
         })
+        return render(request, "leaderboard/my_predictions.html", context)
+
+
+class ParticipantPicksView(LoginRequiredMixin, View):
+    """Read-only view of another participant's picks, mirroring "mis picks"."""
+
+    def get(self, request: HttpRequest, pool_id: int, user_id: int) -> HttpResponse:
+        pool = get_object_or_404(Pool, pk=pool_id)
+        get_object_or_404(PoolMembership, pool=pool, user=request.user)
+
+        if user_id == request.user.pk:
+            return MyPredictionsView.as_view()(request, pool_id=pool_id)
+
+        target_membership = get_object_or_404(
+            PoolMembership.objects.select_related("user"), pool=pool, user_id=user_id
+        )
+
+        # Don't reveal a participant's picks until they have submitted/locked.
+        if not target_membership.predictions_submitted:
+            return render(request, "leaderboard/participant_picks_locked.html", {
+                "pool": pool,
+                "viewing_user": target_membership.user,
+            })
+
+        context = _build_predictions_context(target_membership.user, pool)
+        context.update({
+            "pool": pool,
+            "membership": target_membership,
+            "is_self": False,
+            "viewing_user": target_membership.user,
+        })
+        return render(request, "leaderboard/my_predictions.html", context)
 
 
 class ParticipantsView(LoginRequiredMixin, View):
@@ -325,17 +368,40 @@ class PoolDayView(LoginRequiredMixin, View):
             pool=pool, predictions_submitted=True
         ).select_related("user")
 
+        # For knockout matches the two teams differ per participant (each one
+        # predicted their own bracket). Build each participant's bracket once and
+        # index its slots by bracket_slot so we can show the team codes they put.
+        has_ko = any(m.stage != Match.Stage.GROUP for m in matches)
+        user_slot_maps: dict[int, dict] = {}
+        if has_ko:
+            for m in memberships:
+                try:
+                    bracket = build_predicted_knockout_bracket(m.user, pool)
+                except Exception:
+                    continue
+                slot_map = {}
+                for slots in bracket.values():
+                    for slot in slots:
+                        slot_map[slot.slot_key] = slot
+                user_slot_maps[m.user_id] = slot_map
+
         match_data = []
         for match in matches:
+            is_ko = match.stage != Match.Stage.GROUP
             preds = Prediction.objects.filter(
                 pool=pool, match=match
             ).select_related("user", "predicted_winner")
             pred_by_user = {p.user_id: p for p in preds}
-            participants = [
-                {"user": m.user, "prediction": pred_by_user.get(m.user_id)}
-                for m in memberships
-            ]
-            match_data.append({"match": match, "participants": participants})
+            participants = []
+            for m in memberships:
+                item = {"user": m.user, "prediction": pred_by_user.get(m.user_id)}
+                if is_ko:
+                    slot = user_slot_maps.get(m.user_id, {}).get(match.bracket_slot)
+                    if slot:
+                        item["home_code"] = slot.home_team.fifa_code if slot.home_team else None
+                        item["away_code"] = slot.away_team.fifa_code if slot.away_team else None
+                participants.append(item)
+            match_data.append({"match": match, "participants": participants, "is_ko": is_ko})
 
         available_dates = list(
             Match.objects.filter(tournament=pool.tournament, scheduled_at__isnull=False)
