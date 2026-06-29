@@ -92,6 +92,45 @@ def test_knockout_wrong_result():
     assert score_prediction(2, 0, 0, 1, "qf", None, None, CONFIG) == 0
 
 
+# ─── Clasificado inferred from decisive scoreline ────────────────────────────
+# home_team_id=100, away_team_id=200. predicted_winner_id stays None for
+# decisive predictions (the UX only stores it on draws).
+
+def test_knockout_decisive_home_win_infers_clasificado():
+    # r32: predicted 1-0 (home wins), official 1-0, official winner = home (100)
+    # resultado=6 + goals_a=2 + goals_b=2 + bonus=4 + clasificado=2 = 16
+    assert score_prediction(1, 0, 1, 0, "r32", None, 100, CONFIG, home_team_id=100, away_team_id=200) == 16
+
+
+def test_knockout_decisive_home_win_non_exact_infers_clasificado():
+    # r32: predicted 2-1 (home wins), official 1-0, official winner = home (100)
+    # resultado=6 + clasificado=2 = 8 (no goals match)
+    assert score_prediction(2, 1, 1, 0, "r32", None, 100, CONFIG, home_team_id=100, away_team_id=200) == 8
+
+
+def test_knockout_decisive_away_win_infers_clasificado():
+    # r32: predicted 0-2 (away wins), official 0-1, official winner = away (200)
+    # resultado=6 + goals_a=2 (0==0) + clasificado=2 = 10
+    assert score_prediction(0, 2, 0, 1, "r32", None, 200, CONFIG, home_team_id=100, away_team_id=200) == 10
+
+
+def test_knockout_decisive_wrong_winner_no_clasificado():
+    # r32: predicted 2-1 (home wins), official 0-1, official winner = away (200)
+    # outcome wrong, goals_a wrong (2!=0), goals_b correct (1==1)=2, clasificado not awarded → 2
+    assert score_prediction(2, 1, 0, 1, "r32", None, 200, CONFIG, home_team_id=100, away_team_id=200) == 2
+
+
+def test_knockout_draw_pick_takes_precedence_over_inference():
+    # r32: predicted draw 1-1 with explicit winner pick = home (100), official winner = home
+    # resultado wrong (draw vs home win)=0 + goals_a=2 (1==1) + clasificado=2 = 4
+    assert score_prediction(1, 1, 1, 0, "r32", 100, 100, CONFIG, home_team_id=100, away_team_id=200) == 4
+
+
+def test_knockout_decisive_no_team_ids_no_clasificado():
+    # Backward-compat: without team ids, decisive prediction can't infer winner
+    assert score_prediction(1, 0, 1, 0, "r32", None, 100, CONFIG) == 14
+
+
 # ─── Legacy flat-format config still supported ───────────────────────────────
 
 def test_legacy_flat_config_exact():
