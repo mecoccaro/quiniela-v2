@@ -108,6 +108,21 @@ def _v4_stage_values(stage: str, config: dict) -> dict:
     }
 
 
+def _predicted_winner_team(
+    predicted_home: int,
+    predicted_away: int,
+    predicted_home_team_id: int | None,
+    predicted_away_team_id: int | None,
+    predicted_winner_id: int | None,
+) -> int | None:
+    """Which team the user predicted to advance: decisive → score side, draw → explicit pick."""
+    if predicted_home > predicted_away:
+        return predicted_home_team_id
+    if predicted_away > predicted_home:
+        return predicted_away_team_id
+    return predicted_winner_id  # draw → goes to penalties → explicit winner pick
+
+
 def score_prediction(
     predicted_home: int,
     predicted_away: int,
@@ -119,43 +134,152 @@ def score_prediction(
     config: dict,
     home_team_id: int | None = None,
     away_team_id: int | None = None,
+    predicted_home_team_id: int | None = None,
+    predicted_away_team_id: int | None = None,
 ) -> int:
-    """Return points for one prediction. All v4 components are additive.
+    """Return points for one prediction.
 
-    For knockout clasificado, the predicted winner is taken from
-    ``predicted_winner_id`` when set, otherwise inferred from a decisive
-    predicted scoreline (same rule the bracket builder uses). This mirrors the
-    UX: a winner pick is only stored explicitly when the user predicts a draw.
+    Group stage is purely additive on the scoreline. Knockout scoring is gated by
+    how well the predicted *teams* of the bracket slot match the real teams
+    (resultado/ganador are evaluated per team, not per side):
+
+    - Tier 1 — both predicted teams correct on their side: goals + resultado + ganador + bonus
+    - Tier 2 — exactly one predicted team correct on its side: goals + resultado + ganador
+    - Tier 3 — a predicted team is in the match but on the wrong side: resultado + ganador
+    - Tier 0 — no predicted team is in the real match: 0
     """
     s = _v4_stage_values(stage, config)
-    points = 0
 
-    # Resultado: outcome direction (home/draw/away)
+    if stage == "group":
+        return _score_group(predicted_home, predicted_away, official_home, official_away, s)
+
+    return _score_knockout(
+        predicted_home,
+        predicted_away,
+        official_home,
+        official_away,
+        s,
+        predicted_winner_id,
+        official_knockout_winner_id,
+        home_team_id,
+        away_team_id,
+        predicted_home_team_id,
+        predicted_away_team_id,
+    )
+
+
+def _score_group(
+    predicted_home: int,
+    predicted_away: int,
+    official_home: int,
+    official_away: int,
+    s: dict,
+) -> int:
+    """Additive group scoring: resultado direction + per-side goals + exact bonus."""
+    points = 0
     if _outcome(predicted_home, predicted_away) == _outcome(official_home, official_away):
         points += s.get("correct_resultado", 0)
-
-    # Individual goal correctness
     if predicted_home == official_home:
         points += s.get("correct_goals_team_a", 0)
     if predicted_away == official_away:
         points += s.get("correct_goals_team_b", 0)
-
-    # Bonus: additive when both goals exact
     if predicted_home == official_home and predicted_away == official_away:
         points += s.get("bonus_exact_score", 0)
+    return points
 
-    # Clasificado: knockout only. Use the explicit winner pick if present,
-    # otherwise infer it from a decisive predicted scoreline.
-    effective_winner_id = predicted_winner_id
-    if effective_winner_id is None and predicted_home != predicted_away:
-        effective_winner_id = home_team_id if predicted_home > predicted_away else away_team_id
 
+def _score_knockout(
+    predicted_home: int,
+    predicted_away: int,
+    official_home: int,
+    official_away: int,
+    s: dict,
+    predicted_winner_id: int | None,
+    official_knockout_winner_id: int | None,
+    home_team_id: int | None,
+    away_team_id: int | None,
+    predicted_home_team_id: int | None,
+    predicted_away_team_id: int | None,
+) -> int:
+    """Team-aware knockout scoring. See score_prediction for the tier rules."""
+    predicted_teams = {t for t in (predicted_home_team_id, predicted_away_team_id) if t is not None}
+    real_teams = {t for t in (home_team_id, away_team_id) if t is not None}
+
+    # Tier 0: none of the predicted teams are actually in this match.
+    if not predicted_teams or not (predicted_teams & real_teams):
+        return 0
+
+    exact_home = predicted_home_team_id is not None and predicted_home_team_id == home_team_id
+    exact_away = predicted_away_team_id is not None and predicted_away_team_id == away_team_id
+
+    if exact_home and exact_away:
+        tier = 1
+    elif exact_home or exact_away:
+        tier = 2
+    else:
+        tier = 3
+
+    points = 0
+
+    # Resultado (all tiers): per-team outcome type match (decisive winner team, or both draw→pens).
+    if _resultado_matches(
+        predicted_home,
+        predicted_away,
+        official_home,
+        official_away,
+        predicted_home_team_id,
+        predicted_away_team_id,
+        home_team_id,
+        away_team_id,
+    ):
+        points += s.get("correct_resultado", 0)
+
+    # Ganador / clasificado (all tiers): predicted advancing team == real advancing team.
+    predicted_winner_team = _predicted_winner_team(
+        predicted_home, predicted_away, predicted_home_team_id, predicted_away_team_id, predicted_winner_id
+    )
     if (
-        stage != "group"
-        and effective_winner_id is not None
-        and official_knockout_winner_id is not None
-        and effective_winner_id == official_knockout_winner_id
+        official_knockout_winner_id is not None
+        and predicted_winner_team is not None
+        and predicted_winner_team == official_knockout_winner_id
     ):
         points += s.get("correct_clasificado", 0)
 
+    # Goals (tiers 1 & 2): per-side goal correctness.
+    if tier in (1, 2):
+        if predicted_home == official_home:
+            points += s.get("correct_goals_team_a", 0)
+        if predicted_away == official_away:
+            points += s.get("correct_goals_team_b", 0)
+
+    # Bonus (tier 1 only): exact scoreline with both teams correctly placed.
+    if tier == 1 and predicted_home == official_home and predicted_away == official_away:
+        points += s.get("bonus_exact_score", 0)
+
     return points
+
+
+def _resultado_matches(
+    predicted_home: int,
+    predicted_away: int,
+    official_home: int,
+    official_away: int,
+    predicted_home_team_id: int | None,
+    predicted_away_team_id: int | None,
+    home_team_id: int | None,
+    away_team_id: int | None,
+) -> bool:
+    """True when the predicted result type matches the real one, evaluated per team.
+
+    Both went to penalties (draw scoreline) → match. Both decisive → match only when
+    the predicted winning team equals the real winning team (regardless of which side).
+    """
+    predicted_draw = predicted_home == predicted_away
+    real_draw = official_home == official_away
+    if predicted_draw != real_draw:
+        return False
+    if predicted_draw:
+        return True  # both went to penalties
+    predicted_winner = predicted_home_team_id if predicted_home > predicted_away else predicted_away_team_id
+    real_winner = home_team_id if official_home > official_away else away_team_id
+    return predicted_winner is not None and predicted_winner == real_winner

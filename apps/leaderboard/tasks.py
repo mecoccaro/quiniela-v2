@@ -195,9 +195,22 @@ def _compute_group_classification_bonus(user, pool) -> int:
     return total
 
 
-def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
-    """Score a knockout prediction directly. No bracket-slot gating in v4."""
+def _score_knockout_prediction(prediction, match, config, bracket=None) -> tuple[int, int]:
+    """Score a knockout prediction, gating on how well the user's predicted bracket
+    teams for this slot match the real teams. ``bracket`` may be passed in to avoid
+    rebuilding it per prediction."""
     from apps.leaderboard.scoring import score_prediction
+    from apps.tournaments.services import build_predicted_knockout_bracket
+
+    if bracket is None:
+        bracket = build_predicted_knockout_bracket(prediction.user, prediction.pool)
+
+    predicted_home_team_id = predicted_away_team_id = None
+    for slot in bracket.get(match.stage, []):
+        if slot.slot_key == match.bracket_slot:
+            predicted_home_team_id = slot.home_team.pk if slot.home_team else None
+            predicted_away_team_id = slot.away_team.pk if slot.away_team else None
+            break
 
     points = score_prediction(
         predicted_home=prediction.predicted_home_score,
@@ -210,6 +223,8 @@ def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
         config=config,
         home_team_id=match.home_team_id,
         away_team_id=match.away_team_id,
+        predicted_home_team_id=predicted_home_team_id,
+        predicted_away_team_id=predicted_away_team_id,
     )
     return points, 0  # slot_bonus always 0 in v4
 
