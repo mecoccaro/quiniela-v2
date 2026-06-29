@@ -248,51 +248,63 @@
   <p>Si un equipo gana en tiempo extra (por ejemplo, gol en el minuto 115), eso es <strong>Gana A o Gana B</strong>, no un empate. El empate solo ocurre cuando el partido llega a penales.</p>
 </div>
 
-<h3>Las tres situaciones del bracket</h3>
-<p>Cuando llega el momento del partido, puede suceder una de tres cosas con respecto a los equipos que habías predicho:</p>
+<h3>Las cuatro situaciones del bracket</h3>
+<p>Cuando llega el momento del partido, lo que ganás depende de qué tan bien acertaste <strong>los equipos del cruce</strong> — y en qué <strong>lado</strong> (local / visitante) los pusiste. Puede pasar una de cuatro cosas:</p>
 
 <table>
-  <thead><tr><th>Situación</th><th>¿Qué equipos juegan?</th><th>Puntuación</th></tr></thead>
+  <thead><tr><th>Situación</th><th>¿Qué equipos predijiste vs. los reales?</th><th>Puntuación</th></tr></thead>
   <tbody>
     <tr style="background: var(--success-light)">
       <td><strong>CASO A — Bracket perfecto</strong></td>
-      <td>Ambos equipos que predijiste son los que realmente juegan</td>
-      <td><strong>Puntuación COMPLETA</strong> (resultado + clasificado + goles + bonus)</td>
+      <td>Ambos equipos correctos <strong>y en su mismo lado</strong> (local con local, visitante con visitante)</td>
+      <td><strong>COMPLETA</strong>: resultado + clasificado + goles + bonus</td>
     </tr>
     <tr style="background: var(--pending-light)">
-      <td><strong>CASO B — Bracket parcial</strong></td>
-      <td>Solo uno de los dos equipos que predijiste está en el partido</td>
-      <td><strong>Puntuación PARCIAL</strong> (ver reglas detalladas abajo)</td>
+      <td><strong>CASO B — Un equipo en su lado</strong></td>
+      <td>Exactamente uno de tus equipos coincide <strong>en su lado correcto</strong></td>
+      <td><strong>resultado + clasificado + goles</strong> (sin bonus)</td>
+    </tr>
+    <tr style="background: var(--pending-light)">
+      <td><strong>CASO C — Equipo correcto, lado equivocado</strong></td>
+      <td>Acertaste algún equipo del partido pero <strong>ninguno en su lado</strong> (ej. predijiste a Canadá de visitante y jugó de local). Incluye el caso de ambos equipos cruzados.</td>
+      <td><strong>resultado + clasificado</strong> (sin goles, sin bonus)</td>
     </tr>
     <tr style="background: var(--danger-light)">
-      <td><strong>CASO C — Bracket fallido</strong></td>
+      <td><strong>CASO D — Bracket fallido</strong></td>
       <td>Ninguno de los dos equipos que predijiste está en el partido</td>
       <td><strong>0 puntos</strong> en ese partido</td>
     </tr>
   </tbody>
 </table>
 
-<h3>Reglas del Caso B — Un equipo correcto</h3>
-<p>Cuando uno de tus equipos predichos está presente en el partido y el otro no:</p>
+<div class="box box-warning">
+  <div class="box-title">Lo importante: el marcador no vale por sí solo</div>
+  <p>Acertar "1-0" no da puntos si los equipos de tu cruce no son los que jugaron. Primero tenés que tener a los equipos correctos; recién ahí cuentan el resultado, el clasificado, los goles y el bonus.</p>
+</div>
 
+<h3>Cómo se puntúa cada campo según el caso</h3>
 <table>
-  <thead><tr><th>Campo</th><th>Cómo se puntúa</th></tr></thead>
+  <thead><tr><th>Campo</th><th>Cómo se puntúa</th><th>A</th><th>B</th><th>C</th></tr></thead>
   <tbody>
     <tr>
-      <td><strong>Resultado</strong></td>
-      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo correcto que predijiste como ganador efectivamente ganó. Si tu equipo correcto perdió, no hay puntos de resultado aunque "su slot" haya ganado.</td>
+      <td><strong>Resultado</strong><br><em>(ganador o empate→penales)</em></td>
+      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo que predijiste avanzando es el que realmente ganó (o si predijiste empate→penales y el partido fue a penales). El lado no importa.</td>
+      <td>✓</td><td>✓</td><td>✓</td>
     </tr>
     <tr>
       <td><strong>Clasificado</strong></td>
-      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo correcto que predijiste como clasificado efectivamente avanzó de ronda.</td>
+      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo que predijiste como clasificado efectivamente avanzó de ronda.</td>
+      <td>✓</td><td>✓</td><td>✓</td>
     </tr>
     <tr>
       <td><strong>Goles A y Goles B</strong></td>
-      <td>Basado en la <strong>posición (slot)</strong>: se compara el número de goles que predijiste para cada slot (A o B) con los goles reales anotados por el equipo que juega en ese slot, sin importar si el equipo es el que predijiste o no.</td>
+      <td>Basado en la <strong>posición (slot)</strong>: se compara el número de goles que predijiste para cada lado con los goles reales de ese lado. Solo cuentan cuando al menos un equipo está en su lado correcto (Casos A y B).</td>
+      <td>✓</td><td>✓</td><td>✗</td>
     </tr>
     <tr>
       <td><strong>Bonus marcador exacto</strong></td>
-      <td>Se activa si los goles de ambos slots son correctos (usando la lógica posicional de arriba).</td>
+      <td>Solo en el Caso A: ambos equipos en su lado y el marcador exacto de los dos lados.</td>
+      <td>✓</td><td>✗</td><td>✗</td>
     </tr>
   </tbody>
 </table>
@@ -353,16 +365,16 @@
   Predijiste empate 1-1 y España avanza. El partido fue 1-1 pero <strong>Francia ganó los penales</strong>. Resultado: correcto (fue empate a 120 min ✓), clasificado: incorrecto (Francia avanzó, no España ✗), goles: ambos correctos (1-1 ✓✓) → bonus se activa. Total: 14 pts a pesar de errar quién ganó los penales.
 </div>
 
-<h3>CASO B — Un equipo correcto</h3>
+<h3>CASO B — Un equipo en su lado correcto</h3>
 <h4>Predicción: España (A) vs Suiza (B) · España gana 2-1 · España clasifica</h4>
-<p><em>El partido real es España vs Holanda (Suiza no clasificó del Grupo)</em></p>
+<p><em>El partido real es España vs Holanda — España está en su lado (local); Suiza no clasificó. <strong>No hay bonus en el Caso B</strong> (máximo 12 pts).</em></p>
 
 <table>
   <thead>
     <tr><th>Resultado real</th><th>Resultado</th><th>Clasif.</th><th>Goles A</th><th>Goles B</th><th>Bonus</th><th class="pts">Total</th></tr>
   </thead>
   <tbody>
-    <tr><td>España 2–1 Holanda <em>(España gana)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ +4</td><td class="pts">16</td></tr>
+    <tr><td>España 2–1 Holanda <em>(España gana)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">12</td></tr>
     <tr><td>España 3–1 Holanda</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">10</td></tr>
     <tr><td>España 2–0 Holanda</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
     <tr><td>España 1–1 Holanda → España pen.</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">4</td></tr>
@@ -371,12 +383,30 @@
   </tbody>
 </table>
 
+<p><em>Nota fila 1: aunque acertaste los dos números del marcador (2-1), el bonus <strong>no</strong> se activa porque uno de los equipos del cruce (Suiza) no estaba — solo España en su lado. Por eso 12 y no 16.</em></p>
 <p><em>Nota fila 6: Holanda ganó 2-1. Tus goles B predichos eran 1 (para Suiza), y Holanda anotó 1. Coincidencia de posición → 2 pts de goles B. Pero España perdió (0 pts resultado + clasificado).</em></p>
 
-<h3>CASO C — Ningún equipo correcto</h3>
+<h3>CASO C — Equipo correcto, lado equivocado</h3>
+<h4>Predicción: España (A) vs Francia (B) · España gana 2-1 · España clasifica</h4>
+<p><em>El partido real es <strong>Francia (local) vs España (visitante)</strong>: España está en el partido pero del lado opuesto al que predijiste. No hay puntos de goles ni bonus — solo resultado y clasificado, evaluados por equipo.</em></p>
+
+<table>
+  <thead>
+    <tr><th>Resultado real</th><th>Resultado</th><th>Clasif.</th><th>Goles A</th><th>Goles B</th><th>Bonus</th><th class="pts">Total</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Francia 1–2 España <em>(España gana)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
+    <tr><td>Francia 0–3 España → España avanza</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
+    <tr><td>Francia 2–1 España <em>(Francia gana)</em></td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">0</td></tr>
+  </tbody>
+</table>
+
+<p><em>Predijiste a España ganando; España ganó (aunque de visitante) → resultado + clasificado = 8. Si España hubiera perdido, 0. Los goles nunca cuentan en el Caso C porque ningún equipo está en su lado.</em></p>
+
+<h3>CASO D — Ningún equipo correcto</h3>
 <div class="box box-red">
   <div class="box-title">0 puntos totales</div>
-  <p>Si ninguno de los dos equipos que predijiste para ese slot aparece en el partido real, el partido te da <strong>0 puntos en todos los campos</strong>: resultado, clasificado, goles A, goles B y bonus.</p>
+  <p>Si ninguno de los dos equipos que predijiste para ese slot aparece en el partido real, el partido te da <strong>0 puntos en todos los campos</strong>: resultado, clasificado, goles A, goles B y bonus. Acertar el marcador no cambia nada.</p>
   <p><strong>Ejemplo:</strong> Predijiste Argentina vs Alemania. El partido real es Brasil vs Francia. → 0 pts.</p>
 </div>
 
