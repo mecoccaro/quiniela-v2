@@ -34,6 +34,8 @@ def recalculate_pool_scores(match_id: int) -> None:
                 predicted_winner_id=prediction.predicted_winner_id,
                 official_knockout_winner_id=match.knockout_winner_id,
                 config=config,
+                home_team_id=match.home_team_id,
+                away_team_id=match.away_team_id,
             )
             slot_bonus = 0
         else:
@@ -206,6 +208,8 @@ def _score_knockout_prediction(prediction, match, config) -> tuple[int, int]:
         predicted_winner_id=prediction.predicted_winner_id,
         official_knockout_winner_id=match.knockout_winner_id,
         config=config,
+        home_team_id=match.home_team_id,
+        away_team_id=match.away_team_id,
     )
     return points, 0  # slot_bonus always 0 in v4
 

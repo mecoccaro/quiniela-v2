@@ -117,8 +117,16 @@ def score_prediction(
     predicted_winner_id: int | None,
     official_knockout_winner_id: int | None,
     config: dict,
+    home_team_id: int | None = None,
+    away_team_id: int | None = None,
 ) -> int:
-    """Return points for one prediction. All v4 components are additive."""
+    """Return points for one prediction. All v4 components are additive.
+
+    For knockout clasificado, the predicted winner is taken from
+    ``predicted_winner_id`` when set, otherwise inferred from a decisive
+    predicted scoreline (same rule the bracket builder uses). This mirrors the
+    UX: a winner pick is only stored explicitly when the user predicts a draw.
+    """
     s = _v4_stage_values(stage, config)
     points = 0
 
@@ -136,12 +144,17 @@ def score_prediction(
     if predicted_home == official_home and predicted_away == official_away:
         points += s.get("bonus_exact_score", 0)
 
-    # Clasificado: knockout only, always scored when IDs are known
+    # Clasificado: knockout only. Use the explicit winner pick if present,
+    # otherwise infer it from a decisive predicted scoreline.
+    effective_winner_id = predicted_winner_id
+    if effective_winner_id is None and predicted_home != predicted_away:
+        effective_winner_id = home_team_id if predicted_home > predicted_away else away_team_id
+
     if (
         stage != "group"
-        and predicted_winner_id is not None
+        and effective_winner_id is not None
         and official_knockout_winner_id is not None
-        and predicted_winner_id == official_knockout_winner_id
+        and effective_winner_id == official_knockout_winner_id
     ):
         points += s.get("correct_clasificado", 0)
 
