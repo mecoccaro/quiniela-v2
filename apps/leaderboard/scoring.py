@@ -143,10 +143,10 @@ def score_prediction(
     how well the predicted *teams* of the bracket slot match the real teams
     (resultado/ganador are evaluated per team, not per side):
 
-    - Tier 1 — both predicted teams correct on their side: goals + resultado + ganador + bonus
-    - Tier 2 — exactly one predicted team correct on its side: goals + resultado + ganador
-    - Tier 3 — a predicted team is in the match but on the wrong side: resultado + ganador
-    - Tier 0 — no predicted team is in the real match: 0
+    - Caso A — both predicted teams correct on their side: goals (both) + resultado + clasificado + bonus
+    - Caso B — exactly one predicted team correct on its side: goals (that side only) + resultado + clasificado
+    - Caso C — a predicted team is present but neither on its correct side: clasificado only
+    - Caso D — no predicted team is in the real match: 0
     """
     s = _v4_stage_values(stage, config)
 
@@ -221,8 +221,19 @@ def _score_knockout(
 
     points = 0
 
-    # Resultado (all tiers): per-team outcome type match (decisive winner team, or both draw→pens).
-    if _resultado_matches(
+    # Ganador / clasificado — Casos A, B and C (any predicted team present).
+    predicted_winner_team = _predicted_winner_team(
+        predicted_home, predicted_away, predicted_home_team_id, predicted_away_team_id, predicted_winner_id
+    )
+    if (
+        official_knockout_winner_id is not None
+        and predicted_winner_team is not None
+        and predicted_winner_team == official_knockout_winner_id
+    ):
+        points += s.get("correct_clasificado", 0)
+
+    # Resultado — Casos A and B only. Per-team outcome type match (winner team, or both draw→pens).
+    if tier in (1, 2) and _resultado_matches(
         predicted_home,
         predicted_away,
         official_home,
@@ -234,25 +245,19 @@ def _score_knockout(
     ):
         points += s.get("correct_resultado", 0)
 
-    # Ganador / clasificado (all tiers): predicted advancing team == real advancing team.
-    predicted_winner_team = _predicted_winner_team(
-        predicted_home, predicted_away, predicted_home_team_id, predicted_away_team_id, predicted_winner_id
-    )
-    if (
-        official_knockout_winner_id is not None
-        and predicted_winner_team is not None
-        and predicted_winner_team == official_knockout_winner_id
-    ):
-        points += s.get("correct_clasificado", 0)
-
-    # Goals (tiers 1 & 2): per-side goal correctness.
-    if tier in (1, 2):
+    # Goals — Caso A both sides; Caso B only the correctly-placed team's side.
+    if tier == 1:
         if predicted_home == official_home:
             points += s.get("correct_goals_team_a", 0)
         if predicted_away == official_away:
             points += s.get("correct_goals_team_b", 0)
+    elif tier == 2:
+        if exact_home and predicted_home == official_home:
+            points += s.get("correct_goals_team_a", 0)
+        if exact_away and predicted_away == official_away:
+            points += s.get("correct_goals_team_b", 0)
 
-    # Bonus (tier 1 only): exact scoreline with both teams correctly placed.
+    # Bonus — Caso A only: exact scoreline with both teams correctly placed.
     if tier == 1 and predicted_home == official_home and predicted_away == official_away:
         points += s.get("bonus_exact_score", 0)
 
