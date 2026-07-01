@@ -262,12 +262,12 @@
     <tr style="background: var(--pending-light)">
       <td><strong>CASO B — Un equipo en su lado</strong></td>
       <td>Exactamente uno de tus equipos coincide <strong>en su lado correcto</strong></td>
-      <td><strong>resultado + clasificado + goles</strong> (sin bonus)</td>
+      <td><strong>resultado + clasificado + goles del lado correcto</strong> (sin bonus)</td>
     </tr>
     <tr style="background: var(--pending-light)">
       <td><strong>CASO C — Equipo correcto, lado equivocado</strong></td>
       <td>Acertaste algún equipo del partido pero <strong>ninguno en su lado</strong> (ej. predijiste a Canadá de visitante y jugó de local). Incluye el caso de ambos equipos cruzados.</td>
-      <td><strong>resultado + clasificado</strong> (sin goles, sin bonus)</td>
+      <td><strong>solo clasificado</strong> (sin resultado, sin goles, sin bonus)</td>
     </tr>
     <tr style="background: var(--danger-light)">
       <td><strong>CASO D — Bracket fallido</strong></td>
@@ -287,19 +287,19 @@
   <thead><tr><th>Campo</th><th>Cómo se puntúa</th><th>A</th><th>B</th><th>C</th></tr></thead>
   <tbody>
     <tr>
-      <td><strong>Resultado</strong><br><em>(ganador o empate→penales)</em></td>
-      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo que predijiste avanzando es el que realmente ganó (o si predijiste empate→penales y el partido fue a penales). El lado no importa.</td>
+      <td><strong>Clasificado</strong></td>
+      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo que predijiste como clasificado efectivamente avanzó de ronda. Es el único campo que se conserva en el Caso C.</td>
       <td>✓</td><td>✓</td><td>✓</td>
     </tr>
     <tr>
-      <td><strong>Clasificado</strong></td>
-      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo que predijiste como clasificado efectivamente avanzó de ronda.</td>
-      <td>✓</td><td>✓</td><td>✓</td>
+      <td><strong>Resultado</strong><br><em>(ganador o empate→penales)</em></td>
+      <td>Basado en el <strong>equipo</strong>: se puntúa si el equipo que predijiste avanzando es el que realmente ganó (o si predijiste empate→penales y el partido fue a penales). El lado no importa. Solo en Casos A y B.</td>
+      <td>✓</td><td>✓</td><td>✗</td>
     </tr>
     <tr>
       <td><strong>Goles A y Goles B</strong></td>
-      <td>Basado en la <strong>posición (slot)</strong>: se compara el número de goles que predijiste para cada lado con los goles reales de ese lado. Solo cuentan cuando al menos un equipo está en su lado correcto (Casos A y B).</td>
-      <td>✓</td><td>✓</td><td>✗</td>
+      <td>Se compara el número de goles predicho para un lado con los goles reales de ese lado, <strong>solo del lado cuyo equipo acertaste</strong>. En el Caso A cuentan ambos lados; en el Caso B únicamente el del equipo correcto; en el Caso C no cuentan.</td>
+      <td>✓</td><td>lado correcto</td><td>✗</td>
     </tr>
     <tr>
       <td><strong>Bonus marcador exacto</strong></td>
@@ -367,41 +367,41 @@
 
 <h3>CASO B — Un equipo en su lado correcto</h3>
 <h4>Predicción: España (A) vs Suiza (B) · España gana 2-1 · España clasifica</h4>
-<p><em>El partido real es España vs Holanda — España está en su lado (local); Suiza no clasificó. <strong>No hay bonus en el Caso B</strong> (máximo 12 pts).</em></p>
+<p><em>El partido real es España vs Holanda — España está en su lado (local); Suiza no clasificó. <strong>No hay bonus, y los goles solo cuentan del lado de España</strong> (el equipo correcto). Máximo 10 pts.</em></p>
 
 <table>
   <thead>
-    <tr><th>Resultado real</th><th>Resultado</th><th>Clasif.</th><th>Goles A</th><th>Goles B</th><th>Bonus</th><th class="pts">Total</th></tr>
+    <tr><th>Resultado real</th><th>Resultado</th><th>Clasif.</th><th>Goles A <em>(España)</em></th><th>Goles B <em>(Suiza — ignorado)</em></th><th>Bonus</th><th class="pts">Total</th></tr>
   </thead>
   <tbody>
-    <tr><td>España 2–1 Holanda <em>(España gana)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">12</td></tr>
-    <tr><td>España 3–1 Holanda</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">10</td></tr>
-    <tr><td>España 2–0 Holanda</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
-    <tr><td>España 1–1 Holanda → España pen.</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">4</td></tr>
-    <tr><td>Holanda 1–0 España <em>(Holanda gana)</em></td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">0</td></tr>
-    <tr><td>Holanda 2–1 España</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="pts">2</td></tr>
+    <tr><td>España 2–1 Holanda <em>(España gana)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="no">— 0</td><td class="no">✗ 0</td><td class="pts">10</td></tr>
+    <tr><td>España 2–0 Holanda</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="yes">✓ 2</td><td class="no">— 0</td><td class="no">✗ 0</td><td class="pts">10</td></tr>
+    <tr><td>España 3–1 Holanda</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">— 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
+    <tr><td>España 1–1 Holanda → España pen.</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">— 0</td><td class="no">✗ 0</td><td class="pts">2</td></tr>
+    <tr><td>España 2–3 Holanda <em>(Holanda gana)</em></td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">— 0</td><td class="no">✗ 0</td><td class="pts">2</td></tr>
+    <tr><td>España 0–1 Holanda <em>(Holanda gana)</em></td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">— 0</td><td class="no">✗ 0</td><td class="pts">0</td></tr>
   </tbody>
 </table>
 
-<p><em>Nota fila 1: aunque acertaste los dos números del marcador (2-1), el bonus <strong>no</strong> se activa porque uno de los equipos del cruce (Suiza) no estaba — solo España en su lado. Por eso 12 y no 16.</em></p>
-<p><em>Nota fila 6: Holanda ganó 2-1. Tus goles B predichos eran 1 (para Suiza), y Holanda anotó 1. Coincidencia de posición → 2 pts de goles B. Pero España perdió (0 pts resultado + clasificado).</em></p>
+<p><em>Nota fila 1: acertaste el marcador 2-1, pero el bonus no se activa (Suiza no jugó) y el gol B (lado de Suiza) no se cuenta aunque el número coincida. Por eso 10.</em></p>
+<p><em>Nota fila 5: España perdió 2-3 pero anotó 2 (predijiste 2) → 2 pts por el gol de España. El resultado y el clasificado son 0 porque España no ganó ni avanzó.</em></p>
 
 <h3>CASO C — Equipo correcto, lado equivocado</h3>
 <h4>Predicción: España (A) vs Francia (B) · España gana 2-1 · España clasifica</h4>
-<p><em>El partido real es <strong>Francia (local) vs España (visitante)</strong>: España está en el partido pero del lado opuesto al que predijiste. No hay puntos de goles ni bonus — solo resultado y clasificado, evaluados por equipo.</em></p>
+<p><em>El partido real es <strong>Francia (local) vs España (visitante)</strong>: España está en el partido pero del lado opuesto al que predijiste. <strong>Solo cuenta el clasificado</strong> — ni resultado, ni goles, ni bonus.</em></p>
 
 <table>
   <thead>
     <tr><th>Resultado real</th><th>Resultado</th><th>Clasif.</th><th>Goles A</th><th>Goles B</th><th>Bonus</th><th class="pts">Total</th></tr>
   </thead>
   <tbody>
-    <tr><td>Francia 1–2 España <em>(España gana)</em></td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
-    <tr><td>Francia 0–3 España → España avanza</td><td class="yes">✓ 6</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">8</td></tr>
-    <tr><td>Francia 2–1 España <em>(Francia gana)</em></td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">0</td></tr>
+    <tr><td>Francia 1–2 España <em>(España avanza)</em></td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">2</td></tr>
+    <tr><td>Francia 0–3 España → España avanza</td><td class="no">✗ 0</td><td class="yes">✓ 2</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">2</td></tr>
+    <tr><td>Francia 2–1 España <em>(Francia avanza)</em></td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="no">✗ 0</td><td class="pts">0</td></tr>
   </tbody>
 </table>
 
-<p><em>Predijiste a España ganando; España ganó (aunque de visitante) → resultado + clasificado = 8. Si España hubiera perdido, 0. Los goles nunca cuentan en el Caso C porque ningún equipo está en su lado.</em></p>
+<p><em>Predijiste a España clasificando; España avanzó (aunque de visitante) → solo clasificado = 2. Si España no avanza, 0. En el Caso C ni el resultado ni los goles suman.</em></p>
 
 <h3>CASO D — Ningún equipo correcto</h3>
 <div class="box box-red">

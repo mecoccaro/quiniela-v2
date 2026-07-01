@@ -98,44 +98,59 @@ def test_t1_official_winner_not_set_yet():
     assert ko(1, 0, 1, 0, "r32", None, None, 100, 200) == 14
 
 
-# Tier 2 — exactly one predicted team correct on its side (no bonus, goals on both sides)
-def test_t2_home_team_correct_exact_scoreline():
-    # predicted away team wrong (999). 1-0 exact, home wins: resultado6 + goals_a2 + goals_b2 + clasificado2 = 12 (no bonus)
-    assert ko(1, 0, 1, 0, "r32", None, 100, 100, 999) == 12
+# Caso B — exactly one predicted team correct on its side.
+# No bonus, and goals count ONLY for the correctly-placed side.
+def test_b_home_team_correct_only_home_goal_counts():
+    # away team wrong (999). 1-0 exact, home wins: resultado6 + goals_a2 (home side) + clasificado2 = 10
+    # (goals_b NOT counted even though 0==0, because the away team is wrong)
+    assert ko(1, 0, 1, 0, "r32", None, 100, 100, 999) == 10
 
 
-def test_t2_away_team_correct():
-    # predicted home team wrong (999), away team correct (200). predicted 0-1 (away 200 wins), official 0-1:
-    # resultado6 + goals_a2 + goals_b2 + clasificado2 = 12
-    assert ko(0, 1, 0, 1, "r32", None, 200, 999, 200) == 12
+def test_b_away_team_correct_only_away_goal_counts():
+    # home team wrong (999), away correct (200). predicted 0-1 (away 200 wins), official 0-1:
+    # resultado6 + goals_b2 (away side) + clasificado2 = 10 (home goal 0==0 NOT counted)
+    assert ko(0, 1, 0, 1, "r32", None, 200, 999, 200) == 10
 
 
-def test_t2_wrong_predicted_winner_zeroes_resultado_and_ganador():
-    # home team correct(100) but predicted away(999) to win 0-2; official home wins 1-0:
-    # resultado: predicted winner 999 != real 100 → 0; goals none; clasificado 0 → 0
+def test_b_wrong_side_goal_not_credited():
+    # home correct(100), away wrong(999). predicted 3-1 (home wins), official 3-1 (home wins):
+    # resultado6 + clasificado2 + goals_a2 (home side, 3==3) = 10.
+    # The away number matches (1==1) but must NOT be credited (wrong team) — otherwise it'd be 12.
+    assert ko(3, 1, 3, 1, "r32", None, 100, 100, 999) == 10
+
+
+def test_b_wrong_predicted_winner_zeroes_everything():
+    # home correct(100) but predicted away(999) to win 0-2; official home wins 1-0:
+    # resultado 0 (winner 999!=100); clasificado 0; home goal 0!=1 → 0
     assert ko(0, 2, 1, 0, "r32", None, 100, 100, 999) == 0
 
 
-# Tier 3 — a predicted team is in the match but on the wrong side
-def test_t3_right_team_wrong_side_wins():
-    # real away team(200) was predicted as home and to win 2-0; official 0-1 (away 200 wins):
-    # decisive both, predicted winner=200 == real winner 200 → resultado6 + clasificado2 = 8 (no goals/bonus in T3)
-    assert ko(2, 0, 0, 1, "r32", None, 200, 200, 999) == 8
+# Caso C — a predicted team is present but neither on its correct side → clasificado ONLY
+def test_c_right_team_wrong_side_advances():
+    # real away team(200) predicted as home and to win 2-0; official 0-1 (away 200 wins):
+    # predicted winner=200 == real winner 200 → clasificado2 only (NO resultado, NO goals) = 2
+    assert ko(2, 0, 0, 1, "r32", None, 200, 200, 999) == 2
 
 
-def test_t3_right_team_wrong_side_but_loses():
-    # real home team(100) predicted as away; predicted 0-2 (away=100 wins); official 1-0 (home 100 wins):
-    # predicted winner=100 == real winner 100 → resultado6 + clasificado2 = 8
-    assert ko(0, 2, 1, 0, "r32", None, 100, 999, 100) == 8
+def test_c_right_team_wrong_side_but_loses():
+    # real home team(100) predicted as away to win 0-2; official 1-0 (home 100 wins):
+    # predicted winner=100 == real winner 100 → clasificado2 only = 2
+    assert ko(0, 2, 1, 0, "r32", None, 100, 999, 100) == 2
 
 
-def test_t3_no_goals_or_bonus_even_when_scoreline_matches():
-    # real away(200) predicted as home, exact-looking 1-0 but teams swapped; official 0-1:
-    # predicted home=200 wins by score; real winner=200 → resultado6 + clasificado2 = 8; no goals despite 1/0 numbers
-    assert ko(1, 0, 0, 1, "r32", None, 200, 200, 999) == 8
+def test_c_both_teams_swapped():
+    # both real teams present but on swapped sides; predicted 2-0 (home=200 wins), official 0-1 (away 200 wins):
+    # predicted winner=200 == real winner 200 → clasificado2 only = 2 (no resultado, no goals)
+    assert ko(2, 0, 0, 1, "r32", None, 200, 200, 100) == 2
 
 
-# Tier 0 — no predicted team is in the real match (the Boncan case)
+def test_c_wrong_winner_scores_zero():
+    # predicted team present wrong side but predicted the wrong advancer:
+    # predHome=200(real away), predAway=999; predicted 2-0 → winner 200; official 1-0 → winner 100 → 0
+    assert ko(2, 0, 1, 0, "r32", None, 100, 200, 999) == 0
+
+
+# Caso D — no predicted team is in the real match (the Boncan case)
 def test_t0_predicted_teams_not_in_match():
     # predicted Korea(777) vs Japan(888) 1-0; real match is 100 vs 200 → 0 points regardless of scoreline
     assert ko(1, 0, 1, 0, "r32", None, 100, 777, 888) == 0
