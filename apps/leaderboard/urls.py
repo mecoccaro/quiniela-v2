@@ -10,4 +10,6 @@ urlpatterns = [
     path("pool/<int:pool_id>/day/", views.PoolDayView.as_view(), name="pool_day"),
     path("pool/<int:pool_id>/scoring-guide/", views.ScoringGuideView.as_view(), name="scoring_guide"),
     path("pool/<int:pool_id>/distribution/", views.PredictionDistributionView.as_view(), name="prediction_distribution"),
+    # Hidden (staff-only, no nav links) bar-chart-race view.
+    path("pool/<int:pool_id>/race/", views.RaceView.as_view(), name="race"),
 ]
