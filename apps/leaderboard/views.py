@@ -2,10 +2,11 @@ import datetime
 from collections import defaultdict
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views import View
 
+from apps.leaderboard.race import build_race_data
 from apps.pools.models import (
     LeaderboardEntry,
     Pool,
@@ -423,4 +424,19 @@ class PoolDayView(LoginRequiredMixin, View):
             "available_dates": available_dates,
             "prev_date": prev_date,
             "next_date": next_date,
+        })
+
+
+class RaceView(LoginRequiredMixin, View):
+    """Hidden bar-chart-race page. No navigation links point here; only staff
+    (admin) users may load it — anyone else gets a 404 so the route's existence
+    stays concealed. Grows automatically as results are entered."""
+
+    def get(self, request: HttpRequest, pool_id: int) -> HttpResponse:
+        if not request.user.is_staff:
+            raise Http404
+        pool = get_object_or_404(Pool, pk=pool_id)
+        return render(request, "leaderboard/race.html", {
+            "pool": pool,
+            "race_data": build_race_data(pool),
         })
